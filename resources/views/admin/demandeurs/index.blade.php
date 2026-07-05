@@ -81,7 +81,7 @@
 @push('custom')
     <script>
         $(function() {
-            $('#demandeurs').DataTable({
+            var table = $('#demandeurs').DataTable({
                 "paging": true,
                 "lengthChange": false,
                 "searching": true,
@@ -90,15 +90,24 @@
                 "autoWidth": false,
                 "responsive": true,
                 "columnDefs": [{
-                        "targets": 7,
-                        "orderable": false
-                    },
-                    {
-                        "targets": 3,
-                        "searchable": true
+                        "targets": [1, 6],
+                        "orderable": false,
+                        "searchable": false
                     }
                 ]
 
+            });
+
+            // Add simple search inputs for other columns (skip photo and actions)
+            table.columns().every(function(index) {
+                if (index !== 1 && index !== 6) {
+                    var column = this;
+                    var $input = $('<input type="text" placeholder="@lang("trans.search")" class="form-control form-control-sm">')
+                        .appendTo($(column.header()))
+                        .on('keyup change', function() {
+                            column.search(this.value).draw();
+                        });
+                }
             });
         });
     </script>

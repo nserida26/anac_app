@@ -1490,4 +1490,10 @@ return [
 'delete_confirmation_message' => 'Êtes-vous sûr de vouloir supprimer cet élément ?',
 'delete_warning' => 'Cette action est irréversible !',
 'cancel' => 'Annuler',
+
+    // Clés utilisées mais absentes précédemment
+    'view_demand' => 'Voir la demande',
+    'view_license' => 'Voir la licence',
+    'card_number' => 'Numéro de carte',
+    'validations' => 'Validations',
 ];

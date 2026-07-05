@@ -46,7 +46,7 @@
 .btn-group .btn {
     margin-right: 2px;
 }
-/* Tooltip personnalisé */
+/* Tooltip personnalisï¿½ */
 .tooltip-inner {
     max-width: 350px;
     text-align: left;
@@ -173,7 +173,7 @@
                         <h5 class="mb-0">@lang('trans.filter_licences')</h5>
                     </div>
                     <div class="card-body filter-section">
-                        <form method="GET" action="{{ route('licences') }}" class="row">
+                        <form method="GET" action="{{ route('licences') }}" class="row" id="licencesFilterForm">
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label>@lang('trans.license_type')</label>
@@ -187,7 +187,7 @@
                                     </select>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label>@lang('trans.status')</label>
@@ -205,7 +205,10 @@
                                     </select>
                                 </div>
                             </div>
-                            
+
+                            <input type="hidden" name="date_from" id="date_from" value="{{ $dateFrom }}">
+                            <input type="hidden" name="date_to" id="date_to" value="{{ $dateTo }}">
+
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label>&nbsp;</label>
@@ -216,7 +219,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label>&nbsp;</label>
@@ -242,6 +245,11 @@
                         @elseif(request('status') == 'expired')
                             <span class="badge badge-danger ml-2">
                                 @lang('trans.showing_expired')
+                            </span>
+                        @endif
+                        @if($dateFrom || $dateTo)
+                            <span class="badge badge-info ml-2">
+                                @lang('trans.date_range'): {{ $dateFrom }} - {{ $dateTo }}
                             </span>
                         @endif
                     </div>
@@ -350,7 +358,7 @@
                                                     <form action="{{ route('licences.bloquer', $licence) }}" method="POST" class="d-inline">
                                                         @csrf
                                                         @method('PATCH')
-                                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Confirmer la révocation de la licence ?')">
+                                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Confirmer la rï¿½vocation de la licence ?')">
                                                             <i class="fas fa-ban"></i>
                                                         </button>
                                                     </form>
@@ -434,7 +442,7 @@
                                             $rowClass = $isCurrentDemande ? 'demande-row-success' : '';
                                             $etatDemande = $demande->etat_workflow;
                                             
-                                            // Calcul de la validité médicale
+                                            // Calcul de la validitï¿½ mï¿½dicale
                                             $medicalStatus = [
                                                 'status' => 'none',
                                                 'label' => __('trans.no_medical_exam'),
@@ -449,7 +457,7 @@
                                                 
                                             if ($latestMedical) {
                                                 $examDate = \Carbon\Carbon::parse($latestMedical->date_examen);
-                                                $validityMonths = $latestMedical->validite ?? 2; // défaut 2 mois
+                                                $validityMonths = $latestMedical->validite ?? 2; // dï¿½faut 2 mois
                                                 $expiryDate = $examDate->copy()->addMonths($validityMonths);
                                                 $now = \Carbon\Carbon::now();
                                                 $daysLeft = $now->diffInDays($expiryDate, false);
@@ -484,7 +492,7 @@
                                                 }
                                             }
                                             
-                                            // Calcul de la validité des compétences
+                                            // Calcul de la validitï¿½ des compï¿½tences
                                             $competenceStatus = [
                                                 'status' => 'none',
                                                 'label' => __('trans.no_competence'),
@@ -506,7 +514,7 @@
                                                 
                                                 foreach ($competences as $competence) {
                                                     $compDate = \Carbon\Carbon::parse($competence->date);
-                                                    $validityMonths = $competence->validite ?? 2; // défaut 2 mois
+                                                    $validityMonths = $competence->validite ?? 2; // dï¿½faut 2 mois
                                                     $expiryDate = $compDate->copy()->addMonths($validityMonths);
                                                     $daysLeft = $now->diffInDays($expiryDate, false);
                                                     
@@ -534,7 +542,7 @@
                                                     $competenceStatus['details'][] = $detail;
                                                 }
                                                 
-                                                // Déterminer le statut global
+                                                // Dï¿½terminer le statut global
                                                 if ($competenceStatus['expired_count'] > 0) {
                                                     $competenceStatus['status'] = 'expired';
                                                     $competenceStatus['label'] = __('trans.competence_expired_count', ['count' => $competenceStatus['expired_count']]);
@@ -604,7 +612,7 @@
                                                     <span class="badge {{ $competenceStatus['class'] }}" 
                                                           data-toggle="tooltip" 
                                                           data-html="true"
-                                                          title="@foreach($competenceStatus['details'] as $detail){{ $detail['type'] }}: {{ $detail['date'] }} ({{ $detail['validity_months'] }} mois) - @if($detail['is_expired'])Expiré depuis {{ abs($detail['days_left']) }}j @else Expire le {{ $detail['expiry_date'] }}@endif&#10;@endforeach">
+                                                          title="@foreach($competenceStatus['details'] as $detail){{ $detail['type'] }}: {{ $detail['date'] }} ({{ $detail['validity_months'] }} mois) - @if($detail['is_expired'])Expirï¿½ depuis {{ abs($detail['days_left']) }}j @else Expire le {{ $detail['expiry_date'] }}@endif&#10;@endforeach">
                                                         @if($competenceStatus['status'] == 'expired')
                                                             <i class="fas fa-times-circle"></i>
                                                         @elseif($competenceStatus['status'] == 'expiring_soon')
@@ -640,7 +648,7 @@
                             </table>
                         </div>
                         
-                        <!-- Légende -->
+                        <!-- Lï¿½gende -->
                         <div class="mt-3">
                             <div class="row">
                                 <div class="col-md-6">
@@ -729,15 +737,14 @@ $(document).ready(function() {
                 "order": [[1, 'desc']] // Order by date column descending by default
             });
 
-            // Date Range Picker Configuration
-            let startDate = null;
-            let endDate = null;
-            
+            // Date Range Picker Configuration (server-side filter on license expiration date)
+            let startDate = @json($dateFrom) || null;
+            let endDate = @json($dateTo) || null;
+
             // Initialize the date range picker
-            $('#dateRangePicker').daterangepicker({
+            var pickerOptions = {
                 autoUpdateInput: false,
                 locale: {
-                    cancelLabel: 'Clear',
                     format: 'YYYY-MM-DD',
                     applyLabel: '@lang("trans.apply")',
                     cancelLabel: '@lang("trans.cancel")',
@@ -753,13 +760,22 @@ $(document).ready(function() {
                     '@lang("trans.this_month")': [moment().startOf('month'), moment().endOf('month')],
                     '@lang("trans.last_month")': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
                 }
-            });
+            };
+            if (startDate && endDate) {
+                pickerOptions.startDate = moment(startDate, 'YYYY-MM-DD');
+                pickerOptions.endDate = moment(endDate, 'YYYY-MM-DD');
+            }
+            $('#dateRangePicker').daterangepicker(pickerOptions);
+
+            if (startDate && endDate) {
+                $('#dateRangeLabel').text(startDate + ' - ' + endDate);
+            }
 
             // Handle date range selection
             $('#dateRangePicker').on('apply.daterangepicker', function(ev, picker) {
                 startDate = picker.startDate.format('YYYY-MM-DD');
                 endDate = picker.endDate.format('YYYY-MM-DD');
-                $('#dateRangeLabel').text(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD'));
+                $('#dateRangeLabel').text(startDate + ' - ' + endDate);
             });
 
             $('#dateRangePicker').on('cancel.daterangepicker', function(ev, picker) {
@@ -768,46 +784,25 @@ $(document).ready(function() {
                 $('#dateRangeLabel').text('@lang("trans.select_date_range")');
             });
 
-            // Apply filter button click
+            // Apply filter button click: submit the date range to the server (filters on trans.expiry_date)
             $('#applyDateFilter').on('click', function() {
                 if (startDate && endDate) {
-                    // Apply custom filtering on the date column (index 1)
-                    $.fn.dataTable.ext.search.push(
-                        function(settings, data, dataIndex) {
-                            var dateColumn = data[7]; // Date column index
-                            if (!dateColumn) return true;
-                            
-                            var rowDate = moment(dateColumn, 'YYYY-MM-DD');
-                            if (!rowDate.isValid()) return true;
-                            
-                            var start = moment(startDate, 'YYYY-MM-DD');
-                            var end = moment(endDate, 'YYYY-MM-DD');
-                            
-                            if (rowDate.isBetween(start, end, null, '[]')) {
-                                return true;
-                            }
-                            return false;
-                        }
-                    );
-                    table.draw();
-                    // Remove the filter function after draw to avoid stacking filters
-                    $.fn.dataTable.ext.search.pop();
+                    $('#date_from').val(startDate);
+                    $('#date_to').val(endDate);
+                    $('#licencesFilterForm').submit();
                 } else {
                     alert("@lang('trans.select_date_range_first')");
                 }
             });
 
-            // Clear filter button click
+            // Clear filter button click: remove the date range and reload with other filters kept
             $('#clearDateFilter').on('click', function() {
                 startDate = null;
                 endDate = null;
                 $('#dateRangeLabel').text('@lang("trans.select_date_range")');
-                $('#dateRangePicker').data('daterangepicker').setStartDate(null);
-                $('#dateRangePicker').data('daterangepicker').setEndDate(null);
-                
-                // Clear any active search filters
-                $.fn.dataTable.ext.search.pop();
-                table.search('').draw();
+                $('#date_from').val('');
+                $('#date_to').val('');
+                $('#licencesFilterForm').submit();
             });
 
             // Add simple search inputs for other columns

@@ -285,12 +285,12 @@ class AdminController extends Controller
     public function licences(Request $request)
     {
         $query = Licence::with(['demandeur', 'demande']);
-        
+
         // Filter by license type
         if ($request->has('type') && $request->type && $request->type !== 'all') {
             $query->byType($request->type);
         }
-        
+
         // Filter by expiry status
         if ($request->has('status') && $request->status) {
             switch ($request->status) {
@@ -305,13 +305,27 @@ class AdminController extends Controller
                     break;
             }
         }
-        
+
+        // Filter by expiration date range
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+        if ($dateFrom && $dateTo) {
+            $query->whereBetween('date_expiration', [
+                Carbon::parse($dateFrom)->startOfDay(),
+                Carbon::parse($dateTo)->endOfDay(),
+            ]);
+        } elseif ($dateFrom) {
+            $query->where('date_expiration', '>=', Carbon::parse($dateFrom)->startOfDay());
+        } elseif ($dateTo) {
+            $query->where('date_expiration', '<=', Carbon::parse($dateTo)->endOfDay());
+        }
+
         $licences = $query->orderBy('date_expiration', 'asc')->get();
-        
+
         // Get distinct license types for filter dropdown
         $licenseTypes = Licence::getDistinctTypes();
-        
-        return view('admin.licences.index', compact('licences', 'licenseTypes'));
+
+        return view('admin.licences.index', compact('licences', 'licenseTypes', 'dateFrom', 'dateTo'));
 
         //
     }
@@ -357,22 +371,51 @@ class AdminController extends Controller
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
-        public function carteStagiares()
+        public function carteStagiares(Request $request)
     {
-        $cartes  = CarteStagiare::all();
+        $query = CarteStagiare::query();
 
-        return view('admin.stagiares.index', compact('cartes'));
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+        if ($dateFrom && $dateTo) {
+            $query->whereBetween('date_deliverance', [
+                Carbon::parse($dateFrom)->startOfDay(),
+                Carbon::parse($dateTo)->endOfDay(),
+            ]);
+        } elseif ($dateFrom) {
+            $query->where('date_deliverance', '>=', Carbon::parse($dateFrom)->startOfDay());
+        } elseif ($dateTo) {
+            $query->where('date_deliverance', '<=', Carbon::parse($dateTo)->endOfDay());
+        }
+
+        $cartes = $query->orderBy('date_deliverance', 'desc')->get();
+
+        return view('admin.stagiares.index', compact('cartes', 'dateFrom', 'dateTo'));
 
         //
     }
-     
-    
-        public function validations()
-    {
-        $validations = ValidationLicence::all();
-        
 
-        return view('admin.validations.index', compact('validations'));
+
+        public function validations(Request $request)
+    {
+        $query = ValidationLicence::query();
+
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+        if ($dateFrom && $dateTo) {
+            $query->whereBetween('date_delivrance_licence', [
+                Carbon::parse($dateFrom)->startOfDay(),
+                Carbon::parse($dateTo)->endOfDay(),
+            ]);
+        } elseif ($dateFrom) {
+            $query->where('date_delivrance_licence', '>=', Carbon::parse($dateFrom)->startOfDay());
+        } elseif ($dateTo) {
+            $query->where('date_delivrance_licence', '<=', Carbon::parse($dateTo)->endOfDay());
+        }
+
+        $validations = $query->orderBy('date_delivrance_licence', 'desc')->get();
+
+        return view('admin.validations.index', compact('validations', 'dateFrom', 'dateTo'));
 
         //
     }

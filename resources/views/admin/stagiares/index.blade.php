@@ -22,8 +22,35 @@
 
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header">@lang('trans.cards')</div>
+                    <div class="card-header">
+                        @lang('trans.cards')
+                        @if($dateFrom || $dateTo)
+                            <span class="badge badge-info ml-2">@lang('trans.date_range'): {{ $dateFrom }} - {{ $dateTo }}</span>
+                        @endif
+                    </div>
                     <div class="card-body">
+                        <div class="filter-section" style="background:#f8f9fa;padding:15px;border-radius:5px;margin-bottom:20px;">
+                            <form method="GET" action="{{ route('cartes') }}" class="row align-items-end">
+                                <div class="col-md-3">
+                                    <div class="form-group mb-0">
+                                        <label>@lang('trans.from')</label>
+                                        <input type="date" name="date_from" class="form-control" value="{{ $dateFrom }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group mb-0">
+                                        <label>@lang('trans.to')</label>
+                                        <input type="date" name="date_to" class="form-control" value="{{ $dateTo }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-filter"></i> @lang('trans.apply_filters')
+                                    </button>
+                                    <a href="{{ route('cartes') }}" class="btn btn-secondary">@lang('trans.reset_filters')</a>
+                                </div>
+                            </form>
+                        </div>
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped" id="cartes">
                                 <thead>
@@ -33,7 +60,7 @@
                                         <th>@lang('trans.dob')</th>
                                         <th>@lang('trans.address')</th>
                                         <th>@lang('trans.nationality')</th>
-                                        
+
                                         <th>@lang('trans.actions')</th>
                                     </tr>
                                 </thead>
@@ -85,7 +112,7 @@
 @push('custom')
     <script>
         $(function() {
-            $('#cartes').DataTable({
+            var table = $('#cartes').DataTable({
                 "paging": true,
                 "lengthChange": false,
                 "searching": true,
@@ -94,15 +121,24 @@
                 "autoWidth": false,
                 "responsive": true,
                 "columnDefs": [{
-                        "targets": 7,
-                        "orderable": false
-                    },
-                    {
-                        "targets": 3,
-                        "searchable": true
+                        "targets": [5],
+                        "orderable": false,
+                        "searchable": false
                     }
                 ]
 
+            });
+
+            // Add simple search inputs for other columns
+            table.columns().every(function(index) {
+                if (index !== 5) {
+                    var column = this;
+                    var $input = $('<input type="text" placeholder="@lang("trans.search")" class="form-control form-control-sm">')
+                        .appendTo($(column.header()))
+                        .on('keyup change', function() {
+                            column.search(this.value).draw();
+                        });
+                }
             });
         });
     </script>

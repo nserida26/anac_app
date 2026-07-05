@@ -19,50 +19,70 @@ class DashboardController extends Controller
      */
 
     // Page des statistiques
-    public function index()
+    public function index(Request $request)
     {
-        $dashboardData = $this->getDTADashboardData();
-        $data = $this->getCommonChartData();
-        return view('admin.dashboard', array_merge($data, $dashboardData));
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+
+        $dashboardData = $this->getDTADashboardData($dateFrom, $dateTo);
+        $data = $this->getCommonChartData($dateFrom, $dateTo);
+        return view('admin.dashboard', array_merge($data, $dashboardData, [
+            'dateFrom' => $dateFrom,
+            'dateTo' => $dateTo,
+        ]));
     }
-    private function getCommonChartData()
+    private function getCommonChartData($dateFrom = null, $dateTo = null)
     {
         // Données pour les graphiques existants
         $nombreDemandeurs = Demandeur::count();
-            
-        $demandesParJour = DemandeAutorisation::selectRaw('
+
+        $demandesParJourQuery = DemandeAutorisation::selectRaw('
                 DATE(created_at) as date,
                 SUM(CASE WHEN statut = "validated" THEN 1 ELSE 0 END) as traitees,
                 SUM(CASE WHEN statut != "validated" THEN 1 ELSE 0 END) as non_traitees
-            ')
-            ->whereDate('created_at', '>=', Carbon::now()->subDays(7))
+            ');
+        if ($dateFrom && $dateTo) {
+            $demandesParJourQuery->whereBetween('created_at', [Carbon::parse($dateFrom)->startOfDay(), Carbon::parse($dateTo)->endOfDay()]);
+        } else {
+            $demandesParJourQuery->whereDate('created_at', '>=', Carbon::now()->subDays(7));
+        }
+        $demandesParJour = $demandesParJourQuery
             ->groupBy(DB::raw('DATE(created_at)'))
             ->orderBy('date')
             ->get();
-            
-        $demandesParMois = DemandeAutorisation::selectRaw('
+
+        $demandesParMoisQuery = DemandeAutorisation::selectRaw('
                 MONTH(created_at) as mois,
                 YEAR(created_at) as annee,
                 CONCAT(MONTHNAME(created_at), " ", YEAR(created_at)) as mois_annee,
                 SUM(CASE WHEN statut = "validated" THEN 1 ELSE 0 END) as traitees,
                 SUM(CASE WHEN statut != "validated" THEN 1 ELSE 0 END) as non_traitees
-            ')
-            ->whereYear('created_at', Carbon::now()->year)
+            ');
+        if ($dateFrom && $dateTo) {
+            $demandesParMoisQuery->whereBetween('created_at', [Carbon::parse($dateFrom)->startOfDay(), Carbon::parse($dateTo)->endOfDay()]);
+        } else {
+            $demandesParMoisQuery->whereYear('created_at', Carbon::now()->year);
+        }
+        $demandesParMois = $demandesParMoisQuery
             ->groupBy('annee', 'mois')
             ->orderBy('annee')
             ->orderBy('mois')
             ->get();
-            
-        $demandesParAnnee = DemandeAutorisation::selectRaw('
+
+        $demandesParAnneeQuery = DemandeAutorisation::selectRaw('
                 YEAR(created_at) as annee,
                 SUM(CASE WHEN statut = "validated" THEN 1 ELSE 0 END) as traitees,
                 SUM(CASE WHEN statut != "validated" THEN 1 ELSE 0 END) as non_traitees
-            ')
+            ');
+        if ($dateFrom && $dateTo) {
+            $demandesParAnneeQuery->whereBetween('created_at', [Carbon::parse($dateFrom)->startOfDay(), Carbon::parse($dateTo)->endOfDay()]);
+        }
+        $demandesParAnnee = $demandesParAnneeQuery
             ->groupBy('annee')
             ->orderBy('annee', 'desc')
             ->limit(5)
             ->get();
-            
+
         return [
             'nombreDemandeurs' => $nombreDemandeurs,
             'demandesParJour' => $demandesParJour,
@@ -70,48 +90,54 @@ class DashboardController extends Controller
             'demandesParAnnee' => $demandesParAnnee
         ];
     }
-    
+
     /**
      * Dashboard DTA (Direction des Transports Aériens)
      */
-    private function getDTADashboardData()
+    private function getDTADashboardData($dateFrom = null, $dateTo = null)
     {
+        $applyDateRange = function ($query, $column = 'created_at') use ($dateFrom, $dateTo) {
+            if ($dateFrom && $dateTo) {
+                $query->whereBetween($column, [Carbon::parse($dateFrom)->startOfDay(), Carbon::parse($dateTo)->endOfDay()]);
+            }
+            return $query;
+        };
+
         // Statistiques des autorisations
         $autorisationsStats = [
-            'total' => DemandeAutorisation::count(),
-            'valides' => DemandeAutorisation::join('etat_demande_autorisations','demande_autorisations.id','etat_demande_autorisations.demande_id')
+            'total' => $applyDateRange(DemandeAutorisation::query())->count(),
+            'valides' => $applyDateRange(DemandeAutorisation::join('etat_demande_autorisations','demande_autorisations.id','etat_demande_autorisations.demande_id'), 'demande_autorisations.created_at')
                                                 ->where('etat_demande_autorisations.dg_valider', true)
                                                 ->orWhere('etat_demande_autorisations.dta_dg_valider', true)
                                                 ->count(),
-            'expirees' => Autorisation::where('date_expiration', '<', Carbon::now())->count(),
+            'expirees' => $applyDateRange(Autorisation::where('date_expiration', '<', Carbon::now()))->count(),
 
-            'en_cours' => DemandeAutorisation::join('etat_demande_autorisations','demande_autorisations.id','etat_demande_autorisations.demande_id')
+            'en_cours' => $applyDateRange(DemandeAutorisation::join('etat_demande_autorisations','demande_autorisations.id','etat_demande_autorisations.demande_id'), 'demande_autorisations.created_at')
                                                 ->where('etat_demande_autorisations.dg_annoter', true)
                                                 ->orWhere('etat_demande_autorisations.dta_dg_annoter', true)
                                                 ->count(),
-            'attente_signature' => Autorisation::whereNotNull('signature_dg')->count(),
-            'attente_validation' => Autorisation::whereHas('demande', function ($query) {
+            'attente_signature' => $applyDateRange(Autorisation::whereNotNull('signature_dg'))->count(),
+            'attente_validation' => $applyDateRange(Autorisation::whereHas('demande', function ($query) {
                 $query->whereHas('etatDemande', function ($q) {
                     $q->where('dg_valider', false)->orWhere('dta_dg_valider', false);
                 });
-            })->count(),
+            }))->count(),
 
         ];
-        
+
         // Autorisations récentes
-        $recentAutorisations = Autorisation::with('demande')
-            ->orderBy('created_at', 'desc')
-            ->get();
-            
+        $recentAutorisationsQuery = Autorisation::with('demande')->orderBy('created_at', 'desc');
+        $recentAutorisations = $applyDateRange($recentAutorisationsQuery)->get();
+
         // Demandes en attente de traitement DTA
-        $demandesEnAttente = DemandeAutorisation::whereHas('etatDemande', function($query) {
+        $demandesEnAttenteQuery = DemandeAutorisation::whereHas('etatDemande', function($query) {
                 $query->where('dg_annoter', true)->orWhere('dta_dg_annoter', true)
                       ->where('dta_valider', false);
-            })->count();
-            
+            });
+        $demandesEnAttente = $applyDateRange($demandesEnAttenteQuery)->count();
+
         // Statistiques par type d'autorisation
-        $statsParType = DB::table('demande_autorisations as d')
-            
+        $statsParTypeQuery = DB::table('demande_autorisations as d')
             ->join('type_demande_autorisations as t', 'd.type_demande_autorisation_id', '=', 't.id')
             ->join('etat_demande_autorisations as e', 'e.demande_id', '=', 'd.id')
             ->selectRaw('
@@ -120,11 +146,15 @@ class DashboardController extends Controller
                 SUM(CASE WHEN e.dg_valider = true THEN 1 ELSE 0 END) as valides,
                 SUM(CASE WHEN d.date_fin > NOW()  THEN 1 ELSE 0 END) as expirees,
                 SUM(CASE WHEN e.dg_valider = false THEN 1 ELSE 0 END) as en_cours
-            ')
+            ');
+        if ($dateFrom && $dateTo) {
+            $statsParTypeQuery->whereBetween('d.created_at', [Carbon::parse($dateFrom)->startOfDay(), Carbon::parse($dateTo)->endOfDay()]);
+        }
+        $statsParType = $statsParTypeQuery
             ->groupBy('t.libelle')
             ->orderBy('total', 'desc')
             ->get();
-            
+
         return [
             'autorisations_stats' => $autorisationsStats,
             'recent_autorisations' => $recentAutorisations,
@@ -133,40 +163,55 @@ class DashboardController extends Controller
         ];
     }
     // Retourner les statistiques sous format JSON
-    public function getData()
+    public function getData(Request $request)
     {
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+
         // Nombre total de demandeurs
         $nombreDemandeurs = Demandeur::count();
 
         // Récupérer les demandes traitées et non traitées par jour
-        $demandesParJour = Demande::join('etat_demandes', 'demandes.id', 'etat_demandes.demande_id')->select(
+        $demandesParJourQuery = Demande::join('etat_demandes', 'demandes.id', 'etat_demandes.demande_id')->select(
             DB::raw('DATE(demandes.created_at) as date'),
             DB::raw('COUNT(*) as total'),
             DB::raw('SUM(CASE WHEN etat_demandes.demandeur_cree_demande = 1 THEN 1 ELSE 0 END) as traitees'),
             DB::raw('SUM(CASE WHEN etat_demandes.demandeur_cree_demande = 0 THEN 1 ELSE 0 END) as non_traitees')
-        )
+        );
+        if ($dateFrom && $dateTo) {
+            $demandesParJourQuery->whereBetween('demandes.created_at', [Carbon::parse($dateFrom)->startOfDay(), Carbon::parse($dateTo)->endOfDay()]);
+        }
+        $demandesParJour = $demandesParJourQuery
             ->groupBy('date')
             ->orderBy('date', 'ASC')
             ->get();
 
         // Récupérer les demandes traitées et non traitées par mois
-        $demandesParMois = Demande::join('etat_demandes', 'demandes.id', 'etat_demandes.demande_id')->select(
+        $demandesParMoisQuery = Demande::join('etat_demandes', 'demandes.id', 'etat_demandes.demande_id')->select(
             DB::raw('DATE_FORMAT(demandes.created_at, "%Y-%m") as mois'),
             DB::raw('COUNT(*) as total'),
             DB::raw('SUM(CASE WHEN etat_demandes.demandeur_cree_demande = 1 THEN 1 ELSE 0 END) as traitees'),
             DB::raw('SUM(CASE WHEN etat_demandes.demandeur_cree_demande = 0 THEN 1 ELSE 0 END) as non_traitees')
-        )
+        );
+        if ($dateFrom && $dateTo) {
+            $demandesParMoisQuery->whereBetween('demandes.created_at', [Carbon::parse($dateFrom)->startOfDay(), Carbon::parse($dateTo)->endOfDay()]);
+        }
+        $demandesParMois = $demandesParMoisQuery
             ->groupBy('mois')
             ->orderBy('mois', 'ASC')
             ->get();
 
         // Récupérer les demandes traitées et non traitées par année
-        $demandesParAnnee = Demande::join('etat_demandes', 'demandes.id', 'etat_demandes.demande_id')->select(
+        $demandesParAnneeQuery = Demande::join('etat_demandes', 'demandes.id', 'etat_demandes.demande_id')->select(
             DB::raw('YEAR(demandes.created_at) as annee'),
             DB::raw('COUNT(*) as total'),
             DB::raw('SUM(CASE WHEN etat_demandes.demandeur_cree_demande = 1 THEN 1 ELSE 0 END) as traitees'),
             DB::raw('SUM(CASE WHEN etat_demandes.demandeur_cree_demande = 0 THEN 1 ELSE 0 END) as non_traitees')
-        )
+        );
+        if ($dateFrom && $dateTo) {
+            $demandesParAnneeQuery->whereBetween('demandes.created_at', [Carbon::parse($dateFrom)->startOfDay(), Carbon::parse($dateTo)->endOfDay()]);
+        }
+        $demandesParAnnee = $demandesParAnneeQuery
             ->groupBy('annee')
             ->orderBy('annee', 'ASC')
             ->get();

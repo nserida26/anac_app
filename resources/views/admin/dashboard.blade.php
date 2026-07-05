@@ -20,6 +20,35 @@
     <div class="container-fluid">
         <div class="row justify-content-center">
             <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body filter-section" style="background:#f8f9fa;border-radius:5px;">
+                        <form method="GET" action="{{ route('dashboard') }}" class="row align-items-end">
+                            <div class="col-md-3">
+                                <div class="form-group mb-0">
+                                    <label>@lang('trans.from')</label>
+                                    <input type="date" name="date_from" class="form-control" value="{{ $dateFrom }}">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group mb-0">
+                                    <label>@lang('trans.to')</label>
+                                    <input type="date" name="date_to" class="form-control" value="{{ $dateTo }}">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-filter"></i> @lang('trans.apply_filters')
+                                </button>
+                                <a href="{{ route('dashboard') }}" class="btn btn-secondary">@lang('trans.reset_filters')</a>
+                            </div>
+                            @if($dateFrom || $dateTo)
+                                <div class="col-md-3">
+                                    <span class="badge badge-info">@lang('trans.date_range'): {{ $dateFrom }} - {{ $dateTo }}</span>
+                                </div>
+                            @endif
+                        </form>
+                    </div>
+                </div>
                 @can('manage-dsv')
                     <div class="card">
                         <!--<div class="card-header bg-primary text-white">
@@ -229,7 +258,13 @@
         }
     });
         document.addEventListener("DOMContentLoaded", function() {
-            fetch("{{ route('dashboard.data') }}")
+            const dashboardDateFrom = @json($dateFrom);
+            const dashboardDateTo = @json($dateTo);
+            let dashboardDataUrl = "{{ route('dashboard.data') }}";
+            if (dashboardDateFrom && dashboardDateTo) {
+                dashboardDataUrl += "?date_from=" + encodeURIComponent(dashboardDateFrom) + "&date_to=" + encodeURIComponent(dashboardDateTo);
+            }
+            fetch(dashboardDataUrl)
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('nombreDemandeurs').innerText = data.nombreDemandeurs;
