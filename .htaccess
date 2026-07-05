@@ -1,13 +1,14 @@
 # .htaccess à la racine du projet (pas dans public)
 RewriteEngine On
 
-# Rediriger tout vers le dossier public
+# Rediriger tout vers le dossier public, sauf les fichiers statiques servis
+# directement depuis la racine (uploads, assets)
 RewriteCond %{REQUEST_URI} !^/public/
+RewriteCond %{REQUEST_URI} !^/uploads/
+RewriteCond %{REQUEST_URI} !^/assets/
 RewriteRule ^(.*)$ /public/$1 [L,QSA]
 
 # Pour que index.php ne soit plus visible dans l'URL
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ public/index.php [L]
-
-php_value max_execution_time 360000000

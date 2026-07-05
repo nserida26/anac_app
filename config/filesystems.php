@@ -38,8 +38,8 @@ return [
         'public' => [
             'driver' => 'local',
             'visibility' => 'public',
-            'root'   => base_path() . '/uploads',
-            'url' => env('APP_URL').'/public',
+            'root'   => base_path('uploads'),
+            'url' => env('APP_URL').'/uploads',
         ],
 
         's3' => [
