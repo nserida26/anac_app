@@ -1,0 +1,22 @@
+<?php
+return [
+    'dashboard' => 'Tableau de bord',
+    'demandes' => 'Demandes',
+    'examens' => 'Examens',
+    'id' => 'ID',
+    'photo' => 'Photo',
+    'nom_prenom' => 'Nom et Prénom',
+    'date_naissance' => 'Date de naissance',
+    'adresse' => 'Adresse',
+    'actions' => 'Actions',
+    'create' => 'Créer',
+    'demandeur' => 'Demandeur',
+    'date_examen' => 'Date d\'examen',
+    'aptitude' => 'Aptitude',
+    'show' => 'Afficher',
+    'edit' => 'Modifier',
+    'valider' => 'Valider',
+    'supprimer' => 'Supprimer',
+    'confirm_validation' => 'Confirmer la validation ?',
+    'confirm_suppression' => 'Confirmer la suppression ?',
+];

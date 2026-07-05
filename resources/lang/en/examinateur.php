@@ -1,0 +1,22 @@
+<?php
+return [
+    'dashboard' => 'Dashboard',
+    'demandes' => 'Requests',
+    'examens' => 'Exams',
+    'id' => 'ID',
+    'photo' => 'Photo',
+    'nom_prenom' => 'Full Name',
+    'date_naissance' => 'Date of Birth',
+    'adresse' => 'Address',
+    'actions' => 'Actions',
+    'create' => 'Create',
+    'demandeur' => 'Applicant',
+    'date_examen' => 'Exam Date',
+    'aptitude' => 'Aptitude',
+    'show' => 'Show',
+    'edit' => 'Edit',
+    'valider' => 'Validate',
+    'supprimer' => 'Delete',
+    'confirm_validation' => 'Confirm validation?',
+    'confirm_suppression' => 'Confirm deletion?',
+];

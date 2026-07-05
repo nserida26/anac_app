@@ -1,0 +1,40 @@
+{
+    "fields": [
+        {
+            "name": "wilaya_id",
+            "type": "integer#unsigned"
+        },        
+        {
+            "name": "projet_id",
+            "type": "integer#unsigned"
+        }
+    ],
+    "foreign_keys": [
+        {
+            "column": "wilaya_id",
+            "references": "id",
+            "on": "wilayas",
+            "onDelete": "cascade"
+        },
+        {
+            "column": "projet_id",
+            "references": "id",
+            "on": "projets",
+            "onDelete": "cascade"
+        }
+    ],
+    "relationships": [
+        {
+            "name": "projet",
+            "type": "belongsTo",
+            "class": "App\\Models\\Projet"
+        },
+        {
+            "name": "wilaya",
+            "type": "belongsTo",
+            "class": "App\\Models\\Wilaya"
+        }
+        
+    ]
+    
+}
