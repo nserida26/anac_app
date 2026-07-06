@@ -548,7 +548,7 @@ Route::get('/rapports/compagnie/{id}', [App\Http\Controllers\DgDsvController::cl
 
                 Route::get('/demandeurs', [App\Http\Controllers\AdminController::class, 'indexDemandeur'])->name('demandeurs');
                 Route::get('/demandeurs/show/{id}', [App\Http\Controllers\AdminController::class, 'showDemandeur'])->name('demandeurs.show');
-                Route::post('/demandeurs/update/{demande}', [App\Http\Controllers\AdminController::class, 'updateDemandeur'])->name('demandeurs.update');
+                Route::post('/demandeurs/update/{demandeur}', [App\Http\Controllers\AdminController::class, 'updateDemandeur'])->name('demandeurs.update');
                 Route::patch('/demandeurs/{demandeur}/toggle-status', [App\Http\Controllers\AdminController::class, 'toggleStatus'])->name('demandeurs.toggle-status');
 
 
@@ -572,8 +572,6 @@ Route::post('/demandes/{id}/update-type', [App\Http\Controllers\AdminController:
                 Route::get('licences/send-all-notifications', [App\Http\Controllers\AdminController::class, 'sendAllExpiryNotifications'])
                     ->name('licences.send-all-notifications');
                 
-                Route::get('licences/{licence}/renewal', [App\Http\Controllers\AdminController::class, 'renewalForm'])
-                    ->name('licences.renewal');
                 Route::get('/licences/show/{licence}', [App\Http\Controllers\AdminController::class, 'showLicence'])->name('licences.show');
                 Route::put('/licences/update/{licence}', [App\Http\Controllers\AdminController::class, 'updateLicence'])->name('licences.update');
                 // Dans web.php

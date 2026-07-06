@@ -17,8 +17,6 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\ExaminateurCentre;
 use App\Models\CentreFormation;
 
-use App\Models\Validation;
-
 use App\Models\Checklist;
 use Carbon\Carbon;
 use App\Models\CompetenceDemandeur;
@@ -33,7 +31,6 @@ use App\Models\Cachet;
 
 use App\Models\ExperienceDemandeur;
 use App\Models\ExperienceMaintenanceDemandeur;
-use App\Models\ExprienceMaintenanceDemandeur;
 use App\Models\FormationDemandeur;
 use App\Models\FretVol;
 use App\Models\InterruptionDemandeur;
@@ -88,9 +85,9 @@ class AdminController extends Controller
         //
         $demandes = Demande::with('demandeur')->where('status', '<>', 'En attente')->get();
         $typesDemandes = TypeDemande::all();
-        return view('admin.demandeLicences.index', compact('demandes','typesDemandes'));
+        return view('admin.demandeLicences.index', compact('demandes', 'typesDemandes'));
     }
-    
+
     public function indexDemandeur()
     {
         //
@@ -145,7 +142,7 @@ class AdminController extends Controller
         $signature  =  Auth::user()->signature;
         $cachet  =  Auth::user()->cachet;
 
-        return view('admin.signature', compact('signature','cachet'));
+        return view('admin.signature', compact('signature', 'cachet'));
     }
 
     public function store_sc(Request $request)
@@ -215,7 +212,6 @@ class AdminController extends Controller
         $demandeAutorisation = DemandeAutorisation::find($id);
         $vols = $demandeAutorisation->vols;
 
-        $itineraires = $demandeAutorisation->itineraires;
         $equipe_vols = $demandeAutorisation->equipe;
         $fretVols  = $demandeAutorisation->fret;
         $personnesDeces  = $demandeAutorisation->personnes;
@@ -230,7 +226,7 @@ class AdminController extends Controller
 
         $avions = $demandeAutorisation->avions;
 
-        return view('admin.demandeAutorisations.show', compact('personnesDeces','avions', 'receivingParties', 'demandeAutorisation', 'vols', 'itineraires', 'equipe_vols', 'fretVols'));
+        return view('admin.demandeAutorisations.show', compact('personnesDeces', 'avions', 'receivingParties', 'demandeAutorisation', 'vols', 'equipe_vols', 'fretVols'));
     }
 
     public function approbations()
@@ -256,16 +252,15 @@ class AdminController extends Controller
 
     public function print(Autorisation $autorisation)
     {
-        
+
         return view('admin.autorisations.print', compact('autorisation'));
-        
     }
 
     public function autorisations()
     {
         $autorisations = Autorisation::whereHas('demande')
-        ->orderBy('created_at', 'desc')
-        ->get();
+            ->orderBy('created_at', 'desc')
+            ->get();
         return view('admin.autorisations.index', compact('autorisations'));
 
         //
@@ -329,22 +324,24 @@ class AdminController extends Controller
 
         //
     }
-    
+
     // Method to send manual notification for a specific licence
     public function sendExpiryNotification(Licence $licence)
     {
         try {
             $result = $licence->sendExpiryNotification();
-            
-            
+
+
             if ($result) {
                 return redirect()->back()->with('success', __('trans.notification_sent_successfully'));
             }
+
+            return redirect()->back()->with('error', __('trans.notification_failed'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
-    
+
     // Method to send notifications for all expiring licences
     public function sendAllExpiryNotifications()
     {
@@ -352,10 +349,10 @@ class AdminController extends Controller
             $expiringLicences = Licence::valid()
                 ->whereBetween('date_expiration', [now(), now()->addDays(15)])
                 ->get();
-            
+
             $sentCount = 0;
             $failedCount = 0;
-            
+
             foreach ($expiringLicences as $licence) {
                 if ($licence->sendExpiryNotification()) {
                     $sentCount++;
@@ -363,15 +360,16 @@ class AdminController extends Controller
                     $failedCount++;
                 }
             }
-            
-            return redirect()->back()->with('success', 
+
+            return redirect()->back()->with(
+                'success',
                 __('trans.notifications_sent', ['sent' => $sentCount, 'failed' => $failedCount])
             );
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
-        public function carteStagiares(Request $request)
+    public function carteStagiares(Request $request)
     {
         $query = CarteStagiare::query();
 
@@ -396,7 +394,7 @@ class AdminController extends Controller
     }
 
 
-        public function validations(Request $request)
+    public function validations(Request $request)
     {
         $query = ValidationLicence::query();
 
@@ -494,28 +492,29 @@ class AdminController extends Controller
             ->where('documents.demande_id', $id)
             ->select('type_documents.*', 'documents.*')
             ->get();
-    // Get checklists based on demande's type_demande_id and type_licence_id
-$checklists = Checklist::where('type_demande_id', $demande->type_demande_id)
-    ->where('type_licence_id', $demande->type_licence_id)
-    ->orderBy('section')
-    ->orderBy('ordre')
-    ->get()
-    ->groupBy('section');
+        // Get checklists based on demande's type_demande_id and type_licence_id
+        $checklists = Checklist::where('type_demande_id', $demande->type_demande_id)
+            ->where('type_licence_id', $demande->type_licence_id)
+            ->orderBy('section')
+            ->orderBy('ordre')
+            ->get()
+            ->groupBy('section');
 
-    
-    
-    // Get existing responses
-    $reponses = ChecklistDemande::where('demande_id', $demande->id)
-        ->get()
-        ->keyBy('checklist_id');
-            
-        return view('admin.demandeLicences.show', compact('reponses','checklists','examens', 'formations', 'demande', 'demandeur', 'employeur_demandeurs', 'experience_maintenance_demandeurs', 'interruption_demandeurs', 'formation_demandeurs', 'documents', 'entrainement_demandeurs', 'competence_demandeurs', 'experience_demandeurs', 'medical_examinations', 'qualification_demandeurs'));
+
+
+        // Get existing responses
+        $reponses = ChecklistDemande::where('demande_id', $demande->id)
+            ->get()
+            ->keyBy('checklist_id');
+
+        return view('admin.demandeLicences.show', compact('reponses', 'checklists', 'examens', 'formations', 'demande', 'demandeur', 'employeur_demandeurs', 'experience_maintenance_demandeurs', 'interruption_demandeurs', 'formation_demandeurs', 'documents', 'entrainement_demandeurs', 'competence_demandeurs', 'experience_demandeurs', 'medical_examinations', 'qualification_demandeurs'));
     }
-    
-    public function showDemandeur($id){
-        
-        $demandeur = Demandeur::find($id);
-        
+
+    public function showDemandeur($id)
+    {
+
+        $demandeur = Demandeur::with('user')->find($id);
+
         return view('admin.demandeurs.show', compact('demandeur'));
     }
 
@@ -567,40 +566,38 @@ $checklists = Checklist::where('type_demande_id', $demande->type_demande_id)
     }
     // Dans LicenceController.php
 
-public function updateCalculation(Request $request, $id)
-{
-    
-    try {
-        $request->validate([
-            'type_calcul' => 'required|in:none,jours,fin_mois',
-            'jours_supplementaires' => 'required_if:type_calcul,jours|nullable|integer|min:1|max:365'
-        ]);
+    public function updateCalculation(Request $request, $id)
+    {
 
-        $licence = Licence::findOrFail($id);
-        
-        $licence->type_calcul = $request->type_calcul;
-        
-        if ($request->type_calcul == 'jours') {
-            $licence->jours_supplementaires = $request->jours_supplementaires;
-        } else {
-            $licence->jours_supplementaires = null;
+        try {
+            $request->validate([
+                'type_calcul' => 'required|in:none,jours,fin_mois',
+                'jours_supplementaires' => 'required_if:type_calcul,jours|nullable|integer|min:1|max:365'
+            ]);
+
+            $licence = Licence::findOrFail($id);
+
+            $licence->type_calcul = $request->type_calcul;
+
+            if ($request->type_calcul == 'jours') {
+                $licence->jours_supplementaires = $request->jours_supplementaires;
+            } else {
+                $licence->jours_supplementaires = null;
+            }
+
+            $licence->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => __('trans.calculation_settings_updated_success')
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => __('trans.error_updating_calculation_settings')
+            ], 400);
         }
-        
-        $licence->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => __('trans.calculation_settings_updated_success')
-        ]);
-
-        
-    } catch (\Exception $e) {
-return response()->json([
-    'success' => false,
-    'message' => __('trans.error_updating_calculation_settings')
-], 400);
     }
-}
 
 
     public function imprimerAuth($id)
@@ -614,7 +611,7 @@ return response()->json([
         if ($licence->licence_valide) {
             # code...
             $medical_certificat = $demande->medicalExaminations()->orderByDesc('date_examen')->first();
-            
+
             $qualification_ulm = QualificationDemandeur::join('qualifications', 'qualifications.id', 'qualification_demandeurs.qualification_id')
                 ->join('demandes', 'demandes.id', 'qualification_demandeurs.demande_id')
                 ->where('qualifications.libelle', 'Qualification de Class')
@@ -691,8 +688,8 @@ return response()->json([
                 ->where('demandes.id', $id)
                 ->orderByDesc('competence_demandeurs.date')
                 ->first();
-                
-            
+
+
 
 
 
@@ -760,7 +757,7 @@ return response()->json([
                 ->where('demandes.id', $id)
                 ->orderByDesc('qualification_demandeurs.id')
                 ->get();
-                
+
             $qualification_ifr = QualificationDemandeur::join('qualifications', 'qualifications.id', 'qualification_demandeurs.qualification_id')
                 ->join('demandes', 'demandes.id', 'qualification_demandeurs.demande_id')
                 ->select('qualification_demandeurs.date_examen')
@@ -807,14 +804,14 @@ return response()->json([
             return redirect()->back()->with('error', 'Licence n\' est pas encore valide.');
         }
     }
-    
-        public function imprimerCarte($id)
+
+    public function imprimerCarte($id)
     {
         $demande  = Demande::find($id);
 
         $demandeur = $demande->demandeur;
         $carte_stagiare = $demande->carteStagiare;
-            return view('admin.stagiares.preview', compact('demande', 'demandeur', 'carte_stagiare'));
+        return view('admin.stagiares.preview', compact('demande', 'demandeur', 'carte_stagiare'));
     }
     public function validerLicence(Licence $licence)
     {
@@ -830,7 +827,7 @@ return response()->json([
                 'pel_licence_valider' => true
             ]
         );
-        $activity = Activity::log('pel_licence_valider',$licence->demande->id);
+        $activity = Activity::log('pel_licence_valider', $licence->demande->id);
 
         return back()->with('success', 'Licence validée avec succès.');
     }
@@ -848,7 +845,7 @@ return response()->json([
                 'pel_licence_valider' => false
             ]
         );
-        $activity = Activity::log('pel_licence_valider',$licence->demande->id);
+        $activity = Activity::log('pel_licence_valider', $licence->demande->id);
 
         return back()->with('success', 'Licence bloquée avec succès.');
     }
@@ -857,23 +854,23 @@ return response()->json([
         $l = $licence->delete();
         return back()->with('success', 'Licence supprimée avec succès.');
     }
-    
+
     public function supprimerValidation(ValidationLicence $validation)
-{
-    // Sécurité optionnelle
-    // $this->authorize('delete', $demande);
+    {
+        // Sécurité optionnelle
+        // $this->authorize('delete', $demande);
 
-    $validation->delete();
+        $validation->delete();
 
-    return redirect()->back()
-        ->with('success', __('trans.deleted_successfully'));
-}
+        return redirect()->back()
+            ->with('success', __('trans.deleted_successfully'));
+    }
     public function supprimerCarte(CarteStagiare $carte)
     {
         $l = $carte->delete();
         return back()->with('success', 'Carte supprimée avec succès.');
     }
- 
+
     /**
      * Update the specified resource in storage.
      *
@@ -895,34 +892,30 @@ return response()->json([
 
         return redirect()->route('demandes')->with('success', 'Demande mis à jour.');
     }
-    
-    
+
+
     public function updateDemandeur(Request $request, Demandeur $demandeur)
     {
         //
-        $request->validate([
-            
-        ]);
+        $request->validate([]);
 
 
-        $demandeur->update([
-            
-        ]);
+        $demandeur->update([]);
 
         return redirect()->route('demandeurs')->with('success', 'Demandeur mis à jour.');
     }
 
 
-public function destroy(Demande $demande)
-{
-    // Sécurité optionnelle
-    // $this->authorize('delete', $demande);
+    public function destroy(Demande $demande)
+    {
+        // Sécurité optionnelle
+        // $this->authorize('delete', $demande);
 
-    $demande->delete();
+        $demande->delete();
 
-    return redirect()->back()
-        ->with('success', __('trans.deleted_successfully'));
-}
+        return redirect()->back()
+            ->with('success', __('trans.deleted_successfully'));
+    }
 
     public function enroller($id)
     {
@@ -932,7 +925,7 @@ public function destroy(Demande $demande)
                 'pel_valider_enrol' => true
             ]
         );
-        $activity = Activity::log('pel_valider_enrol',$id);
+        $activity = Activity::log('pel_valider_enrol', $id);
 
 
         return back()->with('success', 'Demandeur enrolée avec succès.');
@@ -947,7 +940,7 @@ public function destroy(Demande $demande)
                 'pel_annoter' => true
             ]
         );
-        $activity = Activity::log('pel_annoter',$demande->id);
+        $activity = Activity::log('pel_annoter', $demande->id);
         // Aucun envoie a lieu
         /*if (!empty($demande->demandeur->user->whatsapp)) {
             # code...
@@ -973,8 +966,8 @@ public function destroy(Demande $demande)
                 'pel_dsv_signer' => Auth::user()->hasRole('admin')
             ]
         );
-        $activity = Activity::log('pel_dsv_signer',$demande->id);
-                $pel = User::role('admin')
+        $activity = Activity::log('pel_dsv_signer', $demande->id);
+        $pel = User::role('admin')
             ->whereHas('permissions', function ($q) {
                 $q->where('name', 'menage-dsv');
             })
@@ -1003,7 +996,7 @@ public function destroy(Demande $demande)
                 'pel_valider' => true
             ]
         );
-        $activity = Activity::log('pel_valider',$demande->id);
+        $activity = Activity::log('pel_valider', $demande->id);
         $dsv = User::role('dsv')
             ->whereHas('signature', function ($q) {
                 $q->whereNotNull('signature');
@@ -1028,8 +1021,8 @@ public function destroy(Demande $demande)
 
     function generateLicenceValidation(ValidationLicence $validation)
     {
-        
-                $dg = User::role('dg')
+
+        $dg = User::role('dg')
             ->whereHas('signature', function ($q) {
                 $q->whereNotNull('signature');
             })
@@ -1048,16 +1041,16 @@ public function destroy(Demande $demande)
             ->orderByDesc('qualification_demandeurs.id')
             ->get()
             ->unique('code'); // Filter unique results by code after retrieval
-            $qualification_types = QualificationDemandeur::join('qualifications', 'qualifications.id', 'qualification_demandeurs.qualification_id')
-                ->join('type_avions', 'type_avions.id', 'qualification_demandeurs.type_avion_id')
-                ->join('demandes', 'demandes.id', 'qualification_demandeurs.demande_id')
-                ->select('type_avions.code', 'qualification_demandeurs.date_examen')
-                ->where('qualifications.libelle', 'Qualification Type Machine')
-                ->where('demandes.id', $validation->demande_id)
-                ->orderByDesc('qualification_demandeurs.id')
-                ->get();
-                
-        return view('admin.licences.print', compact('validation','qualification_types','qualification_amts','dg'));
+        $qualification_types = QualificationDemandeur::join('qualifications', 'qualifications.id', 'qualification_demandeurs.qualification_id')
+            ->join('type_avions', 'type_avions.id', 'qualification_demandeurs.type_avion_id')
+            ->join('demandes', 'demandes.id', 'qualification_demandeurs.demande_id')
+            ->select('type_avions.code', 'qualification_demandeurs.date_examen')
+            ->where('qualifications.libelle', 'Qualification Type Machine')
+            ->where('demandes.id', $validation->demande_id)
+            ->orderByDesc('qualification_demandeurs.id')
+            ->get();
+
+        return view('admin.licences.print', compact('validation', 'qualification_types', 'qualification_amts', 'dg'));
     }
     function generateLicence($id)
     {
@@ -1081,7 +1074,7 @@ public function destroy(Demande $demande)
                 }
             }
         }
-        if(!in_array($demande->typeDemande->id , array(8))){
+        if (!in_array($demande->typeDemande->id, array(8))) {
             $qualification_demandeurs = $demande->qualifications;
             $competence_demandeurs = $demande->competences;
             $maxExpirationDateCompetence = null;
@@ -1111,15 +1104,13 @@ public function destroy(Demande $demande)
                     } else {
                         $expirationDate = $startDate->copy()->addMonths(12)->endOfMonth();
                     }
-    
+
                     return $expirationDate->format('Y-m-d');
                 })->max();
-                
             }
-           
+
             $dateExpiration = $this->findMinDate(array($maxExpirationDateQualification, $maxExpirationDateCompetence));
             $dateExpiration  =  $dateExpiration->format('Y-m-d');
-            
         }
 
         $licenseId = '';
@@ -1146,14 +1137,14 @@ public function destroy(Demande $demande)
                 $q->whereNotNull('signature');
             })
             ->latest()->first();
-        
+
         // Get first DSV user with non-null signature  
         $dsv = User::role('dsv')
             ->whereHas('signature', function ($q) {
                 $q->whereNotNull('signature');
             })
             ->latest()->first();
-        
+
         // Get first admin user with 'menage-dsv' permission and non-null signature
         $pel = User::role('admin')
             ->whereHas('permissions', function ($q) {
@@ -1163,7 +1154,7 @@ public function destroy(Demande $demande)
                 $q->whereNotNull('signature');
             })
             ->latest()->first();
-        if (in_array($demande->typeDemande->id, array(1, 3 ,10))) {
+        if (in_array($demande->typeDemande->id, array(1, 3, 10))) {
             //D + C + V
             $licence = Licence::create(
                 [
@@ -1239,11 +1230,11 @@ public function destroy(Demande $demande)
 
             // Récupérer la dernière carte
             $lastCarte = CarteStagiare::orderBy('id', 'desc')->first();
-            
+
             if ($lastCarte && !empty($lastCarte->id)) {
                 // Extraire le numéro de la dernière carte
                 $parts = explode('/', $lastCarte->numero_carte);
-                
+
                 // Vérifier que le format est correct et qu'il y a un numéro
                 if (count($parts) > 0 && is_numeric($parts[0])) {
                     $lastNumber = (int)$parts[0];
@@ -1256,7 +1247,7 @@ public function destroy(Demande $demande)
                 // Aucune carte existante
                 $nextNumber = '001';
             }
-            
+
             $carteId = $nextNumber . '/' . date('Y') . '/PEL/DSV/ANAC';
             $currentDate = Carbon::now();
             $dateExpiration = $currentDate->copy()->addMonths(12)->endOfMonth();
@@ -1288,34 +1279,34 @@ public function destroy(Demande $demande)
      * @param \DateTime[] $dateTimes
      * @return \DateTime|null
      */
-function findMinDate(array $dateTimes): ?DateTime
-{
-    $validDates = array_filter($dateTimes, function ($date) {
-        // Accept both DateTime objects and valid date strings
-        if ($date instanceof DateTime || $date instanceof \Carbon\Carbon) {
-            return true;
-        }
-        if (is_string($date) && strtotime($date) !== false) {
-            return new \DateTime($date);
-        }
-        return false;
-    });
+    function findMinDate(array $dateTimes): ?DateTime
+    {
+        $validDates = array_filter($dateTimes, function ($date) {
+            // Accept both DateTime objects and valid date strings
+            if ($date instanceof DateTime || $date instanceof \Carbon\Carbon) {
+                return true;
+            }
+            if (is_string($date) && strtotime($date) !== false) {
+                return new \DateTime($date);
+            }
+            return false;
+        });
 
-    if (empty($validDates)) {
-        return null;
+        if (empty($validDates)) {
+            return null;
+        }
+
+        // Convert strings to DateTime if needed
+        $validDates = array_map(function ($date) {
+            if (is_string($date)) {
+                return new \DateTime($date);
+            }
+            return $date;
+        }, $validDates);
+
+        $minDate = min($validDates);
+        return $minDate;
     }
-
-    // Convert strings to DateTime if needed
-    $validDates = array_map(function ($date) {
-        if (is_string($date)) {
-            return new \DateTime($date);
-        }
-        return $date;
-    }, $validDates);
-
-    $minDate = min($validDates);
-    return $minDate;
-}
 
 
     public function rejeter(Request $request)
@@ -1606,83 +1597,82 @@ function findMinDate(array $dateTimes): ?DateTime
         }
     }
 
-public function validateAllItems(Request $request)
-{
-    try {
-        $demande = DemandeAutorisation::findOrFail($request->demande_id);
-        
-        // Valider tous les avions
-        if ($demande->avions->isNotEmpty()) {
-            foreach ($demande->avions as $avion) {
-                $avion->update([
-                    'valider' => true,
-                    //'motif' => $request->global_comments
-                ]);
+    public function validateAllItems(Request $request)
+    {
+        try {
+            $demande = DemandeAutorisation::findOrFail($request->demande_id);
+
+            // Valider tous les avions
+            if ($demande->avions->isNotEmpty()) {
+                foreach ($demande->avions as $avion) {
+                    $avion->update([
+                        'valider' => true,
+                        //'motif' => $request->global_comments
+                    ]);
+                }
             }
-        }
-        
-        // Valider tous les vols
-        if ($demande->vols->isNotEmpty()) {
-            foreach ($demande->vols as $vol) {
-                $vol->update([
-                    'valider' => true,
-                    //'motif' => $request->global_comments
-                ]);
+
+            // Valider tous les vols
+            if ($demande->vols->isNotEmpty()) {
+                foreach ($demande->vols as $vol) {
+                    $vol->update([
+                        'valider' => true,
+                        //'motif' => $request->global_comments
+                    ]);
+                }
             }
-        }
-        
-        // Valider tous les membres d'équipage
-        if ($demande->equipe->isNotEmpty()) {
-            foreach ($demande->equipe as $membre) {
-                $membre->update([
-                    'valider' => true,
-                    //'motif' => $request->global_comments
-                ]);
+
+            // Valider tous les membres d'équipage
+            if ($demande->equipe->isNotEmpty()) {
+                foreach ($demande->equipe as $membre) {
+                    $membre->update([
+                        'valider' => true,
+                        //'motif' => $request->global_comments
+                    ]);
+                }
             }
-        }
-        
-        // Valider tous les fret
-        if ($demande->fret->isNotEmpty()) {
-            foreach ($demande->fret as $fret) {
-                $fret->update([
-                    'valider' => true,
-                    //'motif' => $request->global_comments
-                ]);
+
+            // Valider tous les fret
+            if ($demande->fret->isNotEmpty()) {
+                foreach ($demande->fret as $fret) {
+                    $fret->update([
+                        'valider' => true,
+                        //'motif' => $request->global_comments
+                    ]);
+                }
             }
-        }
-        
-        // Valider toutes les receiving parties
-        if ($demande->receivingParties->isNotEmpty()) {
-            foreach ($demande->receivingParties as $party) {
-                $party->update([
-                    'valider' => true,
-                    //'motif' => $request->global_comments
-                ]);
+
+            // Valider toutes les receiving parties
+            if ($demande->receivingParties->isNotEmpty()) {
+                foreach ($demande->receivingParties as $party) {
+                    $party->update([
+                        'valider' => true,
+                        //'motif' => $request->global_comments
+                    ]);
+                }
             }
-        }
-        
-        // Valider tous les documents
-        if ($demande->documents->isNotEmpty()) {
-            foreach ($demande->documents as $document) {
-                $document->update([
-                    'valider' => true,
-                    //'motif' => $request->global_comments
-                ]);
+
+            // Valider tous les documents
+            if ($demande->documents->isNotEmpty()) {
+                foreach ($demande->documents as $document) {
+                    $document->update([
+                        'valider' => true,
+                        //'motif' => $request->global_comments
+                    ]);
+                }
             }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tous les éléments ont été validés avec succès!'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la validation globale: ' . $e->getMessage()
+            ], 500);
         }
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Tous les éléments ont été validés avec succès!'
-        ]);
-        
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Erreur lors de la validation globale: ' . $e->getMessage()
-        ], 500);
     }
-}
     public function validateAvionVi(Request $request)
     {
         $request->validate([
@@ -1708,7 +1698,8 @@ public function validateAllItems(Request $request)
                 $this->dtaAutorisationNotificationService->sendRejectionNotification(
                     $demande,
                     $recipientUser,
-                    'DTA'
+                    'DTA',
+                    [$request->motif]
                 );
 
                 if ($state) {
@@ -1755,7 +1746,8 @@ public function validateAllItems(Request $request)
                 $this->dtaAutorisationNotificationService->sendRejectionNotification(
                     $demande,
                     $recipientUser,
-                    'DTA'
+                    'DTA',
+                    [$request->motif]
                 );
 
                 if ($state) {
@@ -1829,7 +1821,8 @@ public function validateAllItems(Request $request)
                 $this->dtaAutorisationNotificationService->sendRejectionNotification(
                     $demande,
                     $recipientUser,
-                    'DTA'
+                    'DTA',
+                    [$request->motif]
                 );
 
                 if ($state) {
@@ -1874,7 +1867,8 @@ public function validateAllItems(Request $request)
                 $this->dtaAutorisationNotificationService->sendRejectionNotification(
                     $demande,
                     $recipientUser,
-                    'DTA'
+                    'DTA',
+                    [$request->motif]
                 );
 
                 if ($state) {
@@ -1919,7 +1913,8 @@ public function validateAllItems(Request $request)
                 $this->dtaAutorisationNotificationService->sendRejectionNotification(
                     $demande,
                     $recipientUser,
-                    'DTA'
+                    'DTA',
+                    [$request->motif]
                 );
 
                 if ($state) {
@@ -1964,7 +1959,8 @@ public function validateAllItems(Request $request)
                 $this->dtaAutorisationNotificationService->sendRejectionNotification(
                     $demande,
                     $recipientUser,
-                    'DTA'
+                    'DTA',
+                    [$request->motif]
                 );
 
                 if ($state) {
@@ -2001,7 +1997,8 @@ public function validateAllItems(Request $request)
                 $this->dtaAutorisationNotificationService->sendRejectionNotification(
                     $demande,
                     $recipientUser,
-                    'DTA'
+                    'DTA',
+                    [$request->motif]
                 );
 
                 if ($state) {
@@ -2041,8 +2038,8 @@ public function validateAllItems(Request $request)
             ], 500);
         }
     }
-    
-     public function toggleStatus(Request $request, Demandeur $demandeur)
+
+    public function toggleStatus(Request $request, Demandeur $demandeur)
     {
         $request->validate([
             'field' => 'required|in:is_examinateur,is_instructeur',
@@ -2067,7 +2064,7 @@ public function validateAllItems(Request $request)
             ], 500);
         }
     }
-        public function handleApproval(Request $request)
+    public function handleApproval(Request $request)
     {
         $action = $request->input('action_type');
         $table = $request->input('table');
@@ -2088,12 +2085,12 @@ public function validateAllItems(Request $request)
                 'updated_at' => now()
             ]);
 
-            Activity::log('approved',$demande->id);
+            Activity::log('approved', $demande->id);
 
             return response()->json(['success' => true]);
         } else {
             $request->validate(['motif' => 'required|string|max:500']);
-            
+
             DB::table($table)->where('id', $id)->update([
                 'valider' => 0,
                 'motif' => $motif,
@@ -2103,25 +2100,24 @@ public function validateAllItems(Request $request)
             $demande->update(['mise_a_jour' => true]);
             if ($state = $demande->etatDemande) {
                 $state->resetAllApprovalStates();
-                $state->update(['compagnie_cree_demande' => false,'dta_rejeter' => true]);
+                $state->update(['compagnie_cree_demande' => false, 'dta_rejeter' => true]);
                 $demande->update(['date_soumission' => null]);
-                
             }
 
-            Activity::log('rejected',$demande->id);
+            Activity::log('rejected', $demande->id);
             $recipientUser = $demande->user;
 
-                $this->dtaAutorisationNotificationService->sendRejectionNotification(
-                    $demande,
-                    $recipientUser,
-                    'DTA',
-                    [$motif]
-                );
+            $this->dtaAutorisationNotificationService->sendRejectionNotification(
+                $demande,
+                $recipientUser,
+                'DTA',
+                [$motif]
+            );
             return response()->json(['success' => true]);
         }
     }
-    
-        public function storeDemandePiece(Request $request)
+
+    public function storeDemandePiece(Request $request)
     {
         $request->validate([
             'demande_id' => 'required|exists:demandes,id',
@@ -2149,7 +2145,6 @@ public function validateAllItems(Request $request)
                 'message' => 'Pièce ajoutée avec succès',
                 'piece' => $piece
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -2189,7 +2184,6 @@ public function validateAllItems(Request $request)
                 'message' => 'Pièce mise à jour avec succès',
                 'piece' => $piece
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -2202,19 +2196,18 @@ public function validateAllItems(Request $request)
     {
         try {
             $piece = DemandePiece::findOrFail($id);
-            
+
             // Delete file
             if ($piece->url) {
                 //Storage::disk('public')->delete('uploads/pieces/' . $piece->url);
             }
-            
+
             $piece->delete();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Pièce supprimée avec succès'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -2222,90 +2215,87 @@ public function validateAllItems(Request $request)
             ], 500);
         }
     }
-    
-    public function updatePhoto(Request $request, $id)
-{
-    $request->validate([
-        'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
-    ]);
 
-    try {
-        $licence = Licence::findOrFail($id);
-        
-        // Delete old photo if exists and not default
-        if ($licence->photo && $licence->photo != 'default.png' && file_exists(public_path('uploads/' . $licence->photo))) {
-            unlink(public_path('uploads/' . $licence->photo));
-        }
-        
-        // Upload new photo
-        if ($request->hasFile('photo')) {
-            $file = $request->file('photo');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads'), $filename);
-            $licence->photo = $filename;
-            $licence->save();
-        }
-        
-        return redirect()->back()->with('success', __('trans.photo_updated_successfully'));
-        
-    } catch (\Exception $e) {
-        return redirect()->back()->with('error', __('trans.error_updating_photo') . ': ' . $e->getMessage());
-    }
-}
-public function updateType(Request $request, $id)
-{
-    try {
-        $validator = Validator::make($request->all(), [
-            'type_demande_id' => 'required|exists:type_demandes,id'
-        ], [
-            'type_demande_id.required' => __('trans.type_required'),
-            'type_demande_id.exists' => __('trans.type_invalid')
+    public function updatePhoto(Request $request, $id)
+    {
+        $request->validate([
+            'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
-        
-        if ($validator->fails()) {
+
+        try {
+            $licence = Licence::findOrFail($id);
+
+            // Delete old photo if exists and not default
+            if ($licence->photo && $licence->photo != 'default.png' && file_exists(public_path('uploads/' . $licence->photo))) {
+                unlink(public_path('uploads/' . $licence->photo));
+            }
+
+            // Upload new photo
+            if ($request->hasFile('photo')) {
+                $file = $request->file('photo');
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads'), $filename);
+                $licence->photo = $filename;
+                $licence->save();
+            }
+
+            return redirect()->back()->with('success', __('trans.photo_updated_successfully'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', __('trans.error_updating_photo') . ': ' . $e->getMessage());
+        }
+    }
+    public function updateType(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'type_demande_id' => 'required|exists:type_demandes,id'
+            ], [
+                'type_demande_id.required' => __('trans.type_required'),
+                'type_demande_id.exists' => __('trans.type_invalid')
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('trans.validation_error'),
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $demande = Demande::findOrFail($id);
+            $demande->type_demande_id = $request->type_demande_id;
+            $demande->save();
+
+            // Log pour audit si nécessaire
+            \Log::info('Type de demande mis à jour', [
+                'demande_id' => $id,
+                'new_type_id' => $request->type_demande_id,
+                'user_id' => auth()->id()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => __('trans.type_updated_successfully')
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'success' => false,
-                'message' => __('trans.validation_error'),
-                'errors' => $validator->errors()
-            ], 422);
+                'message' => __('trans.demande_not_found')
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Erreur mise à jour type demande: ' . $e->getMessage(), [
+                'demande_id' => $id,
+                'user_id' => auth()->id(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => __('trans.error_updating_type')
+            ], 500);
         }
-        
-        $demande = Demande::findOrFail($id);
-        $demande->type_demande_id = $request->type_demande_id;
-        $demande->save();
-        
-        // Log pour audit si nécessaire
-        \Log::info('Type de demande mis à jour', [
-            'demande_id' => $id,
-            'new_type_id' => $request->type_demande_id,
-            'user_id' => auth()->id()
-        ]);
-        
-        return response()->json([
-            'success' => true,
-            'message' => __('trans.type_updated_successfully')
-        ]);
-        
-    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-        return response()->json([
-            'success' => false,
-            'message' => __('trans.demande_not_found')
-        ], 404);
-        
-    } catch (\Exception $e) {
-        \Log::error('Erreur mise à jour type demande: ' . $e->getMessage(), [
-            'demande_id' => $id,
-            'user_id' => auth()->id(),
-            'trace' => $e->getTraceAsString()
-        ]);
-        
-        return response()->json([
-            'success' => false,
-            'message' => __('trans.error_updating_type')
-        ], 500);
     }
-}
-    
+
 
     public function pendingExaminateurs()
     {
@@ -2313,7 +2303,7 @@ public function updateType(Request $request, $id)
             ->where('statut_validation', 'en_attente')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
-        
+
         $stats = [
             'total_pending' => ExaminateurCentre::where('statut_validation', 'en_attente')->count(),
             'total_validated' => ExaminateurCentre::where('statut_validation', 'valide')->count(),
@@ -2322,10 +2312,10 @@ public function updateType(Request $request, $id)
                 ->where('date_fin_validite', '<', now())
                 ->count()
         ];
-        
+
         return view('admin.centre-examinateurs.pending', compact('examinateurs', 'stats'));
     }
-    
+
     /**
      * Valider un examinateur
      */
@@ -2335,49 +2325,48 @@ public function updateType(Request $request, $id)
             'date_fin_validite' => 'nullable|date|after:today',
             'commentaire' => 'nullable|string|max:500'
         ]);
-        
+
         try {
             DB::beginTransaction();
-            
+
             $examinateur = ExaminateurCentre::findOrFail($id);
-            
+
             $examinateur->statut_validation = 'valide';
             $examinateur->valide_par = Auth::id();
             $examinateur->date_validation = now();
             $examinateur->motif_refus = null;
-            
+
             if ($request->has('date_fin_validite')) {
                 $examinateur->date_fin_validite = $request->date_fin_validite;
             }
-            
+
             $examinateur->save();
-            
+
             // Log de l'action
             \Log::info('Examinateur validé', [
                 'examinateur_id' => $id,
                 'validated_by' => Auth::id(),
                 'date' => now()
             ]);
-            
+
             DB::commit();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => __('trans.examiner_validated_successfully')
             ]);
-            
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             \Log::error('Erreur validation examinateur: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => __('trans.error_validating_examiner')
             ], 500);
         }
     }
-    
+
     /**
      * Rejeter un examinateur
      */
@@ -2386,85 +2375,84 @@ public function updateType(Request $request, $id)
         $request->validate([
             'motif_refus' => 'required|string|max:500'
         ]);
-        
+
         try {
             DB::beginTransaction();
-            
+
             $examinateur = ExaminateurCentre::findOrFail($id);
-            
+
             $examinateur->statut_validation = 'refuse';
             $examinateur->motif_refus = $request->motif_refus;
             $examinateur->valide_par = Auth::id();
             $examinateur->date_validation = now();
-            
+
             $examinateur->save();
-            
+
             // Log de l'action
             \Log::info('Examinateur rejeté', [
                 'examinateur_id' => $id,
                 'rejected_by' => Auth::id(),
                 'motif' => $request->motif_refus
             ]);
-            
+
             DB::commit();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => __('trans.examiner_rejected_successfully')
             ]);
-            
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             \Log::error('Erreur rejet examinateur: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => __('trans.error_rejecting_examiner')
             ], 500);
         }
     }
-    
+
     /**
      * Afficher tous les examinateurs (validés et rejetés)
      */
     public function allExaminateurs(Request $request)
     {
         $query = ExaminateurCentre::with(['centreFormation', 'validePar']);
-        
+
         // Filtres
         if ($request->has('statut') && $request->statut != '') {
             $query->where('statut_validation', $request->statut);
         }
-        
+
         if ($request->has('centre_id') && $request->centre_id != '') {
             $query->where('centre_formation_id', $request->centre_id);
         }
-        
+
         if ($request->has('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('nom', 'LIKE', "%{$search}%")
-                  ->orWhere('prenom', 'LIKE', "%{$search}%")
-                  ->orWhere('email', 'LIKE', "%{$search}%")
-                  ->orWhere('numero_licence_examinateur', 'LIKE', "%{$search}%");
+                    ->orWhere('prenom', 'LIKE', "%{$search}%")
+                    ->orWhere('email', 'LIKE', "%{$search}%")
+                    ->orWhere('numero_licence_examinateur', 'LIKE', "%{$search}%");
             });
         }
-        
+
         $examinateurs = $query->orderBy('created_at', 'desc')->paginate(15);
-        
+
         $centres = CentreFormation::all();
-        
+
         $stats = [
             'total' => ExaminateurCentre::count(),
             'pending' => ExaminateurCentre::where('statut_validation', 'en_attente')->count(),
             'validated' => ExaminateurCentre::where('statut_validation', 'valide')->count(),
             'rejected' => ExaminateurCentre::where('statut_validation', 'refuse')->count()
         ];
-        
+
         return view('admin.centre-examinateurs.index', compact('examinateurs', 'centres', 'stats'));
     }
-    
+
     /**
      * Afficher les détails d'un examinateur
      */
@@ -2476,8 +2464,7 @@ public function updateType(Request $request, $id)
             'formations.typeFormation',
             'formations.demandeur'
         ])->findOrFail($id);
-        
+
         return view('admin.centre-examinateurs.partials.details', compact('examinateur'));
     }
-    
 }

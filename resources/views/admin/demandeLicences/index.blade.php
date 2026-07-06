@@ -129,7 +129,13 @@
                                     <tr>
                                         <td>{{ $demande->code }}</td>
                                         <td>{{ $demande->date }}</td>
-                                        <td>{{ $demande->demandeur->np }}</td>
+                                        <td>
+                                            @if($demande->demandeur)
+                                                <a href="{{ route('demandeurs.show', $demande->demandeur->id) }}">{{ $demande->demandeur->np }}</a>
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
                                         <td class="type-application-cell" data-demand-id="{{ $demande->id }}">
                                             <span class="type-application-text">
                                                 {{ LaravelLocalization::getCurrentLocale() == 'fr' ? optional($demande->typeDemande)->nom_fr : optional($demande->typeDemande)->nom_en }}

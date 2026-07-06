@@ -38,6 +38,10 @@
                                             <td>{{ $demandeur->np ?? '-' }}</td>
                                         </tr>
                                         <tr>
+                                            <th>@lang('trans.email')</th>
+                                            <td>{{ optional($demandeur->user)->email ?? '-' }}</td>
+                                        </tr>
+                                        <tr>
 
                                             <th>@lang('trans.dob')</th>
                                             <td>{{ !empty($demandeur->date_naissance) ? date('Y-m-d', strtotime($demandeur->date_naissance)) : '-' }}
@@ -181,7 +185,7 @@ $(document).ready(function() {
                 toggleElement.prop('checked', !isActive);
                 
                 // Show error message
-                showAlert('Erreur lors de la mise à jour du statut', 'error');
+                showAlert('Erreur lors de la mise ï¿½ jour du statut', 'error');
                 
                 console.error('Error:', xhr.responseText);
             },
