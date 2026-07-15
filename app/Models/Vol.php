@@ -24,7 +24,7 @@ class Vol extends Model
 {
 
   static $rules = [
-    'numero_vol' => 'required',
+    'numero_vol' => 'nullable|string|max:20',
     'date_depart' => 'required',
     'date_arrivee' => 'required',
     //'nbr_passagers' => 'required',

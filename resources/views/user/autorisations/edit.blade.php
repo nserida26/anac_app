@@ -289,10 +289,8 @@
                 @if(!in_array($demandeAutorisation->type->id, [3]))
                 <div class="col-md-6 mb-3">
                     <div class="form-group">
-                        <label for="numero_vol" class="form-label">@lang('trans.flight_number')<span
-                                class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="numero_vol" name="numero_vol"
-                            required>
+                        <label for="numero_vol" class="form-label">@lang('trans.flight_number')</label>
+                        <input type="text" class="form-control" id="numero_vol" name="numero_vol">
                         <div class="invalid-feedback" id="numero_vol_error"></div>
                     </div>
                 </div>
