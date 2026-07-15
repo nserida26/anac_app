@@ -293,7 +293,7 @@
 
             <div class="row">
                 <!-- Aéroport de départ -->
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="form-group">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <label for="aeroport_depart_id" class="form-label">@lang('trans.start_aeroport') <span
@@ -313,6 +313,17 @@
                     </div>
                 </div>
 
+                <div class="col-md-2 mb-3">
+                    <div class="form-group">
+                        <label for="numero_piste_depart" class="form-label">Piste depart <span
+                                class="text-danger">*</span></label>
+                        <input type="text" class="form-control runway-number" id="numero_piste_depart"
+                            name="numero_piste_depart" maxlength="3" pattern="^(0[1-9]|[12][0-9]|3[0-6])[LCR]?$"
+                            placeholder="09L" required>
+                        <div class="invalid-feedback" id="numero_piste_depart_error"></div>
+                    </div>
+                </div>
+
                 <!-- Heure de départ -->
                 <div class="col-md-2 mb-3">
                     <div class="form-group">
@@ -325,7 +336,7 @@
                 </div>
 
                 <!-- Aéroport d'arrivée -->
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="form-group">
                         <label for="aeroport_arrivee_id">@lang('trans.end_aeroport')<span
                                 class="text-danger">*</span></label>
@@ -337,6 +348,17 @@
                             @endforeach
                         </select>
                         <div class="invalid-feedback" id="aeroport_arrivee_id_error"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-2 mb-3">
+                    <div class="form-group">
+                        <label for="numero_piste_arrivee" class="form-label">Piste arrivee <span
+                                class="text-danger">*</span></label>
+                        <input type="text" class="form-control runway-number" id="numero_piste_arrivee"
+                            name="numero_piste_arrivee" maxlength="3" pattern="^(0[1-9]|[12][0-9]|3[0-6])[LCR]?$"
+                            placeholder="27R" required>
+                        <div class="invalid-feedback" id="numero_piste_arrivee_error"></div>
                     </div>
                 </div>
 
@@ -398,7 +420,9 @@
                                 <th>@lang('trans.flight_number')</th>
                                 
                                 <th>@lang('trans.start_aeroport')</th>
+                                <th>Piste depart</th>
                                 <th>@lang('trans.end_aeroport')</th>
+                                <th>Piste arrivee</th>
                                 <th>@lang('trans.departure_time')</th>
                                 <th>@lang('trans.arrival_time')</th>
                                 <th>@lang('trans.nb_passagers')</th>
@@ -423,7 +447,9 @@
                                     <td>{{ $volItem->numero_vol }}</td>
                                     
                                     <td>{{ $volItem->aeroportDepart->codeICAO ?? 'N/A' }}</td>
+                                    <td>{{ $volItem->numero_piste_depart ?? 'N/A' }}</td>
                                     <td>{{ $volItem->aeroportArrivee->codeICAO ?? 'N/A' }}</td>
+                                    <td>{{ $volItem->numero_piste_arrivee ?? 'N/A' }}</td>
                                     <td>{{ date('H:i', strtotime($volItem->date_depart)) }}</td>
                                     <td>{{ date('H:i', strtotime($volItem->date_arrivee)) }}</td>
                                     <td>{{ $volItem->nbr_passagers }}</td>
@@ -445,6 +471,8 @@
                                         <button class="btn btn-warning btn-sm edit-vol"
                                             data-id="{{ $volItem->id }}"
                                             data-numero_vol="{{ $volItem->numero_vol }}"
+                                            data-numero_piste_depart="{{ $volItem->numero_piste_depart }}"
+                                            data-numero_piste_arrivee="{{ $volItem->numero_piste_arrivee }}"
                                            
                                             data-aeroport_depart_id="{{ $volItem->aeroport_depart_id }}"
                                             data-aeroport_arrivee_id="{{ $volItem->aeroport_arrivee_id }}"
@@ -2236,6 +2264,8 @@ $(document).ready(function() {
         // Remplir le formulaire
         $('#vol_id').val(volId);
         $('#numero_vol').val($(this).data('numero_vol'));
+        $('#numero_piste_depart').val($(this).data('numero_piste_depart'));
+        $('#numero_piste_arrivee').val($(this).data('numero_piste_arrivee'));
         $('#aeroport_depart_id').val($(this).data('aeroport_depart_id')).trigger('change');
         $('#aeroport_arrivee_id').val($(this).data('aeroport_arrivee_id')).trigger('change');
         $('#date_depart').val(formatTime($(this).data('date_depart')));
@@ -2268,6 +2298,10 @@ $(document).ready(function() {
     });
     
 // Après soumission du formulaire
+$(document).on('input', '.runway-number', function() {
+    this.value = this.value.toUpperCase();
+});
+
 $('#volForm').submit(function(e) {
     e.preventDefault();
     

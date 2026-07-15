@@ -40,6 +40,8 @@ class Vol extends Model
    */
   protected $fillable = [
     'numero_vol',
+    'numero_piste_depart',
+    'numero_piste_arrivee',
     'aeroport_depart_id',
     'aeroport_arrivee_id',
     'date_depart',

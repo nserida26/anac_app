@@ -31,6 +31,8 @@ public function store(Request $request)
 {
     $validated = $request->validate([
         'numero_vol' => 'nullable|string|max:20',
+        'numero_piste_depart' => ['required', 'string', 'regex:/^(0[1-9]|[12][0-9]|3[0-6])[LCR]?$/i'],
+        'numero_piste_arrivee' => ['required', 'string', 'regex:/^(0[1-9]|[12][0-9]|3[0-6])[LCR]?$/i'],
         'aeroport_depart_id' => 'required|exists:aeroports,id',
         'aeroport_arrivee_id' => [
             'required',
@@ -88,6 +90,10 @@ public function store(Request $request)
     ], [
         'aeroport_depart_id.required' => 'L\'aéroport de départ est obligatoire.',
         'aeroport_arrivee_id.required' => 'L\'aéroport d\'arrivée est obligatoire.',
+        'numero_piste_depart.required' => 'Le numéro de piste de départ est obligatoire.',
+        'numero_piste_depart.regex' => 'Le numéro de piste de départ doit être au format international : 01 à 36, avec L, C ou R optionnel (ex: 09L, 27, 36R).',
+        'numero_piste_arrivee.required' => 'Le numéro de piste d\'arrivée est obligatoire.',
+        'numero_piste_arrivee.regex' => 'Le numéro de piste d\'arrivée doit être au format international : 01 à 36, avec L, C ou R optionnel (ex: 09L, 27, 36R).',
         'date_depart.required' => 'La date de départ est obligatoire.',
         'date_arrivee.required' => 'La date d\'arrivée est obligatoire.',
         
@@ -136,6 +142,8 @@ public function store(Request $request)
     // Create the vol
     $vol = Vol::create([
         'numero_vol' => $validated['numero_vol'] ?? null,
+        'numero_piste_depart' => strtoupper($validated['numero_piste_depart']),
+        'numero_piste_arrivee' => strtoupper($validated['numero_piste_arrivee']),
         'aeroport_depart_id' => $validated['aeroport_depart_id'],
         'aeroport_arrivee_id' => $validated['aeroport_arrivee_id'],
         'date_depart' => $validated['date_depart'],
@@ -176,6 +184,8 @@ public function update(Request $request, $id)
     
     $validated = $request->validate([
         'numero_vol' => 'nullable|string|max:20',
+        'numero_piste_depart' => ['required', 'string', 'regex:/^(0[1-9]|[12][0-9]|3[0-6])[LCR]?$/i'],
+        'numero_piste_arrivee' => ['required', 'string', 'regex:/^(0[1-9]|[12][0-9]|3[0-6])[LCR]?$/i'],
         'aeroport_depart_id' => 'required|exists:aeroports,id',
         'aeroport_arrivee_id' => [
             'required',
@@ -234,6 +244,10 @@ public function update(Request $request, $id)
     ], [
         'aeroport_depart_id.required' => 'L\'aéroport de départ est obligatoire.',
         'aeroport_arrivee_id.required' => 'L\'aéroport d\'arrivée est obligatoire.',
+        'numero_piste_depart.required' => 'Le numéro de piste de départ est obligatoire.',
+        'numero_piste_depart.regex' => 'Le numéro de piste de départ doit être au format international : 01 à 36, avec L, C ou R optionnel (ex: 09L, 27, 36R).',
+        'numero_piste_arrivee.required' => 'Le numéro de piste d\'arrivée est obligatoire.',
+        'numero_piste_arrivee.regex' => 'Le numéro de piste d\'arrivée doit être au format international : 01 à 36, avec L, C ou R optionnel (ex: 09L, 27, 36R).',
         'date_depart.required' => 'La date de départ est obligatoire.',
         'date_arrivee.required' => 'La date d\'arrivée est obligatoire.',
         
@@ -313,6 +327,8 @@ public function update(Request $request, $id)
     // Update the vol
     $vol->update([
         'numero_vol' => $validated['numero_vol'],
+        'numero_piste_depart' => strtoupper($validated['numero_piste_depart']),
+        'numero_piste_arrivee' => strtoupper($validated['numero_piste_arrivee']),
         'aeroport_depart_id' => $validated['aeroport_depart_id'],
         'aeroport_arrivee_id' => $validated['aeroport_arrivee_id'],
         'date_depart' => $validated['date_depart'],
