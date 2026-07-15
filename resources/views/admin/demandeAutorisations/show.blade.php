@@ -311,7 +311,9 @@
             'columns' => [
                 'numero_vol' => trans('trans.flight_number'),
                 'depart' => trans('trans.departure'),
+                'piste_depart' => 'Piste depart',
                 'arrivee' => trans('trans.arrival'),
+                'piste_arrivee' => 'Piste arrivee',
                 'itineraire' => trans('trans.route')
             ]
         ])

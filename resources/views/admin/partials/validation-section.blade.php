@@ -42,9 +42,17 @@
                                             @case('depart')
                                                 {{ $item->aeroportDepart->codeICAO ?? 'N/A' }}
                                                 @break
+
+                                            @case('piste_depart')
+                                                {{ $item->numero_piste_depart ?? 'N/A' }}
+                                                @break
                                                 
                                             @case('arrivee')
                                                 {{ $item->aeroportArrivee->codeICAO ?? 'N/A' }}
+                                                @break
+
+                                            @case('piste_arrivee')
+                                                {{ $item->numero_piste_arrivee ?? 'N/A' }}
                                                 @break
                                                 
                                             @case('itineraire')

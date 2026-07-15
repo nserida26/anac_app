@@ -339,7 +339,9 @@
                                                 <th>@lang('trans.flight_number')</th>
 
                                                 <th>@lang('trans.start_aeroport')</th>
+                                                <th>Piste depart</th>
                                                 <th>@lang('trans.end_aeroport')</th>
+                                                <th>Piste arrivee</th>
                                                 <th>@lang('trans.departure_time')</th>
                                                 <th>@lang('trans.arrival_time')</th>
                                                 <th>@lang('trans.nb_passagers')</th>
@@ -368,7 +370,9 @@
                                                 <td>{{ $volItem->numero_vol }}</td>
 
                                                 <td>{{ $volItem->aeroportDepart->codeICAO ?? 'N/A' }}</td>
+                                                <td>{{ $volItem->numero_piste_depart ?? 'N/A' }}</td>
                                                 <td>{{ $volItem->aeroportArrivee->codeICAO ?? 'N/A' }}</td>
+                                                <td>{{ $volItem->numero_piste_arrivee ?? 'N/A' }}</td>
                                                 <td>{{ date('H:i', strtotime($volItem->date_depart)) }}</td>
                                                 <td>{{ date('H:i', strtotime($volItem->date_arrivee)) }}</td>
                                                 <td>{{ $volItem->nbr_passagers }}</td>

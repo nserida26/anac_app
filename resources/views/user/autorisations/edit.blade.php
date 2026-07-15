@@ -55,6 +55,25 @@
         color: white;
         display: inline-block;
     }
+    #volForm > .row:nth-of-type(2),
+    #volForm > .row:nth-of-type(3) {
+        padding: 15px;
+        margin-right: 0;
+        margin-left: 0;
+        margin-bottom: 15px;
+        border: 1px solid #e9ecef;
+        border-left: 4px solid #007bff;
+        border-radius: 4px;
+        background: #fbfcfe;
+    }
+    #volForm > .row:nth-of-type(3) {
+        border-left-color: #28a745;
+    }
+    #aeroport_depart_id + .select2-container,
+    #aeroport_arrivee_id + .select2-container {
+        width: 100% !important;
+        min-width: 100%;
+    }
 </style>
 @endpush
 
@@ -293,7 +312,7 @@
 
             <div class="row">
                 <!-- Aéroport de départ -->
-                <div class="col-md-3">
+                <div class="col-lg-6 col-md-5 mb-3">
                     <div class="form-group">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <label for="aeroport_depart_id" class="form-label">@lang('trans.start_aeroport') <span
@@ -313,7 +332,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-2 mb-3">
+                <div class="col-lg-3 col-md-3 mb-3">
                     <div class="form-group">
                         <label for="numero_piste_depart" class="form-label">Piste depart <span
                                 class="text-danger">*</span></label>
@@ -325,7 +344,7 @@
                 </div>
 
                 <!-- Heure de départ -->
-                <div class="col-md-2 mb-3">
+                <div class="col-lg-3 col-md-3 mb-3">
                     <div class="form-group">
                         <label for="date_depart" class="form-label">Heure départ <span
                                 class="text-danger">*</span></label>
@@ -334,9 +353,11 @@
                         <div class="invalid-feedback" id="date_depart_error"></div>
                     </div>
                 </div>
+            </div>
 
+            <div class="row">
                 <!-- Aéroport d'arrivée -->
-                <div class="col-md-3">
+                <div class="col-lg-6 col-md-5 mb-3">
                     <div class="form-group">
                         <label for="aeroport_arrivee_id">@lang('trans.end_aeroport')<span
                                 class="text-danger">*</span></label>
@@ -351,7 +372,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-2 mb-3">
+                <div class="col-lg-3 col-md-3 mb-3">
                     <div class="form-group">
                         <label for="numero_piste_arrivee" class="form-label">Piste arrivee <span
                                 class="text-danger">*</span></label>
@@ -363,7 +384,7 @@
                 </div>
 
                 <!-- Heure d'arrivée -->
-                <div class="col-md-2 mb-3">
+                <div class="col-lg-3 col-md-4 mb-3">
                     <div class="form-group">
                         <label for="date_arrivee" class="form-label">Heure arrivée <span
                                 class="text-danger">*</span></label>
@@ -2457,6 +2478,7 @@ $('#volForm').submit(function(e) {
     // Initialiser Select2
     $('.select2').select2();
     $('.select2_aeroports').select2({
+        width: '100%',
         matcher: function(params, data) {
             if (!params.term || params.term.trim() === '') {
                 return data;
