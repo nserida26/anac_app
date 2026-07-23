@@ -244,7 +244,7 @@
                                                     <tr>
                                                         <th>Immatriculation</th>
                                                         <th>Type</th>
-                                                    <th>Opérateur</th>
+                                                        <th>Opérateur</th>
                                                         <th>Actions</th>
                                                     </tr>
                                                 </thead>
@@ -1867,7 +1867,7 @@
 
                 // AJAX request
                 $.ajax({
-                    url: '{{ route('user.store_aeroports') }}',
+                    url: "{{ route('user.store_aeroports') }}",
                     type: 'POST',
                     data: formData,
                     success: function(response) {
@@ -2001,10 +2001,10 @@
                 $('#compagnie_aerienne_id').val($(this).data('compagnie_aerienne_id')).trigger('change');
 
                 // Afficher le formulaire
-                $('#avionForm').show();
-                $('#avionsTableContainer, #noAvionsAlert').hide();
-                $('#showAvionFormBtn').hide();
-                $('#formActionText').text('Mettre à jour');
+                //$('#avionForm').show();
+                //$('#avionsTableContainer, #noAvionsAlert').hide();
+                //$('#showAvionFormBtn').hide();
+                //$('#formActionText').text('Mettre à jour');
 
                 // Scroller vers le formulaire
                 $('html, body').animate({
@@ -2093,14 +2093,16 @@
     </script>
     <script>
         // Déclarer les aéroports en JavaScript
-        const aeroports = @json(
-            $aeroports->map(function ($aeroport) {
+        @php
+            $aeroportsJs = $aeroports->map(function ($aeroport) {
                 return [
                     'id' => $aeroport->id,
                     'codeICAO' => $aeroport->codeICAO,
                     'nom' => $aeroport->nom,
                 ];
-            }));
+            });
+        @endphp
+        const aeroports = @json($aeroportsJs);
         $(document).ready(function() {
 
             // Variables globales
@@ -2470,7 +2472,7 @@
                         if (xhr.status === 419) {
                             toastr.error(
                                 'Session expirée. Veuillez rafraîchir la page et réessayer.'
-                                );
+                            );
                             setTimeout(() => {
                                 location.reload();
                             }, 2000);
@@ -2484,7 +2486,7 @@
                             toastr.error('Veuillez corriger les erreurs dans le formulaire');
                         } else {
                             toastr.error(xhr.responseJSON?.message ||
-                            'Une erreur est survenue');
+                                'Une erreur est survenue');
                         }
                     },
                     complete: function() {
@@ -2570,7 +2572,7 @@
 
             $('#saveTypeAvionBtn').click(function() {
                 $.ajax({
-                    url: '{{ route('user.store_type_avions') }}', // À adapter selon votre route
+                    url: "{{ route('user.store_type_avions') }}", // À adapter selon votre route
                     type: 'POST',
                     data: $('#typeAvionForm').serialize(),
                     success: function(response) {
@@ -2625,7 +2627,7 @@
 
             $('#saveCompanyBtn').click(function() {
                 $.ajax({
-                    url: '{{ route('user.store_compagnies') }}',
+                    url: "{{ route('user.store_compagnies') }}",
                     type: 'POST',
                     data: $('#companyForm').serialize(),
                     success: function(response) {
@@ -2756,7 +2758,7 @@
                             },
                             success: function() {
                                 $(`#personne-${id}, #edit-form-personne-${id}`)
-                            .remove();
+                                    .remove();
                                 toastr.success('Personne supprimée avec succès');
                             }
                         });
@@ -3167,7 +3169,7 @@
                                             '.table-responsive').remove();
                                         $('#documentsTable').after(
                                             '<div class="alert alert-info mt-3">Aucun document n\'a été uploadé pour cette demande.</div>'
-                                            );
+                                        );
                                     }
                                 });
                                 toastr.success(response.message ||

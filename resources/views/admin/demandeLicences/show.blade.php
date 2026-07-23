@@ -583,7 +583,7 @@
                                             @foreach ($qualification_demandeurs as $qualification_demandeur)
                                                 <tr>
                                                     <td>{{ $qualification_demandeur->qualification }}</td>
-                                                    @if (in_array($demande->typeLicence->id, [27, 28, 29, 30, 31, 32, 37, 38, 39]))
+                                                    @if (in_array($demande->typeLicence->id, [27, 28, 29, 30, 31, 32, 37,, 38, 39]))
                                                         <td>{{ optional($qualification_demandeur->typeAvion)->code }}</td>
                                                         <td>{{ $qualification_demandeur->machine }}</td>
                                                     @endif

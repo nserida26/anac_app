@@ -25,7 +25,8 @@ class Demande extends Model
         'checklist_sma',
         'evaluateur_id',
         'motif_dg',
-        'motif_dsv'
+        'motif_dsv',
+        'mise_a_jour'
     ];
  protected $appends = ['etat_workflow'];
     // Relationships
@@ -441,7 +442,7 @@ public function getEtatWorkflowAttribute()
         return 'draft';
     }
 
-    // ordre du plus avancé au moins avancé
+    // ordre du plus avancï¿½ au moins avancï¿½
     if ($state->pel_licence_valider) {
         return 'printed';
     }

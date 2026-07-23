@@ -1124,15 +1124,11 @@ $demandeAutorisations->map(function ($demande) {
             switch ($action) {
                 // Validation actions
                 case 'demandeur_cree_demande':
-                    
-                        if($demande->mise_a_jour){
-                            $demande->resetAllValidations();
-                            $demande->resetAllMotifs();
-                            if ($demande->etatDemande) {
-                                $demande->etatDemande->resetAllApprovalStates();
-                                
-                            }
-                        }
+                    $demande->resetAllValidations();
+                    $demande->resetAllMotifs();
+                    if ($demande->etatDemande) {
+                        $demande->etatDemande->resetAllApprovalStates();
+                    }
                     $demande->update([
                         'status' => 'En cours de traitement',
                         'mise_a_jour' => false,
