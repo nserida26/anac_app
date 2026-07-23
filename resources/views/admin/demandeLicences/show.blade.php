@@ -564,7 +564,7 @@
                                         <thead>
                                             <tr>
                                                 <th>@lang('trans.ratings')</th>
-                                                @if (in_array($demande->typeLicence->id, [27, 28, 29, 30, 31, 32, 37, 38, 39]))
+                                                @if (in_array($demande->typeLicence->id, [27, 28, 29, 30, 31, 32, 36, 37, 38, 39]))
                                                     <th>@lang('trans.plane_type')</th>
                                                     <th>@lang('trans.machine')</th>
                                                 @endif
@@ -2026,7 +2026,7 @@
                 if (!$('#savingIndicator').length) {
                     $('.modal-footer').prepend(
                         '<span id="savingIndicator" class="text-muted mr-3"><i class="fas fa-spinner fa-spin"></i> Sauvegarde automatique...</span>'
-                        );
+                    );
                 }
             }
 
