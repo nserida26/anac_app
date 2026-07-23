@@ -15,96 +15,105 @@
 
 @push('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-bs4.min.css">
-<style>
-.modal-xl {
-    max-width: 95%;
-}
+    <style>
+        .modal-xl {
+            max-width: 95%;
+        }
 
-.table td, .table th {
-    vertical-align: middle;
-}
+        .table td,
+        .table th {
+            vertical-align: middle;
+        }
 
-.form-check {
-    justify-content: center;
-    display: flex;
-    margin-bottom: 0;
-}
+        .form-check {
+            justify-content: center;
+            display: flex;
+            margin-bottom: 0;
+        }
 
-.form-check-input {
-    margin-top: 0;
-    cursor: pointer;
-}
+        .form-check-input {
+            margin-top: 0;
+            cursor: pointer;
+        }
 
-.form-check-label {
-    cursor: pointer;
-    margin-left: 5px;
-}
+        .form-check-label {
+            cursor: pointer;
+            margin-left: 5px;
+        }
 
-.bg-info {
-    background-color: #17a2b8 !important;
-}
+        .bg-info {
+            background-color: #17a2b8 !important;
+        }
 
-.modal-header .close {
-    color: white;
-    opacity: 0.8;
-}
+        .modal-header .close {
+            color: white;
+            opacity: 0.8;
+        }
 
-.modal-header .close:hover {
-    opacity: 1;
-}
+        .modal-header .close:hover {
+            opacity: 1;
+        }
 
-.observation-text {
-    resize: vertical;
-}
+        .observation-text {
+            resize: vertical;
+        }
 
-/* Progress indicator styles */
-.checklist-progress {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: white;
-    padding: 10px;
-    border-bottom: 1px solid #dee2e6;
-    margin-bottom: 15px;
-}
+        /* Progress indicator styles */
+        .checklist-progress {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: white;
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 15px;
+        }
 
-/* Responsive table */
-@media (max-width: 768px) {
-    .table {
-        font-size: 12px;
-    }
-    
-    .form-check-label .badge {
-        font-size: 10px;
-    }
-    
-    .observation-text {
-        min-width: 150px;
-    }
-}
-</style>
-<style>
-.floating-action-btn {
-    position: fixed;
-    bottom: 30px;
-    right: 80px;
-    z-index: 9999;
-    animation: pulse 2s infinite;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
+        /* Responsive table */
+        @media (max-width: 768px) {
+            .table {
+                font-size: 12px;
+            }
 
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-}
+            .form-check-label .badge {
+                font-size: 10px;
+            }
 
-.floating-action-btn:hover {
-    animation: none;
-    transform: scale(1.1);
-    transition: transform 0.3s;
-}
-</style>
+            .observation-text {
+                min-width: 150px;
+            }
+        }
+    </style>
+    <style>
+        .floating-action-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 80px;
+            z-index: 9999;
+            animation: pulse 2s infinite;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .floating-action-btn:hover {
+            animation: none;
+            transform: scale(1.1);
+            transition: transform 0.3s;
+        }
+    </style>
     <style>
         #documentViewer {
             width: 210mm;
@@ -125,16 +134,20 @@
             <!-- left column -->
             <div class="col-md-12">
                 <!-- general form elements -->
-                 @isset($demandeur)
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="text-center">
-                        {{ $demande->code }} - {{ $demande->demandeur->np ?? 'N/A' }} - {{ $demande->demandeur->compagnie->nom_entreprise ?? 'Privé' }} - {{ LaravelLocalization::getCurrentLocale() == 'fr' ? optional($demande->typeDemande)->nom_fr : optional($demande->typeDemande)->nom_en }} - {{ LaravelLocalization::getCurrentLocale() == 'fr' ? optional($demande->typeLicence)->fr : optional($demande->typeLicence)->en }}
-                        </h4>
-                    </div>
-                   
-                    <div class="card-body">
-                        
+                @isset($demandeur)
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h4 class="text-center">
+                                {{ $demande->code }} - {{ $demande->demandeur->np ?? 'N/A' }} -
+                                {{ $demande->demandeur->compagnie->nom_entreprise ?? 'Privé' }} -
+                                {{ LaravelLocalization::getCurrentLocale() == 'fr' ? optional($demande->typeDemande)->nom_fr : optional($demande->typeDemande)->nom_en }}
+                                -
+                                {{ LaravelLocalization::getCurrentLocale() == 'fr' ? optional($demande->typeLicence)->fr : optional($demande->typeLicence)->en }}
+                            </h4>
+                        </div>
+
+                        <div class="card-body">
+
                             <div class="row justify-content-center">
 
                                 <div class="col-lg-9">
@@ -172,9 +185,9 @@
                                                 @endif
                                             </td>
                                         </tr>
-                                        
-                        
-                        
+
+
+
                                     </table>
                                 </div>
 
@@ -185,19 +198,19 @@
                                         style="width: 150px; height: 150px; object-fit: cover;">
                                 </div>
                             </div>
-                        
+
+                        </div>
+
                     </div>
-                    
-                </div>
                 @endisset
                 @isset($examens)
-                <div class="card">
-                    <div class="card-header bg-success text-white">
-                        @lang('trans.medical_fitness_by_examiner')
-                    </div>
-                    <div class="card-body">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            @lang('trans.medical_fitness_by_examiner')
+                        </div>
+                        <div class="card-body">
 
-                        
+
                             <div class="row">
                                 <div class="col-lg-12 table-responsive">
                                     <table class="table table-striped table-bordered">
@@ -240,19 +253,19 @@
                                     </table>
                                 </div>
                             </div>
-                        
-                    </div>
 
-                </div>
+                        </div>
+
+                    </div>
                 @endisset
                 @isset($medical_examinations)
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        @lang('trans.medical_fitness')
-                    </div>
-                    <div class="card-body">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            @lang('trans.medical_fitness')
+                        </div>
+                        <div class="card-body">
 
-                        
+
                             <div class="row">
                                 <div class="col-lg-12 table-responsive">
                                     <table class="table table-striped table-bordered">
@@ -329,61 +342,62 @@
                                     </table>
                                 </div>
                             </div>
-                       
-                    </div>
 
-                </div>
-                 @endisset
-@isset($formations)
-    <div class="card">
-        <div class="card-header bg-danger text-white">
-            @lang('trans.training')
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-lg-12 table-responsive">
-                    <table class="table table-striped table-bordered">
-                        <thead>
-                            <tr>
-                                <th>@lang('trans.training')</th>
-                                <th>@lang('trans.training_center')</th>
-                                <th>@lang('trans.location')</th>
-                                <th>@lang('trans.training_date')</th>
-                                <th>@lang('trans.proof')</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($formations as $formation)
-                                <tr>
-                                    <td>{{ $formation->typeFormation?->nom ?? 'N/A' }}</td>
-                                    <td>{{ $formation->centreFormation?->libelle ?? 'N/A' }}</td>
-                                    <td>{{ $formation->lieu ?? 'N/A' }}</td>
-                                    <td>{{ $formation->date_formation ? $formation->date_formation->format('Y-m-d') : 'N/A' }}</td>
-                                    <td>
-                                        @if ($formation->attestation)
-                                            <button class="btn btn-primary"
-                                                onclick="openPdfModal('{{ asset('/uploads/' . $formation->attestation) }}')">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-@endisset
+                        </div>
+
+                    </div>
+                @endisset
+                @isset($formations)
+                    <div class="card">
+                        <div class="card-header bg-danger text-white">
+                            @lang('trans.training')
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-lg-12 table-responsive">
+                                    <table class="table table-striped table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>@lang('trans.training')</th>
+                                                <th>@lang('trans.training_center')</th>
+                                                <th>@lang('trans.location')</th>
+                                                <th>@lang('trans.training_date')</th>
+                                                <th>@lang('trans.proof')</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($formations as $formation)
+                                                <tr>
+                                                    <td>{{ $formation->typeFormation?->nom ?? 'N/A' }}</td>
+                                                    <td>{{ $formation->centreFormation?->libelle ?? 'N/A' }}</td>
+                                                    <td>{{ $formation->lieu ?? 'N/A' }}</td>
+                                                    <td>{{ $formation->date_formation ? $formation->date_formation->format('Y-m-d') : 'N/A' }}
+                                                    </td>
+                                                    <td>
+                                                        @if ($formation->attestation)
+                                                            <button class="btn btn-primary"
+                                                                onclick="openPdfModal('{{ asset('/uploads/' . $formation->attestation) }}')">
+                                                                <i class="fas fa-eye"></i>
+                                                            </button>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endisset
                 @isset($licence_demandeurs)
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        @lang('trans.license')
-                    </div>
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            @lang('trans.license')
+                        </div>
 
-                    <div class="card-body">
-                        
+                        <div class="card-body">
+
                             <div class="row">
                                 <div class="col-lg-12 table-responsive">
                                     <table class="table table-striped table-bordered">
@@ -450,17 +464,17 @@
                                     </table>
                                 </div>
                             </div>
-                       
+
+                        </div>
                     </div>
-                </div>
-                 @endisset
-                 @isset($formation_demandeurs)
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        @lang('trans.training')
-                    </div>
-                    <div class="card-body">
-                       
+                @endisset
+                @isset($formation_demandeurs)
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            @lang('trans.training')
+                        </div>
+                        <div class="card-body">
+
                             <div class="row">
                                 <div class="col-lg-12 table-responsive">
                                     <table class="table table-striped table-bordered">
@@ -490,7 +504,7 @@
 
                                                     </td>
                                                     <td>
-                                                       <button type="button" class="btn btn-warning btn-sm"
+                                                        <button type="button" class="btn btn-warning btn-sm"
                                                             onclick="openDeleteModal('formation_demandeurs', '{{ $formation_demandeur->id }}', '{{ $demande->id }}')">
                                                             <i class="fas fa-trash"></i> @lang('trans.delete')
                                                         </button>
@@ -530,20 +544,20 @@
                                     </table>
                                 </div>
                             </div>
-                        
+
+
+                        </div>
 
                     </div>
-
-                </div>
                 @endisset
                 @isset($qualification_demandeurs)
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        @lang('trans.ratings')
-                    </div>
-                    <div class="card-body">
-                        <br>
-                        
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            @lang('trans.ratings')
+                        </div>
+                        <div class="card-body">
+                            <br>
+
                             <div class="row">
                                 <div class="col-lg-12 table-responsive">
                                     <table class="table table-striped table-bordered">
@@ -583,7 +597,7 @@
                                             @foreach ($qualification_demandeurs as $qualification_demandeur)
                                                 <tr>
                                                     <td>{{ $qualification_demandeur->qualification }}</td>
-                                                    @if (in_array($demande->typeLicence->id, [27, 28, 29, 30, 31, 32, 37,, 38, 39]))
+                                                    @if (in_array($demande->typeLicence->id, [27, 28, 29, 30, 31, 32, 37, 36, 38, 39]))
                                                         <td>{{ optional($qualification_demandeur->typeAvion)->code }}</td>
                                                         <td>{{ $qualification_demandeur->machine }}</td>
                                                     @endif
@@ -617,7 +631,7 @@
 
                                                     </td>
                                                     <td>
-                                                       <button type="button" class="btn btn-warning btn-sm"
+                                                        <button type="button" class="btn btn-warning btn-sm"
                                                             onclick="openDeleteModal('qualification_demandeurs', '{{ $qualification_demandeur->id }}', '{{ $demande->id }}')">
                                                             <i class="fas fa-trash"></i> @lang('trans.delete')
                                                         </button>
@@ -657,20 +671,20 @@
                                     </table>
                                 </div>
                             </div>
-                        
+
+
+                        </div>
 
                     </div>
-
-                </div>
                 @endisset
                 @isset($experience_demandeurs)
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        @lang('trans.flights')
-                    </div>
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            @lang('trans.flights')
+                        </div>
 
-                    <div class="card-body">
-                        
+                        <div class="card-body">
+
                             <div class="row">
                                 <div class="col-lg-12 table-responsive">
                                     <table class="table table-striped table-bordered">
@@ -701,7 +715,7 @@
 
                                                     </td>
                                                     <td>
-                                                       <button type="button" class="btn btn-warning btn-sm"
+                                                        <button type="button" class="btn btn-warning btn-sm"
                                                             onclick="openDeleteModal('experience_demandeurs', '{{ $experience_demandeur->id }}', '{{ $demande->id }}')">
                                                             <i class="fas fa-trash"></i> @lang('trans.delete')
                                                         </button>
@@ -741,18 +755,18 @@
                                     </table>
                                 </div>
                             </div>
-                        
-                    </div>
 
-                </div>
+                        </div>
+
+                    </div>
                 @endisset
                 @isset($competence_demandeurs)
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        @lang('trans.control')
-                    </div>
-                    <div class="card-body">
-                        
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            @lang('trans.control')
+                        </div>
+                        <div class="card-body">
+
                             <div class="row">
                                 <div class="col-lg-12 table-responsive">
                                     <table class="table table-striped table-bordered">
@@ -785,7 +799,7 @@
 
                                                     </td>
                                                     <td>
-                                                       <button type="button" class="btn btn-warning btn-sm"
+                                                        <button type="button" class="btn btn-warning btn-sm"
                                                             onclick="openDeleteModal('competence_demandeurs', '{{ $competence_demandeur->id }}', '{{ $demande->id }}')">
                                                             <i class="fas fa-trash"></i> @lang('trans.delete')
                                                         </button>
@@ -825,19 +839,19 @@
                                     </table>
                                 </div>
                             </div>
-                        
+
+
+                        </div>
 
                     </div>
-
-                </div>
                 @endisset
                 @isset($entrainement_demandeurs)
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        @lang('trans.periodic_control')
-                    </div>
-                    <div class="card-body">
-                        
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            @lang('trans.periodic_control')
+                        </div>
+                        <div class="card-body">
+
                             <div class="row">
                                 <div class="col-lg-12 table-responsive">
                                     <table class="table table-striped table-bordered">
@@ -869,7 +883,7 @@
 
                                                     </td>
                                                     <td>
-                                                         <button type="button" class="btn btn-warning btn-sm"
+                                                        <button type="button" class="btn btn-warning btn-sm"
                                                             onclick="openDeleteModal('training_demandeurs', '{{ $entrainement_demandeur->id }}', '{{ $demande->id }}')">
                                                             <i class="fas fa-trash"></i> @lang('trans.delete')
                                                         </button>
@@ -909,21 +923,21 @@
                                     </table>
                                 </div>
                             </div>
-                       
+
+                        </div>
+
+
                     </div>
-
-
-                </div>
-                 @endisset
+                @endisset
                 {{-- Interupptions --}}
                 @isset($interruption_demandeurs)
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        @lang('trans.interruptions')
-                    </div>
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            @lang('trans.interruptions')
+                        </div>
 
-                    <div class="card-body">
-                        
+                        <div class="card-body">
+
                             <div class="row">
                                 <div class="col-lg-12 table-responsive">
                                     <table class="table table-striped table-bordered">
@@ -951,7 +965,7 @@
 
                                                     </td>
                                                     <td>
-                                                       <button type="button" class="btn btn-warning btn-sm"
+                                                        <button type="button" class="btn btn-warning btn-sm"
                                                             onclick="openDeleteModal('interruption_demandeurs', '{{ $interruption_demandeur->id }}', '{{ $demande->id }}')">
                                                             <i class="fas fa-trash"></i> @lang('trans.delete')
                                                         </button>
@@ -991,22 +1005,22 @@
                                     </table>
                                 </div>
                             </div>
-                        
+
+                        </div>
+
+
                     </div>
-
-
-                </div>
                 @endisset
                 {{-- Expérience en maintenance d'aéronefs --}}
                 @isset($experience_maintenance_demandeurs)
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
 
-                        @lang('trans.maintenance')
-                    </div>
+                            @lang('trans.maintenance')
+                        </div>
 
-                    <div class="card-body">
-                        
+                        <div class="card-body">
+
                             <div class="row">
                                 <div class="col-lg-12 table-responsive">
                                     <table class="table table-striped table-bordered">
@@ -1038,7 +1052,7 @@
 
                                                     </td>
                                                     <td>
-                                                         <button type="button" class="btn btn-warning btn-sm"
+                                                        <button type="button" class="btn btn-warning btn-sm"
                                                             onclick="openDeleteModal('experience_maintenance_demandeurs', '{{ $experience_maintenance_demandeur->id }}', '{{ $demande->id }}')">
                                                             <i class="fas fa-trash"></i> @lang('trans.delete')
                                                         </button>
@@ -1078,21 +1092,21 @@
                                     </table>
                                 </div>
                             </div>
-                       
+
+                        </div>
+
+
                     </div>
-
-
-                </div>
-                 @endisset
+                @endisset
                 {{-- Employeurs --}}
                 @isset($employeur_demandeurs)
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        @lang('trans.employers')
-                    </div>
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            @lang('trans.employers')
+                        </div>
 
-                    <div class="card-body">
-                        
+                        <div class="card-body">
+
                             <div class="row">
                                 <div class="col-lg-12 table-responsive">
                                     <table class="table table-striped table-bordered">
@@ -1124,7 +1138,7 @@
 
                                                     </td>
                                                     <td>
-                                                       <button type="button" class="btn btn-warning btn-sm"
+                                                        <button type="button" class="btn btn-warning btn-sm"
                                                             onclick="openDeleteModal('employeur_demandeurs', '{{ $employeur_demandeur->id }}', '{{ $demande->id }}')">
                                                             <i class="fas fa-trash"></i> @lang('trans.delete')
                                                         </button>
@@ -1164,21 +1178,21 @@
                                     </table>
                                 </div>
                             </div>
-                        
+
+                        </div>
+
+
                     </div>
-
-
-                </div>
                 @endisset
                 {{-- --}}
                 @isset($documents)
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        @lang('trans.attachments')
-                    </div>
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            @lang('trans.attachments')
+                        </div>
 
-                    <div class="card-body">
-                        
+                        <div class="card-body">
+
                             <div class="row">
                                 <div class="col-lg-12 table-responsive">
                                     <table class="table table-striped table-bordered">
@@ -1207,7 +1221,7 @@
 
                                                     </td>
                                                     <td>
-                                                       <button type="button" class="btn btn-warning btn-sm"
+                                                        <button type="button" class="btn btn-warning btn-sm"
                                                             onclick="openDeleteModal('documents', '{{ $document->id }}', '{{ $demande->id }}')">
                                                             <i class="fas fa-trash"></i> @lang('trans.delete')
                                                         </button>
@@ -1247,169 +1261,180 @@
                                     </table>
                                 </div>
                             </div>
-                        
+
+                        </div>
                     </div>
-                </div>
                 @endisset
 
             </div>
             <!-- /.card-body -->
         </div>
 
-@if (isset($demande) && $demande)
+        @if (isset($demande) && $demande)
             <div class="row">
-            <div class="col-md-12">
-    <div class="card">
-        <div class="card-header bg-info text-white">
-            @lang('trans.document_pieces')
-        </div>
-
-        <div class="card-body">
-            <form id="pieceForm" enctype="multipart/form-data">
-                @csrf
-                <input type="hidden" value="{{ $demande->id }}" id="demande_id" name="demande_id">
-                
-                <div class="row">
-                    <div class="col-lg-5">
-                        <div class="form-group">
-                            <label for="titre">@lang('trans.title')</label>
-                            <input type="text" class="form-control" id="titre" name="titre" 
-                                   placeholder="@lang('trans.enter_title')" required>
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            @lang('trans.document_pieces')
                         </div>
-                    </div>
 
-                    <div class="col-lg-5">
-                        <div class="form-group">
-                            <label for="document">@lang('trans.document')</label>
-                            <input type="file" class="form-control" id="document" name="document" 
-                                   placeholder="" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required>
-                            <small class="text-muted">@lang('trans.allowed_formats'): PDF, DOC, DOCX, JPG, JPEG, PNG (Max: 10MB)</small>
-                        </div>
-                    </div>
+                        <div class="card-body">
+                            <form id="pieceForm" enctype="multipart/form-data">
+                                @csrf
+                                <input type="hidden" value="{{ $demande->id }}" id="demande_id" name="demande_id">
 
-                    <div class="col-lg-2">
-                        <div class="form-group">
-                            <label>&nbsp;</label>
-                            <button type="submit" class="btn btn-success form-control">
-                                <i class="fas fa-plus"></i> @lang('trans.add')
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </form>
+                                <div class="row">
+                                    <div class="col-lg-5">
+                                        <div class="form-group">
+                                            <label for="titre">@lang('trans.title')</label>
+                                            <input type="text" class="form-control" id="titre" name="titre"
+                                                placeholder="@lang('trans.enter_title')" required>
+                                        </div>
+                                    </div>
 
-            <br>
+                                    <div class="col-lg-5">
+                                        <div class="form-group">
+                                            <label for="document">@lang('trans.document')</label>
+                                            <input type="file" class="form-control" id="document" name="document"
+                                                placeholder="" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required>
+                                            <small class="text-muted">@lang('trans.allowed_formats'): PDF, DOC, DOCX, JPG, JPEG, PNG
+                                                (Max: 10MB)</small>
+                                        </div>
+                                    </div>
 
-            @if(isset($demande->pieces) && $demande->pieces->count() > 0)
-                <div class="row">
-                    <div class="col-lg-12">
-                        <table class="table table-striped table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>@lang('trans.title')</th>
-                                    <th>@lang('trans.document')</th>
-                                    <th>@lang('trans.date_added')</th>
-                                    <th>@lang('trans.actions')</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($demande->pieces as $piece)
-                                    <tr>
-                                        <td>{{ $piece->titre }}</td>
-                                        <td>
-                                            @if ($piece->url)
-                                                <button class="btn btn-sm btn-info" 
-                                                        onclick="openPdfModal('{{ asset('/uploads/pieces/' . $piece->url) }}')">
-                                                    <i class="fas fa-eye"></i> @lang('trans.view')
-                                                </button>
-                                                
-                                            @else
-                                                <span class="badge badge-warning">@lang('trans.no_file')</span>
-                                            @endif
-                                        </td>
-                                        <td>{{ $piece->created_at ? $piece->created_at->format('d/m/Y H:i') : '' }}</td>
-                                        <td>
-                                            <button class="btn btn-warning btn-sm edit-piece" 
-                                                    data-id="{{ $piece->id }}"
-                                                    data-titre="{{ $piece->titre }}">
-                                                <i class="fas fa-edit"></i> @lang('trans.update')
+                                    <div class="col-lg-2">
+                                        <div class="form-group">
+                                            <label>&nbsp;</label>
+                                            <button type="submit" class="btn btn-success form-control">
+                                                <i class="fas fa-plus"></i> @lang('trans.add')
                                             </button>
-                                            <button class="btn btn-danger btn-sm delete-piece" 
-                                                    data-id="{{ $piece->id }}">
-                                                <i class="fas fa-trash"></i> @lang('trans.destroy')
-                                            </button>
-                                        </td>
-                                    </tr>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
 
-                                    <!-- Edit Form (Hidden) -->
-                                    <tr id="edit-form-piece-{{ $piece->id }}" style="display: none;">
-                                        <td colspan="4">
-                                            <form id="updatePieceForm-{{ $piece->id }}" enctype="multipart/form-data">
-                                                @csrf
-                                                @method('PUT')
-                                                <input type="hidden" name="piece_id" value="{{ $piece->id }}">
+                            <br>
 
-                                                <div class="row">
-                                                    <div class="col-lg-5">
-                                                        <div class="form-group">
-                                                            <label for="edit_titre_{{ $piece->id }}">@lang('trans.title')</label>
-                                                            <input type="text" class="form-control" 
-                                                                   name="titre" id="edit_titre_{{ $piece->id }}"
-                                                                   value="{{ $piece->titre }}" required>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col-lg-5">
-                                                        <div class="form-group">
-                                                            <label for="edit_document_{{ $piece->id }}">@lang('trans.document')</label>
-                                                            <input type="file" class="form-control" 
-                                                                   name="document" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
-                                                            @if($piece->url)
-                                                                <small class="text-muted">
-                                                                    @lang('trans.current_file'): {{ $piece->url }}
-                                                                </small>
+                            @if (isset($demande->pieces) && $demande->pieces->count() > 0)
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <table class="table table-striped table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>@lang('trans.title')</th>
+                                                    <th>@lang('trans.document')</th>
+                                                    <th>@lang('trans.date_added')</th>
+                                                    <th>@lang('trans.actions')</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($demande->pieces as $piece)
+                                                    <tr>
+                                                        <td>{{ $piece->titre }}</td>
+                                                        <td>
+                                                            @if ($piece->url)
+                                                                <button class="btn btn-sm btn-info"
+                                                                    onclick="openPdfModal('{{ asset('/uploads/pieces/' . $piece->url) }}')">
+                                                                    <i class="fas fa-eye"></i> @lang('trans.view')
+                                                                </button>
+                                                            @else
+                                                                <span
+                                                                    class="badge badge-warning">@lang('trans.no_file')</span>
                                                             @endif
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col-lg-2">
-                                                        <div class="form-group">
-                                                            <label>&nbsp;</label>
-                                                            <button type="submit" class="btn btn-primary btn-sm form-control update-piece" 
-                                                                    data-id="{{ $piece->id }}">
-                                                                @lang('trans.save')
+                                                        </td>
+                                                        <td>{{ $piece->created_at ? $piece->created_at->format('d/m/Y H:i') : '' }}
+                                                        </td>
+                                                        <td>
+                                                            <button class="btn btn-warning btn-sm edit-piece"
+                                                                data-id="{{ $piece->id }}"
+                                                                data-titre="{{ $piece->titre }}">
+                                                                <i class="fas fa-edit"></i> @lang('trans.update')
                                                             </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-lg-12">
-                                                        <button type="button" class="btn btn-secondary btn-sm" 
-                                                                onclick="togglePieceEditForm({{ $piece->id }})">
-                                                            @lang('trans.cancel')
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                                            <button class="btn btn-danger btn-sm delete-piece"
+                                                                data-id="{{ $piece->id }}">
+                                                                <i class="fas fa-trash"></i> @lang('trans.destroy')
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+
+                                                    <!-- Edit Form (Hidden) -->
+                                                    <tr id="edit-form-piece-{{ $piece->id }}" style="display: none;">
+                                                        <td colspan="4">
+                                                            <form id="updatePieceForm-{{ $piece->id }}"
+                                                                enctype="multipart/form-data">
+                                                                @csrf
+                                                                @method('PUT')
+                                                                <input type="hidden" name="piece_id"
+                                                                    value="{{ $piece->id }}">
+
+                                                                <div class="row">
+                                                                    <div class="col-lg-5">
+                                                                        <div class="form-group">
+                                                                            <label
+                                                                                for="edit_titre_{{ $piece->id }}">@lang('trans.title')</label>
+                                                                            <input type="text" class="form-control"
+                                                                                name="titre"
+                                                                                id="edit_titre_{{ $piece->id }}"
+                                                                                value="{{ $piece->titre }}" required>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="col-lg-5">
+                                                                        <div class="form-group">
+                                                                            <label
+                                                                                for="edit_document_{{ $piece->id }}">@lang('trans.document')</label>
+                                                                            <input type="file" class="form-control"
+                                                                                name="document"
+                                                                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                                                            @if ($piece->url)
+                                                                                <small class="text-muted">
+                                                                                    @lang('trans.current_file'):
+                                                                                    {{ $piece->url }}
+                                                                                </small>
+                                                                            @endif
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="col-lg-2">
+                                                                        <div class="form-group">
+                                                                            <label>&nbsp;</label>
+                                                                            <button type="submit"
+                                                                                class="btn btn-primary btn-sm form-control update-piece"
+                                                                                data-id="{{ $piece->id }}">
+                                                                                @lang('trans.save')
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="col-lg-12">
+                                                                        <button type="button"
+                                                                            class="btn btn-secondary btn-sm"
+                                                                            onclick="togglePieceEditForm({{ $piece->id }})">
+                                                                            @lang('trans.cancel')
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </form>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            @else
+                                <div class="alert alert-info">
+                                    @lang('trans.no_pieces_added')
+                                </div>
+                            @endif
+                        </div>
                     </div>
                 </div>
-            @else
-                <div class="alert alert-info">
-                    @lang('trans.no_pieces_added')
-                </div>
-            @endif
-        </div>
-    </div>
             </div>
-        </div>
 
-@endif
-<div class="row">
+        @endif
+        <div class="row">
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
@@ -1465,28 +1490,29 @@
                 </div>
             </div>
         </div>
-                             <!-- Button to Open Modal -->
-                    <div class="row">
-                        <div class="col-md-12 text-center">
-                            <button type="button" class="btn btn-success btn-lg" data-toggle="modal" data-target="#checklistModal">
-                                <i class="fas fa-check-double"></i> @lang('trans.checklist')
-                            </button>
-                        </div>
-                    </div>
-       <div class="row">
+        <!-- Button to Open Modal -->
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <button type="button" class="btn btn-success btn-lg" data-toggle="modal" data-target="#checklistModal">
+                    <i class="fas fa-check-double"></i> @lang('trans.checklist')
+                </button>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-md-12">
-                </div>
-                </div>
+            </div>
+        </div>
     </div>
-<div class="floating-action-btn">
-    
-        <button type="button" class="btn btn-success btn-lg rounded-circle shadow-lg" data-toggle="modal" data-target="#checklistModal">
-                                <i class="fas fa-check-double"></i> 
-                            </button>
+    <div class="floating-action-btn">
 
-</div>
+        <button type="button" class="btn btn-success btn-lg rounded-circle shadow-lg" data-toggle="modal"
+            data-target="#checklistModal">
+            <i class="fas fa-check-double"></i>
+        </button>
+
+    </div>
     <!-- Single Decision Modal -->
-        <div class="modal fade" id="decisionModal" tabindex="-1" aria-labelledby="decisionModalLabel" aria-hidden="true">
+    <div class="modal fade" id="decisionModal" tabindex="-1" aria-labelledby="decisionModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1515,288 +1541,296 @@
         </div>
     </div>
     <!-- Large Modal for Checklist -->
-<div class="modal fade" id="checklistModal" tabindex="-1" role="dialog" aria-labelledby="checklistModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="checklistModalLabel">
-                    <i class="fas fa-clipboard-list"></i> 
-                    Checklist d'évaluation de {{ $demande->typeDemande->nom_fr }} de {{ $demande->typeLicence->fr }} - Demande #{{ $demande->code }}
-                </h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            
-            <form action="{{ route('admin.checklists.update', $demande) }}" method="POST" id="checklistForm">
-                @csrf
-                @method('PUT')
-                
-                <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-striped">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th style="width: 5%">N°</th>
-                                    <th style="width: 20%">EXIGENCES DU RTA 1 PEL</th>
-                                    <th style="width: 15%" colspan="2">ETAT</th>
-                                    <th style="width: 20%" colspan="3">MISE EN OEUVRE</th>
-                                    <th style="width: 40%">OBSERVATIONS</th>
-                                </tr>
-                                <tr>
-                                    <th></th>
-                                    <th></th>
-                                    <th style="width: 5%">OUI</th>
-                                    <th style="width: 5%">NON</th>
-                                    <th style="width: 5%">S</th>
-                                    <th style="width: 5%">NS</th>
-                                    <th style="width: 5%">S/O</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-    @if(isset($checklists) && $checklists->count() > 0)
-        @foreach($checklists as $section => $items)
-            @if($items && count($items) > 0)
-                {{-- En-tête de section --}}
-                <tr class="bg-info text-white">
-                    <td colspan="8">
-                        <strong>{{ $section ?: 'Sans section' }}</strong>
-                    </td>
-                </tr>
+    <div class="modal fade" id="checklistModal" tabindex="-1" role="dialog" aria-labelledby="checklistModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="checklistModalLabel">
+                        <i class="fas fa-clipboard-list"></i>
+                        Checklist d'évaluation de {{ $demande->typeDemande->nom_fr }} de {{ $demande->typeLicence->fr }}
+                        - Demande #{{ $demande->code }}
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
 
-                {{-- Items de la section --}}
-                @foreach($items as $index => $checklist)
-                    @if($checklist && is_object($checklist) && isset($checklist->id))
-                        @php
-                            $reponse = $reponses && $reponses->has($checklist->id) ? $reponses->get($checklist->id) : null;
-                            $globalIndex = $loop->parent->index * 100 + $loop->index;
-                        @endphp
-                        <tr>
-                            <td class="text-center">{{ $checklist->numero ?? 'N/A' }}</td>
-                            <td>
-                                @if(!empty($checklist->index))
-                                    <small class="text-muted">{{ $checklist->index }}</small><br>
-                                @endif
-                                {{ $checklist->libelle ?? 'Libelle non défini' }}
-                                <input type="hidden" 
-                                       name="reponses[{{ $globalIndex }}][checklist_id]" 
-                                       value="{{ $checklist->id }}">
-                            </td>
-                            
-                            {{-- ETAT OUI/NON --}}
-                            <td class="text-center">
-                                <div class="form-check">
-                                    <input class="form-check-input etat-radio" 
-                                           type="radio" 
-                                           name="reponses[{{ $globalIndex }}][etat]" 
-                                           value="OUI"
-                                           id="etat_oui_{{ $checklist->id }}"
-                                           data-checklist-id="{{ $checklist->id }}"
-                                           {{ $reponse && $reponse->etat == 'OUI' ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="etat_oui_{{ $checklist->id }}">
-                                        <span class="badge badge-success">OUI</span>
-                                    </label>
-                                </div>
-                            </td>
-                            <td class="text-center">
-                                <div class="form-check">
-                                    <input class="form-check-input etat-radio" 
-                                           type="radio" 
-                                           name="reponses[{{ $globalIndex }}][etat]" 
-                                           value="NON"
-                                           id="etat_non_{{ $checklist->id }}"
-                                           data-checklist-id="{{ $checklist->id }}"
-                                           {{ $reponse && $reponse->etat == 'NON' ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="etat_non_{{ $checklist->id }}">
-                                        <span class="badge badge-danger">NON</span>
-                                    </label>
-                                </div>
-                            </td>
-                            
-                            {{-- MISE EN OEUVRE S/NS/SO --}}
-                            <td class="text-center">
-                                <div class="form-check">
-                                    <input class="form-check-input mise-radio" 
-                                           type="radio" 
-                                           name="reponses[{{ $globalIndex }}][mise_en_oeuvre]" 
-                                           value="S"
-                                           id="me_s_{{ $checklist->id }}"
-                                           data-checklist-id="{{ $checklist->id }}"
-                                           {{ $reponse && $reponse->mise_en_oeuvre == 'S' ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="me_s_{{ $checklist->id }}">
-                                        <span class="badge badge-primary">S</span>
-                                    </label>
-                                </div>
-                            </td>
-                            <td class="text-center">
-                                <div class="form-check">
-                                    <input class="form-check-input mise-radio" 
-                                           type="radio" 
-                                           name="reponses[{{ $globalIndex }}][mise_en_oeuvre]" 
-                                           value="NS"
-                                           id="me_ns_{{ $checklist->id }}"
-                                           data-checklist-id="{{ $checklist->id }}"
-                                           {{ $reponse && $reponse->mise_en_oeuvre == 'NS' ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="me_ns_{{ $checklist->id }}">
-                                        <span class="badge badge-warning">NS</span>
-                                    </label>
-                                </div>
-                            </td>
-                            <td class="text-center">
-                                <div class="form-check">
-                                    <input class="form-check-input mise-radio" 
-                                           type="radio" 
-                                           name="reponses[{{ $globalIndex }}][mise_en_oeuvre]" 
-                                           value="S/O"
-                                           id="me_so_{{ $checklist->id }}"
-                                           data-checklist-id="{{ $checklist->id }}"
-                                           {{ $reponse && $reponse->mise_en_oeuvre == 'S/O' ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="me_so_{{ $checklist->id }}">
-                                        <span class="badge badge-secondary">S/O</span>
-                                    </label>
-                                </div>
-                            </td>
-                            
-                            {{-- OBSERVATIONS --}}
-                            <td>
-                                <textarea class="form-control form-control-sm observation-text" 
-                                          name="reponses[{{ $globalIndex }}][observations]" 
-                                          rows="2"
-                                          data-checklist-id="{{ $checklist->id }}">{{ $reponse->observations ?? '' }}</textarea>
-                            </td>
-                        </tr>
-                    @else
-                        <tr>
-                            <td colspan="8" class="text-danger">
-                                Erreur: Checklist invalide détectée
-                            </td>
-                        </tr>
-                    @endif
-                @endforeach
-            @endif
-        @endforeach
-    @else
-        <tr>
-            <td colspan="8" class="text-center text-warning">
-                <i class="fas fa-exclamation-triangle"></i> 
-                Aucune checklist disponible pour cette demande
-            </td>
-        </tr>
-    @endif
-</tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        <i class="fas fa-times"></i> Fermer
-                    </button>
-                    <button type="submit" class="btn btn-primary" id="saveChecklistBtn">
-                        <i class="fas fa-save"></i> Enregistrer la checklist
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-warning">
-                <h5 class="modal-title" id="deleteModalLabel">
-                    <i class="fas fa-exclamation-triangle"></i> @lang('trans.confirm_delete')
-                </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>@lang('trans.delete_confirmation_message')</p>
-                <p class="text-danger"><strong>@lang('trans.delete_warning')</strong></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                    <i class="fas fa-times"></i> @lang('trans.cancel')
-                </button>
-                <form id="deleteForm" method="POST" action="">
+                <form action="{{ route('admin.checklists.update', $demande) }}" method="POST" id="checklistForm">
                     @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-trash"></i> @lang('trans.delete')
-                    </button>
+                    @method('PUT')
+
+                    <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th style="width: 5%">N°</th>
+                                        <th style="width: 20%">EXIGENCES DU RTA 1 PEL</th>
+                                        <th style="width: 15%" colspan="2">ETAT</th>
+                                        <th style="width: 20%" colspan="3">MISE EN OEUVRE</th>
+                                        <th style="width: 40%">OBSERVATIONS</th>
+                                    </tr>
+                                    <tr>
+                                        <th></th>
+                                        <th></th>
+                                        <th style="width: 5%">OUI</th>
+                                        <th style="width: 5%">NON</th>
+                                        <th style="width: 5%">S</th>
+                                        <th style="width: 5%">NS</th>
+                                        <th style="width: 5%">S/O</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (isset($checklists) && $checklists->count() > 0)
+                                        @foreach ($checklists as $section => $items)
+                                            @if ($items && count($items) > 0)
+                                                {{-- En-tête de section --}}
+                                                <tr class="bg-info text-white">
+                                                    <td colspan="8">
+                                                        <strong>{{ $section ?: 'Sans section' }}</strong>
+                                                    </td>
+                                                </tr>
+
+                                                {{-- Items de la section --}}
+                                                @foreach ($items as $index => $checklist)
+                                                    @if ($checklist && is_object($checklist) && isset($checklist->id))
+                                                        @php
+                                                            $reponse =
+                                                                $reponses && $reponses->has($checklist->id)
+                                                                    ? $reponses->get($checklist->id)
+                                                                    : null;
+                                                            $globalIndex = $loop->parent->index * 100 + $loop->index;
+                                                        @endphp
+                                                        <tr>
+                                                            <td class="text-center">{{ $checklist->numero ?? 'N/A' }}
+                                                            </td>
+                                                            <td>
+                                                                @if (!empty($checklist->index))
+                                                                    <small
+                                                                        class="text-muted">{{ $checklist->index }}</small><br>
+                                                                @endif
+                                                                {{ $checklist->libelle ?? 'Libelle non défini' }}
+                                                                <input type="hidden"
+                                                                    name="reponses[{{ $globalIndex }}][checklist_id]"
+                                                                    value="{{ $checklist->id }}">
+                                                            </td>
+
+                                                            {{-- ETAT OUI/NON --}}
+                                                            <td class="text-center">
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input etat-radio"
+                                                                        type="radio"
+                                                                        name="reponses[{{ $globalIndex }}][etat]"
+                                                                        value="OUI"
+                                                                        id="etat_oui_{{ $checklist->id }}"
+                                                                        data-checklist-id="{{ $checklist->id }}"
+                                                                        {{ $reponse && $reponse->etat == 'OUI' ? 'checked' : '' }}>
+                                                                    <label class="form-check-label"
+                                                                        for="etat_oui_{{ $checklist->id }}">
+                                                                        <span class="badge badge-success">OUI</span>
+                                                                    </label>
+                                                                </div>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input etat-radio"
+                                                                        type="radio"
+                                                                        name="reponses[{{ $globalIndex }}][etat]"
+                                                                        value="NON"
+                                                                        id="etat_non_{{ $checklist->id }}"
+                                                                        data-checklist-id="{{ $checklist->id }}"
+                                                                        {{ $reponse && $reponse->etat == 'NON' ? 'checked' : '' }}>
+                                                                    <label class="form-check-label"
+                                                                        for="etat_non_{{ $checklist->id }}">
+                                                                        <span class="badge badge-danger">NON</span>
+                                                                    </label>
+                                                                </div>
+                                                            </td>
+
+                                                            {{-- MISE EN OEUVRE S/NS/SO --}}
+                                                            <td class="text-center">
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input mise-radio"
+                                                                        type="radio"
+                                                                        name="reponses[{{ $globalIndex }}][mise_en_oeuvre]"
+                                                                        value="S" id="me_s_{{ $checklist->id }}"
+                                                                        data-checklist-id="{{ $checklist->id }}"
+                                                                        {{ $reponse && $reponse->mise_en_oeuvre == 'S' ? 'checked' : '' }}>
+                                                                    <label class="form-check-label"
+                                                                        for="me_s_{{ $checklist->id }}">
+                                                                        <span class="badge badge-primary">S</span>
+                                                                    </label>
+                                                                </div>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input mise-radio"
+                                                                        type="radio"
+                                                                        name="reponses[{{ $globalIndex }}][mise_en_oeuvre]"
+                                                                        value="NS" id="me_ns_{{ $checklist->id }}"
+                                                                        data-checklist-id="{{ $checklist->id }}"
+                                                                        {{ $reponse && $reponse->mise_en_oeuvre == 'NS' ? 'checked' : '' }}>
+                                                                    <label class="form-check-label"
+                                                                        for="me_ns_{{ $checklist->id }}">
+                                                                        <span class="badge badge-warning">NS</span>
+                                                                    </label>
+                                                                </div>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input mise-radio"
+                                                                        type="radio"
+                                                                        name="reponses[{{ $globalIndex }}][mise_en_oeuvre]"
+                                                                        value="S/O" id="me_so_{{ $checklist->id }}"
+                                                                        data-checklist-id="{{ $checklist->id }}"
+                                                                        {{ $reponse && $reponse->mise_en_oeuvre == 'S/O' ? 'checked' : '' }}>
+                                                                    <label class="form-check-label"
+                                                                        for="me_so_{{ $checklist->id }}">
+                                                                        <span class="badge badge-secondary">S/O</span>
+                                                                    </label>
+                                                                </div>
+                                                            </td>
+
+                                                            {{-- OBSERVATIONS --}}
+                                                            <td>
+                                                                <textarea class="form-control form-control-sm observation-text" name="reponses[{{ $globalIndex }}][observations]"
+                                                                    rows="2" data-checklist-id="{{ $checklist->id }}">{{ $reponse->observations ?? '' }}</textarea>
+                                                            </td>
+                                                        </tr>
+                                                    @else
+                                                        <tr>
+                                                            <td colspan="8" class="text-danger">
+                                                                Erreur: Checklist invalide détectée
+                                                            </td>
+                                                        </tr>
+                                                    @endif
+                                                @endforeach
+                                            @endif
+                                        @endforeach
+                                    @else
+                                        <tr>
+                                            <td colspan="8" class="text-center text-warning">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                Aucune checklist disponible pour cette demande
+                                            </td>
+                                        </tr>
+                                    @endif
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            <i class="fas fa-times"></i> Fermer
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="saveChecklistBtn">
+                            <i class="fas fa-save"></i> Enregistrer la checklist
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
-</div>
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title" id="deleteModalLabel">
+                        <i class="fas fa-exclamation-triangle"></i> @lang('trans.confirm_delete')
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>@lang('trans.delete_confirmation_message')</p>
+                    <p class="text-danger"><strong>@lang('trans.delete_warning')</strong></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times"></i> @lang('trans.cancel')
+                    </button>
+                    <form id="deleteForm" method="POST" action="">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> @lang('trans.delete')
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @push('script')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-bs4.min.js"></script>
 @endpush
 @push('custom')
     <script>
-    function openDeleteModal(table, itemId, demandeId) {
-    // Set the form action URL based on the table and item
-    let deleteUrl = '';
-    
-    switch(table) {
-        case 'medical_examinations':
-            deleteUrl = `/medical-examinations/${itemId}`;
-            break;
-        case 'licence_demandeurs':
-            deleteUrl = `/licence-demandeurs/${itemId}`;
-            break;
-        case 'formation_demandeurs':
-            deleteUrl = `/formation-demandeurs/${itemId}`;
-            break;
-        case 'qualification_demandeurs':
-            deleteUrl = `/qualification-demandeurs/${itemId}`;
-            break;
-        case 'experience_demandeurs':
-            deleteUrl = `/experience-demandeurs/${itemId}`;
-            break;
-        case 'competence_demandeurs':
-            deleteUrl = `/competence-demandeurs/${itemId}`;
-            break;
-        case 'training_demandeurs':
-            deleteUrl = `/training-demandeurs/${itemId}`;
-            break;
-        case 'interruption_demandeurs':
-            deleteUrl = `/interruption-demandeurs/${itemId}`;
-            break;
-        case 'experience_maintenance_demandeurs':
-            deleteUrl = `/experience-maintenance-demandeurs/${itemId}`;
-            break;
-        case 'employeur_demandeurs':
-            deleteUrl = `/employeur-demandeurs/${itemId}`;
-            break;
-        case 'documents':
-            deleteUrl = `/documents/${itemId}`;
-            break;
-    }
-    
-    // Set the form action
-    document.getElementById('deleteForm').action = deleteUrl;
-    
-    // Add hidden input for demande_id if needed
-    let existingInput = document.getElementById('delete_demande_id');
-    if (!existingInput) {
-        let input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'demande_id';
-        input.value = demandeId;
-        input.id = 'delete_demande_id';
-        document.getElementById('deleteForm').appendChild(input);
-    } else {
-        existingInput.value = demandeId;
-    }
-    
-    // Show the modal
-    $('#deleteModal').modal('show');
-}
+        function openDeleteModal(table, itemId, demandeId) {
+            // Set the form action URL based on the table and item
+            let deleteUrl = '';
+
+            switch (table) {
+                case 'medical_examinations':
+                    deleteUrl = `/medical-examinations/${itemId}`;
+                    break;
+                case 'licence_demandeurs':
+                    deleteUrl = `/licence-demandeurs/${itemId}`;
+                    break;
+                case 'formation_demandeurs':
+                    deleteUrl = `/formation-demandeurs/${itemId}`;
+                    break;
+                case 'qualification_demandeurs':
+                    deleteUrl = `/qualification-demandeurs/${itemId}`;
+                    break;
+                case 'experience_demandeurs':
+                    deleteUrl = `/experience-demandeurs/${itemId}`;
+                    break;
+                case 'competence_demandeurs':
+                    deleteUrl = `/competence-demandeurs/${itemId}`;
+                    break;
+                case 'training_demandeurs':
+                    deleteUrl = `/training-demandeurs/${itemId}`;
+                    break;
+                case 'interruption_demandeurs':
+                    deleteUrl = `/interruption-demandeurs/${itemId}`;
+                    break;
+                case 'experience_maintenance_demandeurs':
+                    deleteUrl = `/experience-maintenance-demandeurs/${itemId}`;
+                    break;
+                case 'employeur_demandeurs':
+                    deleteUrl = `/employeur-demandeurs/${itemId}`;
+                    break;
+                case 'documents':
+                    deleteUrl = `/documents/${itemId}`;
+                    break;
+            }
+
+            // Set the form action
+            document.getElementById('deleteForm').action = deleteUrl;
+
+            // Add hidden input for demande_id if needed
+            let existingInput = document.getElementById('delete_demande_id');
+            if (!existingInput) {
+                let input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'demande_id';
+                input.value = demandeId;
+                input.id = 'delete_demande_id';
+                document.getElementById('deleteForm').appendChild(input);
+            } else {
+                existingInput.value = demandeId;
+            }
+
+            // Show the modal
+            $('#deleteModal').modal('show');
+        }
         // Fonction pour ouvrir la modale et définir les valeurs du formulaire
         function openDecisionModal(table, id, demande, action) {
             // Set modal values
@@ -1882,11 +1916,11 @@
             // Add new piece
             $('#pieceForm').on('submit', function(e) {
                 e.preventDefault();
-                
+
                 var formData = new FormData(this);
-                
+
                 $.ajax({
-                    url: '{{ route("pieces.store") }}',
+                    url: '{{ route('pieces.store') }}',
                     type: 'POST',
                     data: formData,
                     processData: false,
@@ -1895,7 +1929,7 @@
                         location.reload();
                     },
                     error: function(xhr) {
-                        
+
                         console.log(xhr.responseText);
                     }
                 });
@@ -1910,13 +1944,13 @@
             // Update piece
             $('[id^="updatePieceForm-"]').on('submit', function(e) {
                 e.preventDefault();
-                
+
                 var form = $(this);
                 var pieceId = form.find('input[name="piece_id"]').val();
                 var formData = new FormData(this);
-                
+
                 $.ajax({
-                    url: '{{ url("admin/pieces/update") }}/' + pieceId,
+                    url: '{{ url('admin/pieces/update') }}/' + pieceId,
                     type: 'POST', // Using POST for PUT with _method
                     data: formData,
                     processData: false,
@@ -1925,7 +1959,7 @@
                         location.reload();
                     },
                     error: function(xhr) {
-                        
+
                         console.log(xhr.responseText);
                     }
                 });
@@ -1934,19 +1968,19 @@
             // Delete piece
             $('.delete-piece').on('click', function() {
                 var pieceId = $(this).data('id');
-                
+
                 if (confirm('@lang('trans.confirm_delete')')) {
                     $.ajax({
-                        url: '{{ url("admin/pieces/destroy") }}/' + pieceId,
+                        url: '{{ url('admin/pieces/destroy') }}/' + pieceId,
                         type: 'DELETE',
                         data: {
                             _token: '{{ csrf_token() }}'
                         },
                         success: function(response) {
-                           location.reload();
+                            location.reload();
                         },
                         error: function(xhr) {
-                            
+
                             console.log(xhr.responseText);
                         }
                     });
@@ -1956,10 +1990,10 @@
 
         function togglePieceEditForm(pieceId) {
             var formRow = $('#edit-form-piece-' + pieceId);
-            
+
             // Hide all other edit forms
             $('[id^="edit-form-piece-"]').not(formRow).hide();
-            
+
             // Toggle current form
             if (formRow.is(':visible')) {
                 formRow.hide();
@@ -1969,162 +2003,165 @@
         }
     </script>
     <script>
-    // Add this to your main JavaScript file or in a script tag
-$(document).ready(function() {
-    // Auto-open modal if it was open before redirect
-    @if(session('open_modal'))
-        $('#checklistModal').modal('show');
-    @endif
-    
-    // Handle AJAX form submission for auto-save
-    $('#checklistForm').on('submit', function(e) {
-        // Allow normal submission
-        return true;
-    });
-});
-$(document).ready(function() {
-    // Auto-save functionality (optional)
-    let autoSaveTimer;
-    let isSaving = false;
-    
-    // Function to show saving indicator
-    function showSavingIndicator() {
-        if (!$('#savingIndicator').length) {
-            $('.modal-footer').prepend('<span id="savingIndicator" class="text-muted mr-3"><i class="fas fa-spinner fa-spin"></i> Sauvegarde automatique...</span>');
-        }
-    }
-    
-    function hideSavingIndicator() {
-        $('#savingIndicator').remove();
-    }
-    
-    // Auto-save on any change (optional - uncomment to enable)
-    /*
-    $('.etat-radio, .mise-radio, .observation-text').on('change', function() {
-        clearTimeout(autoSaveTimer);
-        autoSaveTimer = setTimeout(function() {
-            if (!isSaving) {
-                autoSaveForm();
-            }
-        }, 2000);
-    });
-    
-    function autoSaveForm() {
-        isSaving = true;
-        showSavingIndicator();
-        
-        var formData = $('#checklistForm').serialize();
-        
-        $.ajax({
-            url: $('#checklistForm').attr('action'),
-            type: 'POST',
-            data: formData + '&_method=PUT',
-            success: function(response) {
-                setTimeout(function() {
-                    hideSavingIndicator();
-                    isSaving = false;
-                    // Optional: Show success toast
-                    showToast('success', 'Checklist sauvegardée automatiquement');
-                }, 500);
-            },
-            error: function(xhr) {
-                hideSavingIndicator();
-                isSaving = false;
-                console.error('Auto-save error:', xhr);
-                showToast('error', 'Erreur lors de la sauvegarde automatique');
-            }
-        });
-    }
-    */
-    
-    // Show toast notification
-    function showToast(type, message) {
-        // You can implement toast notification here
-        // Example using Bootstrap toast or sweet alert
-        if (type === 'success') {
-            toastr.success(message);
-        } else {
-            toastr.error(message);
-        }
-    }
-    
-    // Progress calculation (optional)
-    function calculateProgress() {
-        let totalItems = $('.etat-radio').length / 2; // Each item has OUI and NON radios
-        let answeredItems = 0;
-        
-        $('tr:has(.etat-radio)').each(function() {
-            if ($(this).find('.etat-radio:checked').length > 0) {
-                answeredItems++;
-            }
-        });
-        
-        let progress = totalItems > 0 ? (answeredItems / totalItems) * 100 : 0;
-        return Math.round(progress);
-    }
-    
-    // Update progress bar (optional - add to modal if needed)
-    function updateProgress() {
-        let progress = calculateProgress();
-        if ($('#checklistProgress').length) {
-            $('#checklistProgress').css('width', progress + '%').attr('aria-valuenow', progress);
-            $('#progressText').text(progress + '%');
-        }
-    }
-    
-    // Form validation before submit
-    $('#checklistForm').on('submit', function(e) {
-        // Optional: Add validation logic here
-        let confirmSave = confirm('Êtes-vous sûr de vouloir enregistrer la checklist ?');
-        if (!confirmSave) {
-            e.preventDefault();
-            return false;
-        }
-        
-        // Show loading state on button
-        $('#saveChecklistBtn').html('<i class="fas fa-spinner fa-spin"></i> Enregistrement...').prop('disabled', true);
-        
-        return true;
-    });
-    
-    // Handle modal close confirmation if there are unsaved changes
-    let formChanged = false;
-    
-    $('.etat-radio, .mise-radio, .observation-text').on('change', function() {
-        formChanged = true;
-    });
-    
-    $('#checklistModal').on('hide.bs.modal', function(e) {
-        if (formChanged) {
-            let confirmClose = confirm('Vous avez des modifications non enregistrées. Voulez-vous vraiment fermer ?');
-            if (!confirmClose) {
-                e.preventDefault();
-                return false;
-            }
-        }
-        return true;
-    });
-    
-    $('#checklistModal').on('shown.bs.modal', function() {
-        formChanged = false;
-    });
-    
-    // Initialize tooltips if needed
-    $('[data-toggle="tooltip"]').tooltip();
-    
-    // Optional: Add keyboard shortcuts
-    $(document).keydown(function(e) {
-        // Ctrl + S to save
-        if ((e.ctrlKey || e.metaKey) && e.keyCode == 83) {
-            e.preventDefault();
-            $('#checklistForm').submit();
-            return false;
-        }
-    });
-    
-    // Log console message for debugging
-    console.log('Checklist modal initialized');
-});
-</script>
+        // Add this to your main JavaScript file or in a script tag
+        $(document).ready(function() {
+            // Auto-open modal if it was open before redirect
+            @if (session('open_modal'))
+                $('#checklistModal').modal('show');
+            @endif
 
+            // Handle AJAX form submission for auto-save
+            $('#checklistForm').on('submit', function(e) {
+                // Allow normal submission
+                return true;
+            });
+        });
+        $(document).ready(function() {
+            // Auto-save functionality (optional)
+            let autoSaveTimer;
+            let isSaving = false;
+
+            // Function to show saving indicator
+            function showSavingIndicator() {
+                if (!$('#savingIndicator').length) {
+                    $('.modal-footer').prepend(
+                        '<span id="savingIndicator" class="text-muted mr-3"><i class="fas fa-spinner fa-spin"></i> Sauvegarde automatique...</span>'
+                        );
+                }
+            }
+
+            function hideSavingIndicator() {
+                $('#savingIndicator').remove();
+            }
+
+            // Auto-save on any change (optional - uncomment to enable)
+            /*
+            $('.etat-radio, .mise-radio, .observation-text').on('change', function() {
+                clearTimeout(autoSaveTimer);
+                autoSaveTimer = setTimeout(function() {
+                    if (!isSaving) {
+                        autoSaveForm();
+                    }
+                }, 2000);
+            });
+            
+            function autoSaveForm() {
+                isSaving = true;
+                showSavingIndicator();
+                
+                var formData = $('#checklistForm').serialize();
+                
+                $.ajax({
+                    url: $('#checklistForm').attr('action'),
+                    type: 'POST',
+                    data: formData + '&_method=PUT',
+                    success: function(response) {
+                        setTimeout(function() {
+                            hideSavingIndicator();
+                            isSaving = false;
+                            // Optional: Show success toast
+                            showToast('success', 'Checklist sauvegardée automatiquement');
+                        }, 500);
+                    },
+                    error: function(xhr) {
+                        hideSavingIndicator();
+                        isSaving = false;
+                        console.error('Auto-save error:', xhr);
+                        showToast('error', 'Erreur lors de la sauvegarde automatique');
+                    }
+                });
+            }
+            */
+
+            // Show toast notification
+            function showToast(type, message) {
+                // You can implement toast notification here
+                // Example using Bootstrap toast or sweet alert
+                if (type === 'success') {
+                    toastr.success(message);
+                } else {
+                    toastr.error(message);
+                }
+            }
+
+            // Progress calculation (optional)
+            function calculateProgress() {
+                let totalItems = $('.etat-radio').length / 2; // Each item has OUI and NON radios
+                let answeredItems = 0;
+
+                $('tr:has(.etat-radio)').each(function() {
+                    if ($(this).find('.etat-radio:checked').length > 0) {
+                        answeredItems++;
+                    }
+                });
+
+                let progress = totalItems > 0 ? (answeredItems / totalItems) * 100 : 0;
+                return Math.round(progress);
+            }
+
+            // Update progress bar (optional - add to modal if needed)
+            function updateProgress() {
+                let progress = calculateProgress();
+                if ($('#checklistProgress').length) {
+                    $('#checklistProgress').css('width', progress + '%').attr('aria-valuenow', progress);
+                    $('#progressText').text(progress + '%');
+                }
+            }
+
+            // Form validation before submit
+            $('#checklistForm').on('submit', function(e) {
+                // Optional: Add validation logic here
+                let confirmSave = confirm('Êtes-vous sûr de vouloir enregistrer la checklist ?');
+                if (!confirmSave) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Show loading state on button
+                $('#saveChecklistBtn').html('<i class="fas fa-spinner fa-spin"></i> Enregistrement...')
+                    .prop('disabled', true);
+
+                return true;
+            });
+
+            // Handle modal close confirmation if there are unsaved changes
+            let formChanged = false;
+
+            $('.etat-radio, .mise-radio, .observation-text').on('change', function() {
+                formChanged = true;
+            });
+
+            $('#checklistModal').on('hide.bs.modal', function(e) {
+                if (formChanged) {
+                    let confirmClose = confirm(
+                        'Vous avez des modifications non enregistrées. Voulez-vous vraiment fermer ?');
+                    if (!confirmClose) {
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+                return true;
+            });
+
+            $('#checklistModal').on('shown.bs.modal', function() {
+                formChanged = false;
+            });
+
+            // Initialize tooltips if needed
+            $('[data-toggle="tooltip"]').tooltip();
+
+            // Optional: Add keyboard shortcuts
+            $(document).keydown(function(e) {
+                // Ctrl + S to save
+                if ((e.ctrlKey || e.metaKey) && e.keyCode == 83) {
+                    e.preventDefault();
+                    $('#checklistForm').submit();
+                    return false;
+                }
+            });
+
+            // Log console message for debugging
+            console.log('Checklist modal initialized');
+        });
+    </script>
 @endpush
