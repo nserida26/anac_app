@@ -520,54 +520,69 @@
 
 @if ($autorisation->demande->vols->isNotEmpty())
 
+    @php
+        // Plus de 5 aéroports distincts dans l'itinéraire => renvoyer à la pièce jointe
+        $aeroportsItineraire = [];
+        foreach ($autorisation->demande->vols as $volItineraire) {
+            if ($volItineraire->aeroportDepart) $aeroportsItineraire[] = $volItineraire->aeroportDepart->id;
+            if ($volItineraire->aeroportArrivee) $aeroportsItineraire[] = $volItineraire->aeroportArrivee->id;
+            foreach ($volItineraire->escales as $escaleItineraire) {
+                if ($escaleItineraire->aeroport) $aeroportsItineraire[] = $escaleItineraire->aeroport->id;
+            }
+        }
+        $tropVols = ($documentVols) && (count(array_unique($aeroportsItineraire)) > 5);
+    @endphp
+
     <div style="display:flex;">
         <span style="font-weight:bold; min-width:200px;">
             Itinéraire / Itinerary :
         </span>
 
         <div style="font-weight:bold; word-break:break-word;">
+            @if($tropVols)
+                VOIR PIECE JOINTE
+            @else
+                @foreach ($autorisation->demande->vols as $vol)
 
-            @foreach ($autorisation->demande->vols as $vol)
+                    @php
+                        $itineraireParts = [];
 
-                @php
-                    $itineraireParts = [];
+                        $departCode  = optional($vol->aeroportDepart)->codeICAO ?? $vol->nom_piste_depart ?? 'N/A';
+                        $arriveeCode = optional($vol->aeroportArrivee)->codeICAO ?? $vol->nom_piste_arrivee ?? 'N/A';
 
-                    $departCode  = $vol->aeroportDepart->codeICAO;
-                    $arriveeCode = $vol->aeroportArrivee->codeICAO;
+                        $heureDepartVol  = date('Hi', strtotime($vol->date_depart));
+                        $heureArriveeVol = date('Hi', strtotime($vol->date_arrivee));
 
-                    $heureDepartVol  = date('Hi', strtotime($vol->date_depart));
-                    $heureArriveeVol = date('Hi', strtotime($vol->date_arrivee));
+                        // Départ
+                        $itineraireParts[] = "{$departCode} {$heureDepartVol}";
 
-                    // Départ
-                    $itineraireParts[] = "{$departCode} {$heureDepartVol}";
+                        // Escales
+                        if ($vol->escales->isNotEmpty()) {
+                            foreach ($vol->escales as $escale) {
+                                $heureArriveeEscale = date('Hi', strtotime($escale->date_arrivee));
+                                $heureDepartEscale  = date('Hi', strtotime($escale->date_depart));
+                                $aeroportEscale     = $escale->aeroport->codeICAO;
 
-                    // Escales
-                    if ($vol->escales->isNotEmpty()) {
-                        foreach ($vol->escales as $escale) {
-                            $heureArriveeEscale = date('Hi', strtotime($escale->date_arrivee));
-                            $heureDepartEscale  = date('Hi', strtotime($escale->date_depart));
-                            $aeroportEscale     = $escale->aeroport->codeICAO;
-
-                            $itineraireParts[] = "{$heureArriveeEscale} {$aeroportEscale} {$heureDepartEscale}";
+                                $itineraireParts[] = "{$heureArriveeEscale} {$aeroportEscale} {$heureDepartEscale}";
+                            }
                         }
-                    }
 
-                    // Arrivée
-                    if ($departCode === $arriveeCode) {
-                        $itineraireParts[] = "{$heureArriveeVol} {$arriveeCode}";
-                    } else {
-                        $itineraireParts[] = "{$heureArriveeVol} {$arriveeCode}";
-                    }
+                        // Arrivée
+                        if ($departCode === $arriveeCode) {
+                            $itineraireParts[] = "{$heureArriveeVol} {$arriveeCode}";
+                        } else {
+                            $itineraireParts[] = "{$heureArriveeVol} {$arriveeCode}";
+                        }
 
-                    $itineraireComplet = implode(' - ', $itineraireParts);
-                @endphp
+                        $itineraireComplet = implode(' - ', $itineraireParts);
+                    @endphp
 
-                <div>
-                    {{ $vol->numero_vol }} {{ $itineraireComplet }}     @if($documentVols)  <span> OR SUB VOIR PIECE JOINTE </span> @endif
-                </div>
+                    <div>
+                        {{ $vol->numero_vol }} {{ $itineraireComplet }}
+                    </div>
 
-            @endforeach
-
+                @endforeach
+            @endif
         </div>
     </div>
 
