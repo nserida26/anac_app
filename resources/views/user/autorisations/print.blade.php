@@ -389,10 +389,9 @@
                             $output2[] = " {$avion->immatriculation} ";
                         }
 
-                        $uniqueTypes = array_unique($output1);
-                        $typeString1 = implode(' / ', $uniqueTypes);
+                        $typeString1 = implode(' / ', array_unique($output1));
                         $typeString2 = implode(' / ', $output2);
-                        $tropAvions = ($documentAvions) && (count($output2) > 5 || count($uniqueTypes) > 5);
+                        $tropAvions = (bool) $documentAvions;
                     @endphp
 
                     <div class="dual-column">
@@ -445,16 +444,7 @@
 @if ($autorisation->demande->vols->isNotEmpty())
 
     @php
-        // Plus de 5 aéroports distincts dans l'itinéraire => renvoyer à la pièce jointe
-        $aeroportsItineraire = [];
-        foreach ($autorisation->demande->vols as $volItineraire) {
-            if ($volItineraire->aeroportDepart) $aeroportsItineraire[] = $volItineraire->aeroportDepart->id;
-            if ($volItineraire->aeroportArrivee) $aeroportsItineraire[] = $volItineraire->aeroportArrivee->id;
-            foreach ($volItineraire->escales as $escaleItineraire) {
-                if ($escaleItineraire->aeroport) $aeroportsItineraire[] = $escaleItineraire->aeroport->id;
-            }
-        }
-        $tropVols = ($documentVols) && (count(array_unique($aeroportsItineraire)) > 5);
+        $tropVols = (bool) $documentVols;
     @endphp
 
     <div style="display:flex;">
