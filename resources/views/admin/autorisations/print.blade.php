@@ -345,7 +345,7 @@
                                     if ($autorisation->demande->vols->isNotEmpty()){
                                         foreach($autorisation->demande->vols as $vol){
                                             // Aéroport d'arrivée
-                                            if ($vol->aeroportArrivee->pays_id === 29) {
+                                            if (optional($vol->aeroportArrivee)->pays_id === 29) {
                                                 $aeroportName = mb_strtoupper($vol->aeroportArrivee->nom, 'UTF-8');
                                                 // Vérifier l'unicité
                                                 if (!in_array($aeroportName, $aeroportsUniques)) {
@@ -354,7 +354,7 @@
                                                 }
                                             }
                                             // Aéroport de départ
-                                            if ($vol->aeroportDepart->pays_id === 29) {
+                                            if (optional($vol->aeroportDepart)->pays_id === 29) {
                                                 $aeroportName = mb_strtoupper($vol->aeroportDepart->nom, 'UTF-8');
                                                 // Vérifier l'unicité
                                                 if (!in_array($aeroportName, $aeroportsUniques)) {
@@ -506,6 +506,19 @@
 
 @if ($autorisation->demande->vols->isNotEmpty())
 
+    @php
+        // Plus de 5 aéroports distincts dans l'itinéraire => renvoyer à la pièce jointe
+        $aeroportsItineraire = [];
+        foreach ($autorisation->demande->vols as $volItineraire) {
+            if ($volItineraire->aeroportDepart) $aeroportsItineraire[] = $volItineraire->aeroportDepart->id;
+            if ($volItineraire->aeroportArrivee) $aeroportsItineraire[] = $volItineraire->aeroportArrivee->id;
+            foreach ($volItineraire->escales as $escaleItineraire) {
+                if ($escaleItineraire->aeroport) $aeroportsItineraire[] = $escaleItineraire->aeroport->id;
+            }
+        }
+        $showItineraireAttachmentNote = count(array_unique($aeroportsItineraire)) > 5;
+    @endphp
+
     <div style="display:flex;">
         <span style="font-weight:bold; min-width:200px;">
             Itinéraire / Itinerary :
@@ -518,8 +531,8 @@
                 @php
                     $itineraireParts = [];
 
-                    $departCode  = $vol->aeroportDepart->codeICAO;
-                    $arriveeCode = $vol->aeroportArrivee->codeICAO;
+                    $departCode  = optional($vol->aeroportDepart)->codeICAO ?? $vol->nom_piste_depart ?? 'N/A';
+                    $arriveeCode = optional($vol->aeroportArrivee)->codeICAO ?? $vol->nom_piste_arrivee ?? 'N/A';
 
                     $heureDepartVol  = date('Hi', strtotime($vol->date_depart));
                     $heureArriveeVol = date('Hi', strtotime($vol->date_arrivee));
@@ -549,7 +562,7 @@
                 @endphp
 
                 <div>
-                    {{ $vol->numero_vol }} {{ $itineraireComplet }}     @if($documentVols)  <span> OR SUB VOIR PIECE JOINTE </span> @endif
+                    {{ $vol->numero_vol }} {{ $itineraireComplet }}     @if($showItineraireAttachmentNote)  <span> OR SUB VOIR PIECE JOINTE </span> @endif
                 </div>
 
             @endforeach

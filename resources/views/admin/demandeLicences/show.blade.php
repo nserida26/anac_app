@@ -653,6 +653,7 @@
                                                             <button type="button" class="btn btn-danger btn-sm ml-2"
                                                                 onclick="openDecisionModal('qualification_demandeurs', '{{ $qualification_demandeur->id }}', '{{ $demande->id }}', 'reject')">
                                                                 <i class="fas fa-times"></i> @lang('trans.reject')
+                                        
                                                             </button>
                                                         @else
                                                             <!-- Rejected state - show status and approve option -->

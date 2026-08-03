@@ -107,9 +107,9 @@
 
                 <div class="card card-primary">
                     <div class="card-header bg-primary text-white">
-                        <h3 class="card-title">Information sur l'avion</h3>
+                        <h3 class="card-title">@lang('trans.plane_info')</h3>
                         <button type="button" class="btn btn-sm btn-light float-right" id="showAvionFormBtn">
-                            <i class="fas fa-plus"></i> Ajouter des avions
+                            <i class="fas fa-plus"></i> @lang('trans.add_planes')
                         </button>
                     </div>
                     <div class="card-body">
@@ -122,8 +122,7 @@
 
                             <div class="alert alert-info">
                                 <i class="fas fa-info-circle"></i>
-                                Saisissez les immatriculations une par une et appuyez sur <kbd>Entrée</kbd> ou <kbd>,</kbd>
-                                pour les ajouter.
+                                @lang('trans.registrations_help')
                             </div>
 
                             <div class="row">
@@ -131,7 +130,7 @@
                                 <div class="col-md-12 mb-3">
                                     <div class="form-group">
                                         <label for="immatriculations" class="form-label">
-                                            Immatriculations <span class="text-danger">*</span>
+                                            @lang('trans.registrations') <span class="text-danger">*</span>
                                         </label>
                                         <!-- Champs caché pour Select2 -->
                                         <select class="form-control" id="immatriculations_select" name="immatriculations[]"
@@ -139,8 +138,7 @@
                                             <!-- Les options seront ajoutées dynamiquement -->
                                         </select>
                                         <div class="invalid-feedback" id="immatriculations_error"></div>
-                                        <small class="text-muted">Tapez une immatriculation et appuyez sur Entrée pour
-                                            l'ajouter</small>
+                                        <small class="text-muted">@lang('trans.registration_input_help')</small>
                                     </div>
                                 </div>
                             </div>
@@ -150,15 +148,15 @@
                                 <div class="col-md-6 mb-3">
                                     <div class="form-group">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <label for="type_avion_id" class="form-label">Type d'avion <span
+                                            <label for="type_avion_id" class="form-label">@lang('trans.plane_type') <span
                                                     class="text-danger">*</span></label>
                                             <button type="button" class="btn btn-sm btn-success" id="addTypeAvionBtn">
-                                                <i class="fas fa-plus"></i> Ajouter
+                                                <i class="fas fa-plus"></i> @lang('trans.add_action')
                                             </button>
                                         </div>
                                         <select class="form-control select2-single" id="type_avion_id" name="type_avion_id"
                                             required>
-                                            <option value="">Sélectionnez un type</option>
+                                            <option value="">@lang('trans.select_type')</option>
                                             @foreach ($type_avions as $type)
                                                 <option value="{{ $type->id }}" data-code="{{ $type->code }}"
                                                     data-capacite="{{ $type->capacite }}">
@@ -174,16 +172,16 @@
                                 <div class="col-md-6 mb-3">
                                     <div class="form-group">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <label for="compagnie_aerienne_id" class="form-label">Opérateur <span
+                                            <label for="compagnie_aerienne_id" class="form-label">@lang('trans.operator') <span
                                                     class="text-danger">*</span></label>
                                             <button type="button" class="btn btn-sm btn-success" id="addCompanyBtn">
-                                                <i class="fas fa-plus"></i> Ajouter
+                                                <i class="fas fa-plus"></i> @lang('trans.add_action')
                                             </button>
                                         </div>
 
                                         <select class="form-control select2-single" id="compagnie_aerienne_id"
                                             name="compagnie_aerienne_id" required>
-                                            <option value="">Sélectionnez un Opérateur</option>
+                                            <option value="">@lang('trans.select_operator')</option>
                                             @foreach ($compagnies as $compagnie)
                                                 <option value="{{ $compagnie->id }}" data-code="{{ $compagnie->code }}">
                                                     @if (!empty($compagnie->code))
@@ -203,17 +201,17 @@
                             <div class="row" id="previewSection" style="display: none;">
                                 <div class="col-md-12">
                                     <div class="alert alert-success">
-                                        <h6><i class="fas fa-plane"></i> Aperçu des avions à ajouter :</h6>
+                                        <h6><i class="fas fa-plane"></i> @lang('trans.preview_planes_title')</h6>
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <p><strong>Type:</strong> <span id="selectedTypeDisplay">-</span></p>
-                                                <p><strong>Opérateur:</strong> <span id="selectedOperatorDisplay">-</span>
+                                                <p><strong>@lang('trans.type'):</strong> <span id="selectedTypeDisplay">-</span></p>
+                                                <p><strong>@lang('trans.operator'):</strong> <span id="selectedOperatorDisplay">-</span>
                                                 </p>
                                             </div>
                                             <div class="col-md-6">
                                                 <div id="immatriculationsPreview" class="mt-2"></div>
-                                                <p class="mb-0"><strong>Total:</strong> <span id="totalCount">0</span>
-                                                    avion(s)</p>
+                                                <p class="mb-0"><strong>@lang('trans.total'):</strong> <span id="totalCount">0</span>
+                                                    @lang('trans.plane_unit')</p>
                                             </div>
                                         </div>
                                     </div>
@@ -223,11 +221,11 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <button type="submit" class="btn btn-success float-right" id="submitAvionBtn">
-                                        <i class="fas fa-save"></i> <span id="formActionText">Ajouter les avions</span>
+                                        <i class="fas fa-save"></i> <span id="formActionText">@lang('trans.add_planes')</span>
                                     </button>
                                     <button type="button" class="btn btn-secondary float-right mr-2"
                                         id="cancelAvionFormBtn">
-                                        <i class="fas fa-times"></i> Annuler
+                                        <i class="fas fa-times"></i> @lang('trans.cancel')
                                     </button>
                                 </div>
                             </div>
@@ -242,10 +240,10 @@
                                             <table class="table table-striped table-bordered" id="avionsTable">
                                                 <thead>
                                                     <tr>
-                                                        <th>Immatriculation</th>
-                                                        <th>Type</th>
-                                                        <th>Opérateur</th>
-                                                        <th>Actions</th>
+                                                        <th>@lang('trans.registration')</th>
+                                                        <th>@lang('trans.type')</th>
+                                                        <th>@lang('trans.operator')</th>
+                                                        <th>@lang('trans.actions')</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -261,11 +259,11 @@
                                                                         data-immatriculation="{{ $avionItem->immatriculation }}"
                                                                         data-type_avion_id="{{ $avionItem->type_avion_id }}"
                                                                         data-compagnie_aerienne_id="{{ $avionItem->compagnie_aerienne_id }}">
-                                                                        <i class="fas fa-edit"></i> Modifier
+                                                                        <i class="fas fa-edit"></i> @lang('trans.edit')
                                                                     </button>
                                                                     <button class="btn btn-danger btn-sm delete-avion"
                                                                         data-id="{{ $avionItem->id }}">
-                                                                        <i class="fas fa-trash"></i> Supprimer
+                                                                        <i class="fas fa-trash"></i> @lang('trans.delete')
                                                                     </button>
                                                                 </div>
                                                             </td>
@@ -279,7 +277,7 @@
                             </div>
                         @else
                             <div class="alert alert-info" id="noAvionsAlert">
-                                Aucun avion enregistré.
+                                @lang('trans.no_planes_registered')
                             </div>
                         @endif
                     </div>
@@ -288,9 +286,9 @@
                 <!-- Information sur le vol -->
                 <div class="card card-primary">
                     <div class="card-header bg-primary text-white">
-                        <h3 class="card-title">Information sur le vol</h3>
+                        <h3 class="card-title">@lang('trans.flight_info')</h3>
                         <button type="button" class="btn btn-sm btn-light float-right" id="showVolFormBtn">
-                            <i class="fas fa-plus"></i> Ajouter un vol
+                            <i class="fas fa-plus"></i> @lang('trans.add_flight')
                         </button>
                     </div>
                     <div class="card-body">
@@ -300,6 +298,13 @@
                             <input type="hidden" name="vol_id" id="vol_id" value="">
                             <input type="hidden" name="demande_autorisation_id" id="demande_autorisation_id"
                                 value="{{ $demandeAutorisation->id }}">
+
+                            <div class="alert alert-info d-flex justify-content-between align-items-center flex-wrap">
+                                <span><i class="fas fa-info-circle"></i> @lang('trans.airport_not_listed_hint')</span>
+                                <button type="button" class="btn btn-sm btn-success" id="addAeroportBtn">
+                                    <i class="fas fa-plus"></i> @lang('trans.add_action')
+                                </button>
+                            </div>
 
                             <div class="row">
                                 <!-- Numéro de vol -->
@@ -332,38 +337,46 @@
                                 <div class="col-lg-6 col-md-5 mb-3">
                                     <div class="form-group">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <label for="aeroport_depart_id" class="form-label">@lang('trans.start_aeroport') <span
+                                            <label class="form-label mb-0">@lang('trans.start_aeroport') <span
                                                     class="text-danger">*</span></label>
-                                            <button type="button" class="btn btn-sm btn-success" id="addAeroportBtn">
-                                                <i class="fas fa-plus"></i> Ajouter
-                                            </button>
+                                            <div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input lieu-type-radio" type="radio"
+                                                        name="type_lieu_depart" id="type_lieu_depart_aeroport"
+                                                        value="aeroport" data-field="depart" checked>
+                                                    <label class="form-check-label" for="type_lieu_depart_aeroport">@lang('trans.airport')</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input lieu-type-radio" type="radio"
+                                                        name="type_lieu_depart" id="type_lieu_depart_piste"
+                                                        value="piste" data-field="depart">
+                                                    <label class="form-check-label" for="type_lieu_depart_piste">@lang('trans.runway')</label>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <select class="form-control select2_aeroports" id="aeroport_depart_id"
-                                            name="aeroport_depart_id" required>
-                                            @foreach ($aeroports as $aeroport)
-                                                <option value="{{ $aeroport->id }}">{{ $aeroport->codeICAO }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        <div class="invalid-feedback" id="aeroport_depart_id_error"></div>
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-3 col-md-3 mb-3">
-                                    <div class="form-group">
-                                        <label for="numero_piste_depart" class="form-label">Piste depart <span
-                                                class="text-danger">*</span></label>
-                                        <input type="text" class="form-control runway-number" id="numero_piste_depart"
-                                            name="numero_piste_depart" maxlength="3"
-                                            pattern="^(0[1-9]|[12][0-9]|3[0-6])[LCR]?$" placeholder="09L" required>
-                                        <div class="invalid-feedback" id="numero_piste_depart_error"></div>
+                                        <div id="aeroport_depart_wrapper">
+                                            <select class="form-control select2_aeroports" id="aeroport_depart_id"
+                                                name="aeroport_depart_id" required>
+                                                @foreach ($aeroports as $aeroport)
+                                                    <option value="{{ $aeroport->id }}">{{ $aeroport->codeICAO }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <div class="invalid-feedback" id="aeroport_depart_id_error"></div>
+                                        </div>
+                                        <div id="piste_depart_wrapper" style="display:none;">
+                                            <input type="text" class="form-control" id="nom_piste_depart"
+                                                name="nom_piste_depart" maxlength="255"
+                                                placeholder="{{ __('trans.runway_name') }}">
+                                            <div class="invalid-feedback" id="nom_piste_depart_error"></div>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <!-- Heure de départ -->
-                                <div class="col-lg-3 col-md-3 mb-3">
+                                <div class="col-lg-6 col-md-3 mb-3">
                                     <div class="form-group">
-                                        <label for="date_depart" class="form-label">Heure départ <span
+                                        <label for="date_depart" class="form-label">@lang('trans.departure_time') <span
                                                 class="text-danger">*</span></label>
                                         <input type="time" class="form-control" id="date_depart" name="date_depart"
                                             required>
@@ -376,34 +389,47 @@
                                 <!-- Aéroport d'arrivée -->
                                 <div class="col-lg-6 col-md-5 mb-3">
                                     <div class="form-group">
-                                        <label for="aeroport_arrivee_id">@lang('trans.end_aeroport')<span
-                                                class="text-danger">*</span></label>
-                                        <select class="form-control select2_aeroports" id="aeroport_arrivee_id"
-                                            name="aeroport_arrivee_id" required>
-                                            @foreach ($aeroports as $aeroport)
-                                                <option value="{{ $aeroport->id }}">{{ $aeroport->codeICAO }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        <div class="invalid-feedback" id="aeroport_arrivee_id_error"></div>
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-3 col-md-3 mb-3">
-                                    <div class="form-group">
-                                        <label for="numero_piste_arrivee" class="form-label">Piste arrivee <span
-                                                class="text-danger">*</span></label>
-                                        <input type="text" class="form-control runway-number"
-                                            id="numero_piste_arrivee" name="numero_piste_arrivee" maxlength="3"
-                                            pattern="^(0[1-9]|[12][0-9]|3[0-6])[LCR]?$" placeholder="27R" required>
-                                        <div class="invalid-feedback" id="numero_piste_arrivee_error"></div>
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <label class="form-label mb-0">@lang('trans.end_aeroport')<span
+                                                    class="text-danger">*</span></label>
+                                            <div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input lieu-type-radio" type="radio"
+                                                        name="type_lieu_arrivee" id="type_lieu_arrivee_aeroport"
+                                                        value="aeroport" data-field="arrivee" checked>
+                                                    <label class="form-check-label" for="type_lieu_arrivee_aeroport">@lang('trans.airport')</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input lieu-type-radio" type="radio"
+                                                        name="type_lieu_arrivee" id="type_lieu_arrivee_piste"
+                                                        value="piste" data-field="arrivee">
+                                                    <label class="form-check-label" for="type_lieu_arrivee_piste">@lang('trans.runway')</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="aeroport_arrivee_wrapper">
+                                            <select class="form-control select2_aeroports" id="aeroport_arrivee_id"
+                                                name="aeroport_arrivee_id" required>
+                                                @foreach ($aeroports as $aeroport)
+                                                    <option value="{{ $aeroport->id }}">{{ $aeroport->codeICAO }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <div class="invalid-feedback" id="aeroport_arrivee_id_error"></div>
+                                        </div>
+                                        <div id="piste_arrivee_wrapper" style="display:none;">
+                                            <input type="text" class="form-control" id="nom_piste_arrivee"
+                                                name="nom_piste_arrivee" maxlength="255"
+                                                placeholder="{{ __('trans.runway_name') }}">
+                                            <div class="invalid-feedback" id="nom_piste_arrivee_error"></div>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <!-- Heure d'arrivée -->
-                                <div class="col-lg-3 col-md-4 mb-3">
+                                <div class="col-lg-6 col-md-4 mb-3">
                                     <div class="form-group">
-                                        <label for="date_arrivee" class="form-label">Heure arrivée <span
+                                        <label for="date_arrivee" class="form-label">@lang('trans.arrival_time') <span
                                                 class="text-danger">*</span></label>
                                         <input type="time" class="form-control" id="date_arrivee" name="date_arrivee"
                                             required>
@@ -417,16 +443,16 @@
                                 <div class="col-md-12">
                                     <div class="card card-secondary">
                                         <div class="card-header">
-                                            <h3 class="card-title">Aéroport(s) intermédiaire(s)</h3>
+                                            <h3 class="card-title">@lang('trans.intermediate_airports')</h3>
                                             <button type="button" class="btn btn-sm btn-success float-right"
                                                 id="addEscaleBtn">
-                                                <i class="fas fa-plus"></i> Ajouter une aéroport intermédiaire
+                                                <i class="fas fa-plus"></i> @lang('trans.add_intermediate_airport')
                                             </button>
                                         </div>
                                         <div class="card-body" id="escalesContainer">
                                             <!-- Les escales seront ajoutées dynamiquement ici -->
                                             <div class="alert alert-info" id="noEscalesAlert">
-                                                Aucune aéroport intermédiaire ajoutée.
+                                                @lang('trans.no_intermediate_airports')
                                             </div>
                                         </div>
                                     </div>
@@ -438,11 +464,11 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <button type="submit" class="btn btn-success float-right" id="submitVolBtn">
-                                        <i class="fas fa-save"></i> <span id="volFormAction">Ajouter</span>
+                                        <i class="fas fa-save"></i> <span id="volFormAction">@lang('trans.add_action')</span>
                                     </button>
                                     <button type="button" class="btn btn-secondary float-right mr-2"
                                         id="cancelVolFormBtn">
-                                        <i class="fas fa-times"></i> Annuler
+                                        <i class="fas fa-times"></i> @lang('trans.cancel')
                                     </button>
                                 </div>
                             </div>
@@ -459,9 +485,7 @@
                                                     <th>@lang('trans.flight_number')</th>
 
                                                     <th>@lang('trans.start_aeroport')</th>
-                                                    <th>Piste depart</th>
                                                     <th>@lang('trans.end_aeroport')</th>
-                                                    <th>Piste arrivee</th>
                                                     <th>@lang('trans.departure_time')</th>
                                                     <th>@lang('trans.arrival_time')</th>
                                                     <th>@lang('trans.nb_passagers')</th>
@@ -474,22 +498,20 @@
                                                     @php
                                                         // Récupérer les escales pour ce vol
                                                         $escales = $volItem->escales()->orderBy('ordre')->get();
-                                                        $routeString = $volItem->aeroportDepart->codeICAO ?? 'N/A';
+                                                        $routeString = optional($volItem->aeroportDepart)->codeICAO ?? $volItem->nom_piste_depart ?? 'N/A';
                                                         if ($escales->isNotEmpty()) {
                                                             foreach ($escales as $escale) {
                                                                 $routeString .= ' → ' . $escale->aeroport->codeICAO;
                                                             }
                                                         }
                                                         $routeString .=
-                                                            ' → ' . ($volItem->aeroportArrivee->codeICAO ?? 'N/A');
+                                                            ' → ' . (optional($volItem->aeroportArrivee)->codeICAO ?? $volItem->nom_piste_arrivee ?? 'N/A');
                                                     @endphp
                                                     <tr id="vol-{{ $volItem->id }}">
                                                         <td>{{ $volItem->numero_vol }}</td>
 
-                                                        <td>{{ $volItem->aeroportDepart->codeICAO ?? 'N/A' }}</td>
-                                                        <td>{{ $volItem->numero_piste_depart ?? 'N/A' }}</td>
-                                                        <td>{{ $volItem->aeroportArrivee->codeICAO ?? 'N/A' }}</td>
-                                                        <td>{{ $volItem->numero_piste_arrivee ?? 'N/A' }}</td>
+                                                        <td>{{ optional($volItem->aeroportDepart)->codeICAO ?? $volItem->nom_piste_depart ?? 'N/A' }}</td>
+                                                        <td>{{ optional($volItem->aeroportArrivee)->codeICAO ?? $volItem->nom_piste_arrivee ?? 'N/A' }}</td>
                                                         <td>{{ date('H:i', strtotime($volItem->date_depart)) }}</td>
                                                         <td>{{ date('H:i', strtotime($volItem->date_arrivee)) }}</td>
                                                         <td>{{ $volItem->nbr_passagers }}</td>
@@ -506,7 +528,7 @@
                                                                         @endif
                                                                     @endforeach
                                                                 @else
-                                                                    Aucune aéroport intermédiaire
+                                                                    @lang('trans.no_intermediate_airports')
                                                                 @endif
                                                             </small>
                                                         </td>
@@ -514,10 +536,10 @@
                                                             <button class="btn btn-warning btn-sm edit-vol"
                                                                 data-id="{{ $volItem->id }}"
                                                                 data-numero_vol="{{ $volItem->numero_vol }}"
-                                                                data-numero_piste_depart="{{ $volItem->numero_piste_depart }}"
-                                                                data-numero_piste_arrivee="{{ $volItem->numero_piste_arrivee }}"
                                                                 data-aeroport_depart_id="{{ $volItem->aeroport_depart_id }}"
                                                                 data-aeroport_arrivee_id="{{ $volItem->aeroport_arrivee_id }}"
+                                                                data-nom_piste_depart="{{ $volItem->nom_piste_depart }}"
+                                                                data-nom_piste_arrivee="{{ $volItem->nom_piste_arrivee }}"
                                                                 data-date_depart="{{ $volItem->date_depart }}"
                                                                 data-date_arrivee="{{ $volItem->date_arrivee }}"
                                                                 data-nbr_passagers="{{ $volItem->nbr_passagers }}"
@@ -539,7 +561,7 @@
                             </div>
                         @else
                             <div class="alert alert-info" id="noVolsAlert">
-                                Aucun vol enregistré.
+                                @lang('trans.no_flights_registered')
                             </div>
                         @endif
                     </div>
@@ -963,11 +985,9 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="poids">@lang('trans.weight_kg')
-                                                <span class="text-danger">*</span>
-                                            </label>
+                                            <label for="poids">@lang('trans.weight_kg')</label>
                                             <input type="number" step="0.01" min="0" class="form-control"
-                                                id="poids" name="poids" required>
+                                                id="poids" name="poids">
                                         </div>
                                     </div>
                                 </div>
@@ -1050,7 +1070,7 @@
                                                                                 <label>@lang('trans.weight_kg')</label>
                                                                                 <input type="number" step="0.01"
                                                                                     class="form-control" name="poids"
-                                                                                    value="{{ $fret->poids }}" required>
+                                                                                    value="{{ $fret->poids }}">
                                                                             </div>
                                                                         </div>
 
@@ -1088,7 +1108,7 @@
                     <!-- Receiving Party Section -->
                     <div class="card card-primary">
                         <div class="card-header bg-primary text-white">
-                            <h3 class="card-title">Renseignements sur le Receiving-party</h3>
+                            <h3 class="card-title">@lang('trans.receiving_party_info')</h3>
                         </div>
                         <div class="card-body">
                             <form method="POST" id="receivingPartyForm" action="{{ url('/user/receiving-parties/') }}"
@@ -1100,14 +1120,14 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="nomcontact"><i class="fa fa-user mr-2"></i>Nom et Prénoms*</label>
+                                            <label for="nomcontact"><i class="fa fa-user mr-2"></i>@lang('trans.full_name')*</label>
                                             <input id="nomcontact" name="nom_contact" class="form-control" required>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="telephonecontact"><i
-                                                    class="fa fa-phone mr-2"></i>Téléphone/WhatsApp*</label>
+                                                    class="fa fa-phone mr-2"></i>@lang('trans.phone_whatsapp')*</label>
                                             <input id="telephonecontact" name="telephone_contact" class="form-control"
                                                 required>
                                         </div>
@@ -1117,7 +1137,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="emailcontact"><i class="fa fa-envelope mr-2"></i>Email</label>
+                                            <label for="emailcontact"><i class="fa fa-envelope mr-2"></i>@lang('trans.email')</label>
                                             <input id="emailcontact" name="email_contact" type="email"
                                                 class="form-control">
                                         </div>
@@ -1125,7 +1145,7 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="fonctioncontact"><i
-                                                    class="fa fa-certificate mr-2"></i>Fonction</label>
+                                                    class="fa fa-certificate mr-2"></i>@lang('trans.function')</label>
                                             <input id="fonctioncontact" name="fonction_contact" class="form-control">
                                         </div>
                                     </div>
@@ -1134,7 +1154,7 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <label for="autrerenseignement">Autres renseignements</label>
+                                            <label for="autrerenseignement">@lang('trans.other_information')</label>
                                             <textarea class="form-control" id="autrerenseignement" name="autres_renseignements" rows="2"></textarea>
                                         </div>
                                     </div>
@@ -1143,8 +1163,7 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <label for="pieceidentite"><i class="fa fa-credit-card mr-2"></i>Pièce
-                                                d'identité</label>
+                                            <label for="pieceidentite"><i class="fa fa-credit-card mr-2"></i>@lang('trans.identity_document')</label>
                                             <input id="pieceidentite" name="piece_identite" type="file"
                                                 class="form-control-file">
                                         </div>
@@ -1154,7 +1173,7 @@
                                 <div class="row">
                                     <div class="col-lg-12">
                                         <button type="submit" class="btn btn-success float-right">
-                                            <i class="fas fa-plus"></i> Ajouter
+                                            <i class="fas fa-plus"></i> @lang('trans.add_action')
                                         </button>
                                     </div>
                                 </div>
@@ -1167,12 +1186,12 @@
                                             <table class="table table-striped table-bordered" id="partyTable">
                                                 <thead>
                                                     <tr>
-                                                        <th>Contact</th>
-                                                        <th>Téléphone</th>
-                                                        <th>Email</th>
-                                                        <th>Fonction</th>
-                                                        <th>Pièce d'identité</th>
-                                                        <th>Actions</th>
+                                                        <th>@lang('trans.contact')</th>
+                                                        <th>@lang('trans.phone')</th>
+                                                        <th>@lang('trans.email')</th>
+                                                        <th>@lang('trans.function')</th>
+                                                        <th>@lang('trans.identity_document')</th>
+                                                        <th>@lang('trans.actions')</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -1215,7 +1234,7 @@
                                                                     <div class="row">
                                                                         <div class="col-md-6">
                                                                             <div class="form-group">
-                                                                                <label>Nom et Prénoms*</label>
+                                                                                <label>@lang('trans.full_name')*</label>
                                                                                 <input type="text" class="form-control"
                                                                                     name="nom_contact"
                                                                                     value="{{ $party->nom_contact }}"
@@ -1224,7 +1243,7 @@
                                                                         </div>
                                                                         <div class="col-md-6">
                                                                             <div class="form-group">
-                                                                                <label>Téléphone*</label>
+                                                                                <label>@lang('trans.phone_whatsapp')*</label>
                                                                                 <input type="text" class="form-control"
                                                                                     name="telephone_contact"
                                                                                     value="{{ $party->telephone_contact }}"
@@ -1235,7 +1254,7 @@
                                                                     <div class="row">
                                                                         <div class="col-md-6">
                                                                             <div class="form-group">
-                                                                                <label>Email</label>
+                                                                                <label>@lang('trans.email')</label>
                                                                                 <input type="email" class="form-control"
                                                                                     name="email_contact"
                                                                                     value="{{ $party->email_contact }}">
@@ -1243,7 +1262,7 @@
                                                                         </div>
                                                                         <div class="col-md-6">
                                                                             <div class="form-group">
-                                                                                <label>Fonction</label>
+                                                                                <label>@lang('trans.function')</label>
                                                                                 <input type="text" class="form-control"
                                                                                     name="fonction_contact"
                                                                                     value="{{ $party->fonction_contact }}">
@@ -1253,7 +1272,7 @@
                                                                     <div class="row">
                                                                         <div class="col-md-12">
                                                                             <div class="form-group">
-                                                                                <label>Autres renseignements</label>
+                                                                                <label>@lang('trans.other_information')</label>
                                                                                 <textarea class="form-control" name="autres_renseignements" rows="2">{{ $party->autres_renseignements }}</textarea>
                                                                             </div>
                                                                         </div>
@@ -1261,10 +1280,8 @@
                                                                     <div class="row">
                                                                         <div class="col-md-12">
                                                                             <div class="form-group">
-                                                                                <label>Pièce d'identité (Laisser vide pour
-                                                                                    ne
-                                                                                    pas
-                                                                                    changer)</label>
+                                                                                <label>@lang('trans.identity_document')
+                                                                                    @lang('trans.keep_current_file_hint')</label>
                                                                                 <input type="file"
                                                                                     class="form-control-file"
                                                                                     name="piece_identite">
@@ -1273,12 +1290,11 @@
                                                                     </div>
                                                                     <button type="submit"
                                                                         class="btn btn-primary btn-sm update-party"
-                                                                        data-id="{{ $party->id }}">Mettre à
-                                                                        jour</button>
+                                                                        data-id="{{ $party->id }}">@lang('trans.update')</button>
                                                                     <button type="button"
                                                                         class="btn btn-secondary btn-sm cancel-edit"
                                                                         data-id="{{ $party->id }}"
-                                                                        data-type="party">Annuler</button>
+                                                                        data-type="party">@lang('trans.cancel')</button>
                                                                 </form>
                                                             </td>
                                                         </tr>
@@ -1512,7 +1528,7 @@
 
                 <div class="card card-primary">
                     <div class="card-header bg-primary text-white">
-                        <h3 class="card-title">Documents</h3>
+                        <h3 class="card-title">@lang('trans.documents')</h3>
                     </div>
                     <div class="card-body">
                         <form method="POST" id="documentForm" action="{{ url('/user/documents') }}"
@@ -1539,7 +1555,7 @@
                                                     <strong>{{ LaravelLocalization::getCurrentLocale() == 'fr' ? $requiredDoc->nom_fr : $requiredDoc->nom_en }}</strong>
 
                                                     @if ($existingDoc)
-                                                        <span class="badge badge-success ml-2">Document existant</span>
+                                                        <span class="badge badge-success ml-2">@lang('trans.existing_document')</span>
                                                     @endif
 
                                                     <div class="input-group">
@@ -1554,7 +1570,7 @@
                                                         @endif
                                                     </div>
                                                     <small class="form-text text-muted">
-                                                        Formats acceptés: PDF uniquement (max 10MB)
+                                                        @lang('trans.pdf_only_max_size')
                                                     </small>
                                                 </li>
                                             @endforeach
@@ -1571,7 +1587,7 @@
                                     </div>
 
                                     <button id="uploadBtn" type="submit" class="btn btn-success mt-4 float-right">
-                                        <i class="fas fa-upload"></i> <span id="uploadBtnText">Uploader</span>
+                                        <i class="fas fa-upload"></i> <span id="uploadBtnText">@lang('trans.upload')</span>
                                     </button>
                                 </div>
                             </div>
@@ -1584,11 +1600,11 @@
                                         <table class="table table-striped" id="documentsTable">
                                             <thead>
                                                 <tr>
-                                                    <th>Type</th>
-                                                    <th>Document</th>
-                                                    <th>Statut</th>
-                                                    <th>Dernière modification</th>
-                                                    <th>Actions</th>
+                                                    <th>@lang('trans.type')</th>
+                                                    <th>@lang('trans.document')</th>
+                                                    <th>@lang('trans.status')</th>
+                                                    <th>@lang('trans.last_modified')</th>
+                                                    <th>@lang('trans.actions')</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -1598,13 +1614,13 @@
                                                             {{ LaravelLocalization::getCurrentLocale() == 'fr' ? optional($document->typeDocument)->nom_fr : optional($document->typeDocument)->nom_en }}
                                                         </td>
                                                         <td>
-                                                            <a href="{{ asset('/uploads/documents/' . $document->url) }}"
+                                                            <a href="{{ $document->file_url }}"
                                                                 target="_blank" class="btn btn-sm btn-primary">
-                                                                <i class="fas fa-eye"></i> Voir
+                                                                <i class="fas fa-eye"></i> @lang('trans.view')
                                                             </a>
                                                         </td>
                                                         <td>
-                                                            <span class="badge badge-success">Uploadé</span>
+                                                            <span class="badge badge-success">@lang('trans.uploaded_status')</span>
                                                         </td>
                                                         <td>
                                                             {{ $document->updated_at->format('d/m/Y H:i') }}
@@ -1614,7 +1630,7 @@
                                                                 <button class="btn btn-sm btn-info replace-document"
                                                                     data-id="{{ $document->id }}"
                                                                     data-type="{{ optional($document->typeDocument)->nom_fr }}">
-                                                                    <i class="fas fa-sync"></i> Remplacer
+                                                                    <i class="fas fa-sync"></i> @lang('trans.replace')
                                                                 </button>
                                                                 <button class="btn btn-sm btn-danger delete-document"
                                                                     data-id="{{ $document->id }}">
@@ -1631,7 +1647,7 @@
                             </div>
                         @else
                             <div class="alert alert-info mt-3">
-                                <i class="fas fa-info-circle"></i> Aucun document n'a été uploadé pour cette demande.
+                                <i class="fas fa-info-circle"></i> @lang('trans.no_documents_uploaded')
                             </div>
                         @endif
                     </div>
@@ -1642,27 +1658,27 @@
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title">Remplacer le document</h5>
+                                <h5 class="modal-title">@lang('trans.replace_document')</h5>
                                 <button type="button" class="close" data-dismiss="modal">
                                     <span>&times;</span>
                                 </button>
                             </div>
                             <div class="modal-body">
-                                <p>Type de document: <strong id="replace-doc-type"></strong></p>
+                                <p>@lang('trans.document_type'): <strong id="replace-doc-type"></strong></p>
                                 <form id="replaceDocumentForm" enctype="multipart/form-data">
                                     @csrf
                                     @method('PUT')
                                     <div class="form-group">
-                                        <label>Nouveau document (PDF uniquement)</label>
+                                        <label>@lang('trans.new_document')</label>
                                         <input type="file" class="form-control" id="replace_piece" name="piece"
                                             accept="application/pdf" required>
                                     </div>
                                 </form>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('trans.cancel')</button>
                                 <button type="button" class="btn btn-primary" id="confirmReplace">
-                                    <i class="fas fa-sync"></i> Remplacer
+                                    <i class="fas fa-sync"></i> @lang('trans.replace')
                                 </button>
                             </div>
                         </div>
@@ -1679,7 +1695,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addAeroportModalLabel">Add New Aeroport</h5>
+                    <h5 class="modal-title" id="addAeroportModalLabel">@lang('trans.add_new_airport')</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -1690,20 +1706,20 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="nom">Nom Aeroport</label>
+                                    <label for="nom">@lang('trans.airport_name')</label>
                                     <input type="text" class="form-control" id="nom" name="nom" required>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="codeIATA">IATA Code</label>
+                                    <label for="codeIATA">@lang('trans.iata_code')</label>
                                     <input type="text" class="form-control" id="codeIATA" name="codeIATA"
                                         maxlength="3">
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="codeICAO">ICAO Code</label>
+                                    <label for="codeICAO">@lang('trans.icao_code')</label>
                                     <input type="text" class="form-control" id="codeICAO" name="codeICAO"
                                         maxlength="4">
                                 </div>
@@ -1713,9 +1729,9 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="pays_id">Country</label>
+                                    <label for="pays_id">@lang('trans.country')</label>
                                     <select class="form-control" id="pays_id" name="pays_id" required>
-                                        <option value="">Select Country</option>
+                                        <option value="">@lang('trans.select_country')</option>
                                         @foreach ($pays as $pay)
                                             <option value="{{ $pay->id }}">{{ $pay->nom }}
                                                 ({{ $pay->code }})
@@ -1726,7 +1742,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="ville">City</label>
+                                    <label for="ville">@lang('trans.city')</label>
                                     <input type="text" class="form-control" id="ville" name="ville">
                                 </div>
                             </div>
@@ -1735,14 +1751,14 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="latitude">Latitude</label>
+                                    <label for="latitude">@lang('trans.latitude')</label>
                                     <input type="number" step="any" class="form-control" id="latitude"
                                         name="latitude">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="longitude">Longitude</label>
+                                    <label for="longitude">@lang('trans.longitude')</label>
                                     <input type="number" step="any" class="form-control" id="longitude"
                                         name="longitude">
                                 </div>
@@ -1750,8 +1766,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Aeroport</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('trans.cancel')</button>
+                        <button type="submit" class="btn btn-primary">@lang('trans.save_airport')</button>
                     </div>
                 </form>
             </div>
@@ -1763,38 +1779,38 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Nouveau Opérateur</h5>
+                    <h5 class="modal-title">@lang('trans.new_operator')</h5>
                     <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="companyForm">
                         @csrf
                         <div class="mb-3">
-                            <label for="nom" class="form-label">Nom <span class="text-danger">*</span></label>
+                            <label for="nom" class="form-label">@lang('trans.name') <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="nom_entreprise" name="nom_entreprise"
                                 required>
                         </div>
                         <div class="mb-3">
-                            <label for="code" class="form-label">Code <span class="text-danger">*</span></label>
+                            <label for="code" class="form-label">@lang('trans.code') <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="code" name="code" required>
                         </div>
                         <div class="form-group">
-                            <label for="email">Email</label>
+                            <label for="email">@lang('trans.email')</label>
                             <input type="email" class="form-control" id="email" name="email">
                         </div>
                         <div class="form-group">
-                            <label for="telephone">Téléphone</label>
+                            <label for="telephone">@lang('trans.phone')</label>
                             <input type="text" class="form-control" id="telephone" name="telephone">
                         </div>
                         <div class="form-group">
-                            <label for="adresse">Adresse</label>
+                            <label for="adresse">@lang('trans.address')</label>
                             <input type="text" class="form-control" id="adresse" name="adresse">
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
-                    <button type="button" class="btn btn-primary" id="saveCompanyBtn">Enregistrer</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('trans.close')</button>
+                    <button type="button" class="btn btn-primary" id="saveCompanyBtn">@lang('trans.save')</button>
                 </div>
             </div>
         </div>
@@ -1804,31 +1820,31 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Nouveau Type d'Avion</h5>
+                    <h5 class="modal-title">@lang('trans.new_aircraft_type')</h5>
                     <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="typeAvionForm">
                         @csrf
                         <div class="mb-3">
-                            <label for="code" class="form-label">Code <span class="text-danger">*</span></label>
+                            <label for="code" class="form-label">@lang('trans.code') <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="code_type" name="code" required>
                         </div>
                         <div class="mb-3">
-                            <label for="capacite" class="form-label">Capacité (passagers)</label>
+                            <label for="capacite" class="form-label">@lang('trans.passenger_capacity')</label>
                             <input type="number" class="form-control" id="capacite" name="capacite"
                                 min="0" value="0">
                         </div>
                         <div class="mb-3">
-                            <label for="charge_max" class="form-label">Charge maximale (kg)</label>
+                            <label for="charge_max" class="form-label">@lang('trans.max_load_kg')</label>
                             <input type="number" class="form-control" id="charge_max" name="charge_max"
                                 min="0" value="0">
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
-                    <button type="button" class="btn btn-primary" id="saveTypeAvionBtn">Enregistrer</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('trans.close')</button>
+                    <button type="button" class="btn btn-primary" id="saveTypeAvionBtn">@lang('trans.save')</button>
                 </div>
             </div>
         </div>
@@ -1863,7 +1879,7 @@
                 // Show loading state
                 var submitButton = $(this).find('button[type="submit"]');
                 submitButton.prop('disabled', true).html(
-                    '<i class="fas fa-spinner fa-spin"></i> Saving...');
+                    '<i class="fas fa-spinner fa-spin"></i> ' + @json(__('trans.saving')));
 
                 // AJAX request
                 $.ajax({
@@ -1875,7 +1891,7 @@
                         $('#addAeroportModal').modal('hide');
 
                         // Show success message
-                        toastr.success('Aeroport added successfully!');
+                        toastr.success(@json(__('trans.airport_added_success')));
 
                         // Reset form
                         $('#addAeroportForm')[0].reset();
@@ -1890,7 +1906,7 @@
                     },
                     error: function(xhr) {
                         // Show error message
-                        var errorMessage = xhr.responseJSON.message || 'An error occurred';
+                        var errorMessage = xhr.responseJSON.message || @json(__('trans.error_occurred'));
                         toastr.error(errorMessage);
 
                         // Highlight error fields
@@ -1904,7 +1920,7 @@
                     },
                     complete: function() {
                         // Reset button state
-                        submitButton.prop('disabled', false).html('Save Aeroport');
+                        submitButton.prop('disabled', false).html(@json(__('trans.save_airport')));
                     }
                 });
             });
@@ -1973,7 +1989,7 @@
                 $('#avionsTableContainer, #noAvionsAlert').hide();
                 $('#showAvionFormBtn').hide();
                 $('#avion_id').val(''); // Reset l'ID pour une nouvelle création
-                $('#formActionText').text('Ajouter');
+                $('#formActionText').text(@json(__('trans.add_action')));
                 $('#avionForm')[0].reset(); // Reset le formulaire
                 $('.invalid-feedback').text(''); // Effacer les messages d'erreur
                 $('.is-invalid').removeClass('is-invalid'); // Enlever les classes d'erreur
@@ -2123,7 +2139,7 @@
                 const escaleId = isEditMode ? escaleData.id : '';
 
                 // Construire les options des aéroports
-                let options = '<option value="">Sélectionnez...</option>';
+                let options = '<option value="">{{ __('trans.select_placeholder') }}</option>';
                 if (typeof aeroports !== 'undefined') {
                     aeroports.forEach(aeroport => {
                         const selected = isEditMode && aeroportId == aeroport.id ? 'selected' : '';
@@ -2136,7 +2152,7 @@
             <div class="row escale-row" id="escale-row-${counter}" data-escale-id="${escaleId}">
                 <div class="col-md-4">
                     <div class="form-group">
-                        <label for="escale_aeroport_${counter}">Aéroport d'escale</label>
+                        <label for="escale_aeroport_${counter}">{{ __('trans.aeroport') }}</label>
                         <select class="form-control select2 escale-aeroport" 
                                 id="escale_aeroport_${counter}" 
                                 name="escales[${counter}][aeroport_id]"
@@ -2147,7 +2163,7 @@
                 </div>
                 <div class="col-md-3">
                     <div class="form-group">
-                        <label for="escale_arrivee_${counter}">Heure arrivée</label>
+                        <label for="escale_arrivee_${counter}">{{ __('trans.arrival_time') }}</label>
                         <input type="time" class="form-control escale-arrivee" 
                                id="escale_arrivee_${counter}" 
                                name="escales[${counter}][date_arrivee]"
@@ -2156,7 +2172,7 @@
                 </div>
                 <div class="col-md-3">
                     <div class="form-group">
-                        <label for="escale_depart_${counter}">Heure départ</label>
+                        <label for="escale_depart_${counter}">{{ __('trans.departure_time') }}</label>
                         <input type="time" class="form-control escale-depart" 
                                id="escale_depart_${counter}" 
                                name="escales[${counter}][date_depart]"
@@ -2267,7 +2283,7 @@
                 let previousTime = $('#date_depart').val();
 
                 if (!previousTime) {
-                    toastr.error('Veuillez d\'abord remplir l\'heure de départ');
+                    toastr.error(@json(__('trans.fill_departure_time_first')));
                     return false;
                 }
 
@@ -2278,13 +2294,13 @@
                     const aeroport = $(this).find('.escale-aeroport').val();
 
                     if (!aeroport) {
-                        toastr.error('Veuillez sélectionner un aéroport pour toutes les escales');
+                        toastr.error(@json(__('trans.select_airport_for_stopovers')));
                         isValid = false;
                         return false;
                     }
 
                     if (!arrivee || !depart) {
-                        toastr.error('Veuillez remplir toutes les heures des escales');
+                        toastr.error(@json(__('trans.fill_all_stopover_times')));
                         isValid = false;
                         return false;
                     }
@@ -2314,16 +2330,46 @@
                 return isValid;
             }
 
+            // Bascule Aéroport / Piste pour le départ et l'arrivée
+            function setLieuMode(field, mode) {
+                const aeroportWrapper = $('#aeroport_' + field + '_wrapper');
+                const pisteWrapper = $('#piste_' + field + '_wrapper');
+                const aeroportSelect = $('#aeroport_' + field + '_id');
+                const nomPisteInput = $('#nom_piste_' + field);
+
+                if (mode === 'piste') {
+                    aeroportWrapper.hide();
+                    pisteWrapper.show();
+                    aeroportSelect.prop('required', false).val(null).trigger('change');
+                    nomPisteInput.prop('required', true);
+                } else {
+                    pisteWrapper.hide();
+                    aeroportWrapper.show();
+                    aeroportSelect.prop('required', true);
+                    nomPisteInput.prop('required', false).val('');
+                }
+            }
+
+            $(document).on('change', '.lieu-type-radio', function() {
+                setLieuMode($(this).data('field'), $(this).val());
+            });
+
             // Afficher le formulaire quand on clique sur "Ajouter un vol"
+
             $('#showVolFormBtn').click(function() {
                 $('#volForm').show();
                 $('#volsTableContainer, #noVolsAlert').hide();
                 $('#showVolFormBtn').hide();
                 $('#vol_id').val('');
-                $('#volFormAction').text('Ajouter');
+                $('#volFormAction').text(@json(__('trans.add_action')));
                 $('#volForm')[0].reset();
                 $('.invalid-feedback').text('');
                 $('.is-invalid').removeClass('is-invalid');
+
+                // Réinitialiser le choix Aéroport/Piste
+                $('#type_lieu_depart_aeroport, #type_lieu_arrivee_aeroport').prop('checked', true);
+                setLieuMode('depart', 'aeroport');
+                setLieuMode('arrivee', 'aeroport');
 
                 // Réinitialiser les escales
                 $('#escalesContainer').empty();
@@ -2349,10 +2395,31 @@
                 // Remplir le formulaire
                 $('#vol_id').val(volId);
                 $('#numero_vol').val($(this).data('numero_vol'));
-                $('#numero_piste_depart').val($(this).data('numero_piste_depart'));
-                $('#numero_piste_arrivee').val($(this).data('numero_piste_arrivee'));
-                $('#aeroport_depart_id').val($(this).data('aeroport_depart_id')).trigger('change');
-                $('#aeroport_arrivee_id').val($(this).data('aeroport_arrivee_id')).trigger('change');
+
+                // Départ : Aéroport ou Piste
+                const departAeroportId = $(this).data('aeroport_depart_id');
+                if (departAeroportId) {
+                    $('#type_lieu_depart_aeroport').prop('checked', true);
+                    setLieuMode('depart', 'aeroport');
+                    $('#aeroport_depart_id').val(departAeroportId).trigger('change');
+                } else {
+                    $('#type_lieu_depart_piste').prop('checked', true);
+                    setLieuMode('depart', 'piste');
+                    $('#nom_piste_depart').val($(this).data('nom_piste_depart'));
+                }
+
+                // Arrivée : Aéroport ou Piste
+                const arriveeAeroportId = $(this).data('aeroport_arrivee_id');
+                if (arriveeAeroportId) {
+                    $('#type_lieu_arrivee_aeroport').prop('checked', true);
+                    setLieuMode('arrivee', 'aeroport');
+                    $('#aeroport_arrivee_id').val(arriveeAeroportId).trigger('change');
+                } else {
+                    $('#type_lieu_arrivee_piste').prop('checked', true);
+                    setLieuMode('arrivee', 'piste');
+                    $('#nom_piste_arrivee').val($(this).data('nom_piste_arrivee'));
+                }
+
                 $('#date_depart').val(formatTime($(this).data('date_depart')));
                 $('#date_arrivee').val(formatTime($(this).data('date_arrivee')));
                 $('#nbr_passagers').val($(this).data('nbr_passagers'));
@@ -2374,17 +2441,12 @@
                 $('#volForm').show();
                 $('#volsTableContainer, #noVolsAlert').hide();
                 $('#showVolFormBtn').hide();
-                $('#volFormAction').text('Mettre à jour');
+                $('#volFormAction').text(@json(__('trans.update')));
 
                 // Scroller vers le formulaire
                 $('html, body').animate({
                     scrollTop: $('#volForm').offset().top
                 }, 500);
-            });
-
-            // Après soumission du formulaire
-            $(document).on('input', '.runway-number', function() {
-                this.value = this.value.toUpperCase();
             });
 
             $('#volForm').submit(function(e) {
@@ -3219,10 +3281,10 @@
                 },
                 language: {
                     noResults: function() {
-                        return "Aucun résultat";
+                        return @json(__('trans.no_results'));
                     },
                     searching: function() {
-                        return "Recherche...";
+                        return @json(__('trans.searching'));
                     }
                 }
             }).on('change', function() {
@@ -3235,7 +3297,7 @@
                 theme: 'bootstrap4',
                 width: '100%',
                 placeholder: function() {
-                    return $(this).data('placeholder') || 'Sélectionnez...';
+                    return $(this).data('placeholder') || @json(__('trans.select_placeholder'));
                 }
             }).on('change', function() {
                 console.log('Select2 single change event');

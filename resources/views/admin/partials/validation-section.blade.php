@@ -40,29 +40,21 @@
                                                 @break
                                                 
                                             @case('depart')
-                                                {{ $item->aeroportDepart->codeICAO ?? 'N/A' }}
+                                                {{ optional($item->aeroportDepart)->codeICAO ?? $item->nom_piste_depart ?? 'N/A' }}
                                                 @break
 
-                                            @case('piste_depart')
-                                                {{ $item->numero_piste_depart ?? 'N/A' }}
-                                                @break
-                                                
                                             @case('arrivee')
-                                                {{ $item->aeroportArrivee->codeICAO ?? 'N/A' }}
+                                                {{ optional($item->aeroportArrivee)->codeICAO ?? $item->nom_piste_arrivee ?? 'N/A' }}
                                                 @break
 
-                                            @case('piste_arrivee')
-                                                {{ $item->numero_piste_arrivee ?? 'N/A' }}
-                                                @break
-                                                
                                             @case('itineraire')
                                                 @php
                                                     $escales = $item->escales()->orderBy('ordre')->get();
-                                                    $route = $item->aeroportDepart->codeICAO ?? 'N/A';
+                                                    $route = optional($item->aeroportDepart)->codeICAO ?? $item->nom_piste_depart ?? 'N/A';
                                                     foreach($escales as $escale) {
                                                         $route .= ' → ' . $escale->aeroport->codeICAO;
                                                     }
-                                                    $route .= ' → ' . ($item->aeroportArrivee->codeICAO ?? 'N/A');
+                                                    $route .= ' → ' . (optional($item->aeroportArrivee)->codeICAO ?? $item->nom_piste_arrivee ?? 'N/A');
                                                 @endphp
                                                 <small>{{ $route }}</small>
                                                 @break
@@ -80,11 +72,14 @@
                                             @case('piece_identite')
                                             @case('document')
                                                 @php
+                                                    $fileUrl = $key === 'document'
+                                                        ? ($item->url ? $item->file_url : null)
+                                                        : asset('/uploads/' . ($key === 'piece_identite' ? $item->piece_identite_path : $item->justificatif));
                                                     $path = $key === 'document' ? $item->url : ($key === 'piece_identite' ? $item->piece_identite_path : $item->justificatif);
                                                 @endphp
                                                 @if($path)
-                                                    <a href="{{ asset('/uploads/' . $path) }}" 
-                                                       target="_blank" 
+                                                    <a href="{{ $fileUrl }}"
+                                                       target="_blank"
                                                        class="btn btn-sm btn-primary">
                                                         <i class="fas fa-eye"></i>
                                                     </a>

@@ -22,7 +22,7 @@
 
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header">Paiement</div>
+                    <div class="card-header">@lang('trans.payment')</div>
                     <div class="card-body">
                         <!-- Formulaire -->
                         <form action="{{ route('update-state', $paiement->demande_autorisation_id) }}" method="POST"
@@ -33,24 +33,24 @@
                             <input type="hidden" name="action" value="compagnie_payer">
                             <input type="hidden" name="is_approved" value="1">
                             <div class="mb-3">
-                                <label class="form-label">Date paiement</label>
+                                <label class="form-label">@lang('trans.payment_date')</label>
                                 <input type="date" name="date_paiement" class="form-control"
                                     value="{{ $paiement->date_paiement }}" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">@lang('trans.method')</label>
                                 <select name="methode" id="methode" class="form-control">
-                                    <option value="">-- Select Payment Method --</option>
-                                    <option value="credit_card">Credit Card</option>
-                                    <option value="paypal">PayPal</option>
-                                    <option value="bank_transfer">Bank Transfer</option>
-                                    <option value="cash">Cash</option>
-                                    <option value="check">Check</option>
-                                    <option value="mobile_payment">Mobile Payment (Apple Pay/Google Pay)</option>
-                                    <option value="cryptocurrency">Cryptocurrency</option>
-                                    <option value="direct_debit">Direct Debit</option>
-                                    <option value="wire_transfer">Wire Transfer</option>
-                                    <option value="other">Other</option>
+                                    <option value="">@lang('trans.select_payment_method')</option>
+                                    <option value="credit_card">@lang('trans.credit_card')</option>
+                                    <option value="paypal">@lang('trans.paypal')</option>
+                                    <option value="bank_transfer">@lang('trans.bank_transfer')</option>
+                                    <option value="cash">@lang('trans.cash')</option>
+                                    <option value="check">@lang('trans.check')</option>
+                                    <option value="mobile_payment">@lang('trans.mobile_payment')</option>
+                                    <option value="cryptocurrency">@lang('trans.cryptocurrency')</option>
+                                    <option value="direct_debit">@lang('trans.direct_debit')</option>
+                                    <option value="wire_transfer">@lang('trans.wire_transfer')</option>
+                                    <option value="other">@lang('trans.other')</option>
                                 </select>
                             </div>
 
@@ -59,7 +59,7 @@
                                 <input type="file" name="justificatif" class="form-control" required>
                             </div>
 
-                            <button type="submit" class="btn btn-success">Enregistrer</button>
+                            <button type="submit" class="btn btn-success">@lang('trans.save')</button>
                         </form>
                     </div>
                 </div>

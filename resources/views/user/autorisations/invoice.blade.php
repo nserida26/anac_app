@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Facture {{ $paiement->id }} / {{ date('Y') }}</title>
+    <title>@lang('trans.invoice') {{ $paiement->id }} / {{ date('Y') }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -197,7 +197,7 @@
         </div>
     </div>
 
-    <button class="print-button" onclick="window.print()">Imprimer la Facture</button>
+    <button class="print-button" onclick="window.print()">@lang('trans.print_invoice')</button>
 </body>
 
 </html>

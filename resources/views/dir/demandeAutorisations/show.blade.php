@@ -339,9 +339,7 @@
                                                 <th>@lang('trans.flight_number')</th>
 
                                                 <th>@lang('trans.start_aeroport')</th>
-                                                <th>Piste depart</th>
                                                 <th>@lang('trans.end_aeroport')</th>
-                                                <th>Piste arrivee</th>
                                                 <th>@lang('trans.departure_time')</th>
                                                 <th>@lang('trans.arrival_time')</th>
                                                 <th>@lang('trans.nb_passagers')</th>
@@ -358,21 +356,19 @@
                                             @php
                                             // Récupérer les escales pour ce vol
                                             $escales = $volItem->escales()->orderBy('ordre')->get();
-                                            $routeString = $volItem->aeroportDepart->codeICAO ?? 'N/A';
+                                            $routeString = optional($volItem->aeroportDepart)->codeICAO ?? $volItem->nom_piste_depart ?? 'N/A';
                                             if ($escales->isNotEmpty()) {
                                             foreach ($escales as $escale) {
                                             $routeString .= ' → ' . $escale->aeroport->codeICAO;
                                             }
                                             }
-                                            $routeString .= ' → ' . ($volItem->aeroportArrivee->codeICAO ?? 'N/A');
+                                            $routeString .= ' → ' . (optional($volItem->aeroportArrivee)->codeICAO ?? $volItem->nom_piste_arrivee ?? 'N/A');
                                             @endphp
                                             <tr id="vol-{{ $volItem->id }}">
                                                 <td>{{ $volItem->numero_vol }}</td>
 
-                                                <td>{{ $volItem->aeroportDepart->codeICAO ?? 'N/A' }}</td>
-                                                <td>{{ $volItem->numero_piste_depart ?? 'N/A' }}</td>
-                                                <td>{{ $volItem->aeroportArrivee->codeICAO ?? 'N/A' }}</td>
-                                                <td>{{ $volItem->numero_piste_arrivee ?? 'N/A' }}</td>
+                                                <td>{{ optional($volItem->aeroportDepart)->codeICAO ?? $volItem->nom_piste_depart ?? 'N/A' }}</td>
+                                                <td>{{ optional($volItem->aeroportArrivee)->codeICAO ?? $volItem->nom_piste_arrivee ?? 'N/A' }}</td>
                                                 <td>{{ date('H:i', strtotime($volItem->date_depart)) }}</td>
                                                 <td>{{ date('H:i', strtotime($volItem->date_arrivee)) }}</td>
                                                 <td>{{ $volItem->nbr_passagers }}</td>
@@ -899,7 +895,7 @@
                                                     {{ LaravelLocalization::getCurrentLocale() == 'fr' ? optional($document->typeDocument)->nom_fr : optional($document->typeDocument)->nom_en }}
                                                 </td>
                                                 <td>
-                                                    <a href="{{ asset('/uploads/' . $document->url) }}" target="_blank"
+                                                    <a href="{{ $document->file_url }}" target="_blank"
                                                         class="btn btn-sm btn-primary">
                                                         <i class="fas fa-eye"></i>
                                                     </a>

@@ -1358,7 +1358,7 @@ public function destroyDeceasedPerson($id)
         $validator = Validator::make($request->all(), [
             'demande_autorisation_id' => 'required|exists:demande_autorisations,id',
             'nature' => 'required|in:normal,dangerous,perishable,living',
-            'poids' => 'required|numeric|min:0',
+            'poids' => 'nullable|numeric|min:0',
             'numero_waybill' => 'nullable|string',
             'expediteur' => 'nullable|string',
             'destinataire' => 'nullable|string',
@@ -1383,7 +1383,7 @@ public function destroyDeceasedPerson($id)
 
         $validator = Validator::make($request->all(), [
             'nature' => 'required|in:normal,dangerous,perishable,living',
-            'poids' => 'required|numeric|min:0',
+            'poids' => 'nullable|numeric|min:0',
             'numero_waybill' => 'nullable|string',
             'expediteur' => 'nullable|string',
             'destinataire' => 'nullable|string',

@@ -107,7 +107,8 @@
                                         @foreach($demandeAutorisations as $demande)
                                             @php
                                                 $etat = $demande->etat_workflow;
-                                                $canView = optional($demande->etatDemande)->compagnie_cree_demande ?? false;
+                                                $canView = (optional($demande->etatDemande)->compagnie_cree_demande ?? false)
+                                                    && (optional($demande->etatDemande)->dta_annoter ?? false);
                                             @endphp
                                             <tr data-etat="{{ $etat }}" data-type="{{ $demande->type->id }}">
                                                 <td data-order="{{ $demande->created_at ? strtotime($demande->created_at) : 0 }}">
@@ -373,5 +374,12 @@
         positionClass: "toast-top-right",
         timeOut: 3000
     };
+
+    @if(session('error'))
+        toastr.error(@json(session('error')));
+    @endif
+    @if(session('success'))
+        toastr.success(@json(session('success')));
+    @endif
 </script>
 @endpush

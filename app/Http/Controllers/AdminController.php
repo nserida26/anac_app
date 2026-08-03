@@ -210,6 +210,12 @@ class AdminController extends Controller
     {
         //
         $demandeAutorisation = DemandeAutorisation::find($id);
+
+        if (!optional($demandeAutorisation->etatDemande)->dta_annoter) {
+            return redirect()->route('demandeAutorisations')
+                ->with('error', "Cette demande n'a pas encore été annotée par la DTA.");
+        }
+
         $vols = $demandeAutorisation->vols;
 
         $equipe_vols = $demandeAutorisation->equipe;

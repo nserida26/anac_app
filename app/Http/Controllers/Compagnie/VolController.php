@@ -31,20 +31,27 @@ public function store(Request $request)
 {
     $validated = $request->validate([
         'numero_vol' => 'nullable|string|max:20',
-        'numero_piste_depart' => ['required', 'string', 'regex:/^(0[1-9]|[12][0-9]|3[0-6])[LCR]?$/i'],
-        'numero_piste_arrivee' => ['required', 'string', 'regex:/^(0[1-9]|[12][0-9]|3[0-6])[LCR]?$/i'],
-        'aeroport_depart_id' => 'required|exists:aeroports,id',
+        'type_lieu_depart' => 'required|in:aeroport,piste',
+        'type_lieu_arrivee' => 'required|in:aeroport,piste',
+        'aeroport_depart_id' => 'required_if:type_lieu_depart,aeroport|nullable|exists:aeroports,id',
+        'nom_piste_depart' => 'required_if:type_lieu_depart,piste|nullable|string|max:255',
+        'nom_piste_arrivee' => 'required_if:type_lieu_arrivee,piste|nullable|string|max:255',
         'aeroport_arrivee_id' => [
-            'required',
+            'required_if:type_lieu_arrivee,aeroport',
+            'nullable',
             'exists:aeroports,id',
             // Validation personnalisée : différent de l'aéroport de départ si pas d'escales
             function ($attribute, $value, $fail) use ($request) {
-                $hasEscales = $request->has('escales') && 
-                              is_array($request->escales) && 
+                if ($request->type_lieu_depart !== 'aeroport' || $request->type_lieu_arrivee !== 'aeroport') {
+                    return;
+                }
+
+                $hasEscales = $request->has('escales') &&
+                              is_array($request->escales) &&
                               count(array_filter($request->escales, function($escale) {
                                   return !empty($escale['aeroport_id']);
                               })) > 0;
-                
+
                 // Si pas d'escales, l'aéroport d'arrivée doit être différent de l'aéroport de départ
                 if (!$hasEscales && $value == $request->aeroport_depart_id) {
                     $fail('L\'aéroport d\'arrivée doit être différent de l\'aéroport de départ lorsqu\'il n\'y a pas d\'escales.');
@@ -64,18 +71,18 @@ public function store(Request $request)
                 // Extraire l'index de l'escale depuis l'attribut (ex: escales.0.aeroport_id)
                 preg_match('/escales\.(\d+)\.aeroport_id/', $attribute, $matches);
                 $currentIndex = isset($matches[1]) ? (int)$matches[1] : null;
-                
+
                 if ($currentIndex === null) return;
-                
+
                 // Pour la première escale, comparer avec l'aéroport de départ
                 if ($currentIndex === 0) {
-                    if ($value == $request->aeroport_depart_id) {
+                    if ($request->type_lieu_depart === 'aeroport' && $value == $request->aeroport_depart_id) {
                         $fail('La première escale doit être différente de l\'aéroport de départ.');
                     }
                 } else {
                     // Pour les escales suivantes, comparer avec l'escale précédente
                     $previousIndex = $currentIndex - 1;
-                    if (isset($request->escales[$previousIndex]['aeroport_id']) && 
+                    if (isset($request->escales[$previousIndex]['aeroport_id']) &&
                         $value == $request->escales[$previousIndex]['aeroport_id']) {
                         $fail('Deux escales consécutives ne peuvent pas avoir le même aéroport.');
                     }
@@ -88,64 +95,64 @@ public function store(Request $request)
             'date_format:H:i'
         ],
     ], [
-        'aeroport_depart_id.required' => 'L\'aéroport de départ est obligatoire.',
-        'aeroport_arrivee_id.required' => 'L\'aéroport d\'arrivée est obligatoire.',
-        'numero_piste_depart.required' => 'Le numéro de piste de départ est obligatoire.',
-        'numero_piste_depart.regex' => 'Le numéro de piste de départ doit être au format international : 01 à 36, avec L, C ou R optionnel (ex: 09L, 27, 36R).',
-        'numero_piste_arrivee.required' => 'Le numéro de piste d\'arrivée est obligatoire.',
-        'numero_piste_arrivee.regex' => 'Le numéro de piste d\'arrivée doit être au format international : 01 à 36, avec L, C ou R optionnel (ex: 09L, 27, 36R).',
+        'aeroport_depart_id.required_if' => 'L\'aéroport de départ est obligatoire.',
+        'aeroport_arrivee_id.required_if' => 'L\'aéroport d\'arrivée est obligatoire.',
+        'nom_piste_depart.required_if' => 'Le nom de la piste de départ est obligatoire.',
+        'nom_piste_arrivee.required_if' => 'Le nom de la piste d\'arrivée est obligatoire.',
         'date_depart.required' => 'La date de départ est obligatoire.',
         'date_arrivee.required' => 'La date d\'arrivée est obligatoire.',
-        
+
     ]);
-    
+
     // Boucle supplémentaire pour vérifier toutes les escales
-    $hasValidEscales = $request->has('escales') && 
-                       is_array($request->escales) && 
+    $hasValidEscales = $request->has('escales') &&
+                       is_array($request->escales) &&
                        count(array_filter($request->escales, function($escale) {
                            return !empty($escale['aeroport_id']);
                        })) > 0;
-    
-    if (!$hasValidEscales) {
-        // Vérification supplémentaire : aéroport d'arrivée != aéroport de départ
-        if ($request->aeroport_depart_id == $request->aeroport_arrivee_id) {
-            return response()->json([
-                'message' => 'Erreur de validation',
-                'errors' => [
-                    'aeroport_arrivee_id' => ['L\'aéroport d\'arrivée doit être différent de l\'aéroport de départ lorsqu\'il n\'y a pas d\'escales.'],
-                ]
-            ], 422);
-        }
-        
-    } else {
-        // Avec escales : vérifier que la dernière escale n'est pas l'aéroport d'arrivée
-        $escales = array_values(array_filter($request->escales, function($escale) {
-            return !empty($escale['aeroport_id']);
-        }));
-        
-        if (count($escales) > 0) {
-            $lastEscale = end($escales);
-            
-            // Vérifier que la dernière escale n'est pas identique à l'aéroport d'arrivée
-            if ($lastEscale['aeroport_id'] == $request->aeroport_arrivee_id) {
+
+    if ($request->type_lieu_depart === 'aeroport' && $request->type_lieu_arrivee === 'aeroport') {
+        if (!$hasValidEscales) {
+            // Vérification supplémentaire : aéroport d'arrivée != aéroport de départ
+            if ($request->aeroport_depart_id == $request->aeroport_arrivee_id) {
                 return response()->json([
                     'message' => 'Erreur de validation',
                     'errors' => [
-                        'aeroport_arrivee_id' => ['L\'aéroport d\'arrivée doit être différent de la dernière escale.'],
+                        'aeroport_arrivee_id' => ['L\'aéroport d\'arrivée doit être différent de l\'aéroport de départ lorsqu\'il n\'y a pas d\'escales.'],
                     ]
                 ], 422);
             }
-        
+
+        } else {
+            // Avec escales : vérifier que la dernière escale n'est pas l'aéroport d'arrivée
+            $escales = array_values(array_filter($request->escales, function($escale) {
+                return !empty($escale['aeroport_id']);
+            }));
+
+            if (count($escales) > 0) {
+                $lastEscale = end($escales);
+
+                // Vérifier que la dernière escale n'est pas identique à l'aéroport d'arrivée
+                if ($lastEscale['aeroport_id'] == $request->aeroport_arrivee_id) {
+                    return response()->json([
+                        'message' => 'Erreur de validation',
+                        'errors' => [
+                            'aeroport_arrivee_id' => ['L\'aéroport d\'arrivée doit être différent de la dernière escale.'],
+                        ]
+                    ], 422);
+                }
+
+            }
         }
     }
-    
+
     // Create the vol
     $vol = Vol::create([
         'numero_vol' => $validated['numero_vol'] ?? null,
-        'numero_piste_depart' => strtoupper($validated['numero_piste_depart']),
-        'numero_piste_arrivee' => strtoupper($validated['numero_piste_arrivee']),
-        'aeroport_depart_id' => $validated['aeroport_depart_id'],
-        'aeroport_arrivee_id' => $validated['aeroport_arrivee_id'],
+        'aeroport_depart_id' => $validated['type_lieu_depart'] === 'aeroport' ? $validated['aeroport_depart_id'] : null,
+        'aeroport_arrivee_id' => $validated['type_lieu_arrivee'] === 'aeroport' ? $validated['aeroport_arrivee_id'] : null,
+        'nom_piste_depart' => $validated['type_lieu_depart'] === 'piste' ? $validated['nom_piste_depart'] : null,
+        'nom_piste_arrivee' => $validated['type_lieu_arrivee'] === 'piste' ? $validated['nom_piste_arrivee'] : null,
         'date_depart' => $validated['date_depart'],
         'date_arrivee' => $validated['date_arrivee'],
         'nbr_passagers' => $validated['nbr_passagers'] ?? null,
@@ -184,20 +191,27 @@ public function update(Request $request, $id)
     
     $validated = $request->validate([
         'numero_vol' => 'nullable|string|max:20',
-        'numero_piste_depart' => ['required', 'string', 'regex:/^(0[1-9]|[12][0-9]|3[0-6])[LCR]?$/i'],
-        'numero_piste_arrivee' => ['required', 'string', 'regex:/^(0[1-9]|[12][0-9]|3[0-6])[LCR]?$/i'],
-        'aeroport_depart_id' => 'required|exists:aeroports,id',
+        'type_lieu_depart' => 'required|in:aeroport,piste',
+        'type_lieu_arrivee' => 'required|in:aeroport,piste',
+        'aeroport_depart_id' => 'required_if:type_lieu_depart,aeroport|nullable|exists:aeroports,id',
+        'nom_piste_depart' => 'required_if:type_lieu_depart,piste|nullable|string|max:255',
+        'nom_piste_arrivee' => 'required_if:type_lieu_arrivee,piste|nullable|string|max:255',
         'aeroport_arrivee_id' => [
-            'required',
+            'required_if:type_lieu_arrivee,aeroport',
+            'nullable',
             'exists:aeroports,id',
             // Validation personnalisée : différent de l'aéroport de départ si pas d'escales
             function ($attribute, $value, $fail) use ($request) {
-                $hasEscales = $request->has('escales') && 
-                              is_array($request->escales) && 
+                if ($request->type_lieu_depart !== 'aeroport' || $request->type_lieu_arrivee !== 'aeroport') {
+                    return;
+                }
+
+                $hasEscales = $request->has('escales') &&
+                              is_array($request->escales) &&
                               count(array_filter($request->escales, function($escale) {
                                   return !empty($escale['aeroport_id']);
                               })) > 0;
-                
+
                 // Si pas d'escales, l'aéroport d'arrivée doit être différent de l'aéroport de départ
                 if (!$hasEscales && $value == $request->aeroport_depart_id) {
                     $fail('L\'aéroport d\'arrivée doit être différent de l\'aéroport de départ lorsqu\'il n\'y a pas d\'escales.');
@@ -218,18 +232,18 @@ public function update(Request $request, $id)
                 // Extraire l'index de l'escale depuis l'attribut (ex: escales.0.aeroport_id)
                 preg_match('/escales\.(\d+)\.aeroport_id/', $attribute, $matches);
                 $currentIndex = isset($matches[1]) ? (int)$matches[1] : null;
-                
+
                 if ($currentIndex === null) return;
-                
+
                 // Pour la première escale, comparer avec l'aéroport de départ
                 if ($currentIndex === 0) {
-                    if ($value == $request->aeroport_depart_id) {
+                    if ($request->type_lieu_depart === 'aeroport' && $value == $request->aeroport_depart_id) {
                         $fail('La première escale doit être différente de l\'aéroport de départ.');
                     }
                 } else {
                     // Pour les escales suivantes, comparer avec l'escale précédente
                     $previousIndex = $currentIndex - 1;
-                    if (isset($request->escales[$previousIndex]['aeroport_id']) && 
+                    if (isset($request->escales[$previousIndex]['aeroport_id']) &&
                         $value == $request->escales[$previousIndex]['aeroport_id']) {
                         $fail('Deux escales consécutives ne peuvent pas avoir le même aéroport.');
                     }
@@ -242,54 +256,53 @@ public function update(Request $request, $id)
             'date_format:H:i'
         ],
     ], [
-        'aeroport_depart_id.required' => 'L\'aéroport de départ est obligatoire.',
-        'aeroport_arrivee_id.required' => 'L\'aéroport d\'arrivée est obligatoire.',
-        'numero_piste_depart.required' => 'Le numéro de piste de départ est obligatoire.',
-        'numero_piste_depart.regex' => 'Le numéro de piste de départ doit être au format international : 01 à 36, avec L, C ou R optionnel (ex: 09L, 27, 36R).',
-        'numero_piste_arrivee.required' => 'Le numéro de piste d\'arrivée est obligatoire.',
-        'numero_piste_arrivee.regex' => 'Le numéro de piste d\'arrivée doit être au format international : 01 à 36, avec L, C ou R optionnel (ex: 09L, 27, 36R).',
+        'aeroport_depart_id.required_if' => 'L\'aéroport de départ est obligatoire.',
+        'aeroport_arrivee_id.required_if' => 'L\'aéroport d\'arrivée est obligatoire.',
+        'nom_piste_depart.required_if' => 'Le nom de la piste de départ est obligatoire.',
+        'nom_piste_arrivee.required_if' => 'Le nom de la piste d\'arrivée est obligatoire.',
         'date_depart.required' => 'La date de départ est obligatoire.',
         'date_arrivee.required' => 'La date d\'arrivée est obligatoire.',
-        
+
     ]);
-    
+
     // Boucle supplémentaire pour vérifier toutes les escales
-    $hasValidEscales = $request->has('escales') && 
-                       is_array($request->escales) && 
+    $hasValidEscales = $request->has('escales') &&
+                       is_array($request->escales) &&
                        count(array_filter($request->escales, function($escale) {
                            return !empty($escale['aeroport_id']);
                        })) > 0;
-    
-    if (!$hasValidEscales) {
-        // Vérification supplémentaire : aéroport d'arrivée != aéroport de départ
-        if ($request->aeroport_depart_id == $request->aeroport_arrivee_id) {
-            return response()->json([
-                'message' => 'Erreur de validation',
-                'errors' => [
-                    'aeroport_arrivee_id' => ['L\'aéroport d\'arrivée doit être différent de l\'aéroport de départ lorsqu\'il n\'y a pas d\'escales.'],
-                ]
-            ], 422);
-        }
-        
-    } else {
-        // Avec escales : vérifier que la dernière escale n'est pas l'aéroport d'arrivée
-        $escales = array_values(array_filter($request->escales, function($escale) {
-            return !empty($escale['aeroport_id']);
-        }));
-        
-        if (count($escales) > 0) {
-            $lastEscale = end($escales);
-            
-            // Vérifier que la dernière escale n'est pas identique à l'aéroport d'arrivée
-            if ($lastEscale['aeroport_id'] == $request->aeroport_arrivee_id) {
+
+    if ($request->type_lieu_depart === 'aeroport' && $request->type_lieu_arrivee === 'aeroport') {
+        if (!$hasValidEscales) {
+            // Vérification supplémentaire : aéroport d'arrivée != aéroport de départ
+            if ($request->aeroport_depart_id == $request->aeroport_arrivee_id) {
                 return response()->json([
                     'message' => 'Erreur de validation',
                     'errors' => [
-                        'aeroport_arrivee_id' => ['L\'aéroport d\'arrivée doit être différent de la dernière escale.'],
+                        'aeroport_arrivee_id' => ['L\'aéroport d\'arrivée doit être différent de l\'aéroport de départ lorsqu\'il n\'y a pas d\'escales.'],
                     ]
                 ], 422);
             }
-            
+
+        } else {
+            // Avec escales : vérifier que la dernière escale n'est pas l'aéroport d'arrivée
+            $escales = array_values(array_filter($request->escales, function($escale) {
+                return !empty($escale['aeroport_id']);
+            }));
+
+            if (count($escales) > 0) {
+                $lastEscale = end($escales);
+
+                // Vérifier que la dernière escale n'est pas identique à l'aéroport d'arrivée
+                if ($lastEscale['aeroport_id'] == $request->aeroport_arrivee_id) {
+                    return response()->json([
+                        'message' => 'Erreur de validation',
+                        'errors' => [
+                            'aeroport_arrivee_id' => ['L\'aéroport d\'arrivée doit être différent de la dernière escale.'],
+                        ]
+                    ], 422);
+                }
+
             // Vérifier la cohérence temporelle des escales
             $previousTime = $request->date_depart;
             foreach ($escales as $index => $escale) {
@@ -321,16 +334,17 @@ public function update(Request $request, $id)
                     ]
                 ], 422);
             }
+            }
         }
     }
-    
+
     // Update the vol
     $vol->update([
         'numero_vol' => $validated['numero_vol'],
-        'numero_piste_depart' => strtoupper($validated['numero_piste_depart']),
-        'numero_piste_arrivee' => strtoupper($validated['numero_piste_arrivee']),
-        'aeroport_depart_id' => $validated['aeroport_depart_id'],
-        'aeroport_arrivee_id' => $validated['aeroport_arrivee_id'],
+        'aeroport_depart_id' => $validated['type_lieu_depart'] === 'aeroport' ? $validated['aeroport_depart_id'] : null,
+        'aeroport_arrivee_id' => $validated['type_lieu_arrivee'] === 'aeroport' ? $validated['aeroport_arrivee_id'] : null,
+        'nom_piste_depart' => $validated['type_lieu_depart'] === 'piste' ? $validated['nom_piste_depart'] : null,
+        'nom_piste_arrivee' => $validated['type_lieu_arrivee'] === 'piste' ? $validated['nom_piste_arrivee'] : null,
         'date_depart' => $validated['date_depart'],
         'date_arrivee' => $validated['date_arrivee'],
         'nbr_passagers' => $validated['nbr_passagers'] ?? null,

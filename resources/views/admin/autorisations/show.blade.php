@@ -48,13 +48,13 @@
                         @isset($autorisation)
                             @php
                                 $statusClass = match($autorisation->statut) {
-                                    'validé' => 'success',
-                                    'rejeté' => 'danger',
+                                    'validï¿½' => 'success',
+                                    'rejetï¿½' => 'danger',
                                     default => 'warning'
                                 };
                                 $statusLabel = match($autorisation->statut) {
-                                    'validé' => __('trans.validated'),
-                                    'rejeté' => __('trans.rejected'),
+                                    'validï¿½' => __('trans.validated'),
+                                    'rejetï¿½' => __('trans.rejected'),
                                     default => __('trans.pending')
                                 };
                             @endphp
@@ -79,7 +79,7 @@
                                 $paiement = $demande ? $demande->paiement : null;
                             @endphp
 
-                            <!-- Section 1: Informations Générales de l'Autorisation -->
+                            <!-- Section 1: Informations Gï¿½nï¿½rales de l'Autorisation -->
                             <div class="info-section">
                                 <h4><i class="fas fa-certificate mr-2"></i>@lang('trans.authorization_information')</h4>
                                 <div class="table-responsive">
@@ -202,11 +202,11 @@
                                             </tr>
                                             <tr>
                                                 <th>@lang('trans.departure_airport')</th>
-                                                <td>{{ $vol->aeroportDepart ? $vol->aeroportDepart->nom . ' (' . $vol->aeroportDepart->codeIATA . ')' : '-' }}</td>
+                                                <td>{{ $vol->aeroportDepart ? $vol->aeroportDepart->nom . ' (' . $vol->aeroportDepart->codeIATA . ')' : ($vol->nom_piste_depart ?? '-') }}</td>
                                             </tr>
                                             <tr>
                                                 <th>@lang('trans.arrival_airport')</th>
-                                                <td>{{ $vol->aeroportArrivee ? $vol->aeroportArrivee->nom . ' (' . $vol->aeroportArrivee->codeIATA . ')' : '-' }}</td>
+                                                <td>{{ $vol->aeroportArrivee ? $vol->aeroportArrivee->nom . ' (' . $vol->aeroportArrivee->codeIATA . ')' : ($vol->nom_piste_arrivee ?? '-') }}</td>
                                             </tr>
                                             <tr>
                                                 <th>@lang('trans.departure_date')</th>
@@ -296,7 +296,7 @@
                             </div>
                             @endif
 
-                            <!-- Section 5: Équipage -->
+                            <!-- Section 5: ï¿½quipage -->
                             @if($equipes->isNotEmpty())
                             <div class="info-section">
                                 <h4><i class="fas fa-users mr-2"></i>@lang('trans.crew') ({{ $equipes->count() }})</h4>
@@ -572,7 +572,7 @@
 @push('script')
 <script>
     $(document).ready(function() {
-        // Initialiser les tooltips si nécessaire
+        // Initialiser les tooltips si nï¿½cessaire
         $('[data-toggle="tooltip"]').tooltip();
     });
 </script>

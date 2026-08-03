@@ -30,4 +30,14 @@ class DocumentAutorisation extends Model
     {
         return $this->belongsTo(TypeDocumentAutorisation::class, 'type_document_id');
     }
+
+    /**
+     * Full viewable URL, tolerant of both legacy ('documents/xxx.pdf')
+     * and current (basename-only) values stored in `url`.
+     */
+    public function getFileUrlAttribute()
+    {
+        $path = str_contains($this->url, '/') ? $this->url : 'documents/' . $this->url;
+        return asset('/uploads/' . $path);
+    }
 }
