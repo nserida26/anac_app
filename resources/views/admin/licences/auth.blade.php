@@ -252,68 +252,73 @@
                     </p>
                     <p>
                         Ratings :
-                       @php
-    $typeDetails = [];
-    $groupedQualifications = [];
-@endphp
+                        @php
+                            $typeDetails = [];
+                            $groupedQualifications = [];
+                        @endphp
 
-@if (!empty($qualification_types) && $qualification_types->isNotEmpty())
-    @foreach ($qualification_types as $qualification_type)
-        @php
-            $typeStartDate = Carbon::parse($qualification_type->date_examen);
-            $codeAirCraft = $qualification_type->code;
-            
-            // Calcul de la date d'expiration selon le type de licence
-            if (in_array($demande->typeLicence->id, [31 ,36, 39])) {
-                $typeExpiryDate = $typeStartDate->copy()->addMonths(
-                    $demande->typeLicence->id == 39 ? 12 : 24
-                )->endOfMonth();
-            } else {
-                $typeExpiryDate = $typeStartDate->copy()->addMonths(12)->endOfMonth();
-            }
-            
-            // SUPPRIMÉ: if ($currentDate->lte($typeExpiryDate)) {
-                $expiryFormatted = $typeExpiryDate->format('d-m-Y');
-                
-                // Grouper par codeAirCraft et garder la date d'expiration maximale
-                if (!isset($groupedQualifications[$codeAirCraft]) || 
-                    $typeExpiryDate->gt(Carbon::createFromFormat('d-m-Y', $groupedQualifications[$codeAirCraft]))) {
-                    $groupedQualifications[$codeAirCraft] = $expiryFormatted;
-                }
-            // SUPPRIMÉ: }
-        @endphp
-    @endforeach
+                        @if (!empty($qualification_types) && $qualification_types->isNotEmpty())
+                            @foreach ($qualification_types as $qualification_type)
+                                @php
+                                    $typeStartDate = Carbon::parse($qualification_type->date_examen);
+                                    $codeAirCraft = $qualification_type->code;
 
-    @php
-        $resultStrings = [];
-        
-        // Pour les types de licence 36 et 39, on regroupe tous les codes avec leurs dates
-        if (in_array($demande->typeLicence->id, [36, 39])) {
-            // Pour le type 36 et 39, on peut avoir plusieurs codes avec différentes dates
-            // On les regroupe par date d'expiration
-            $groupedByExpiry = [];
-            foreach ($groupedQualifications as $code => $expiryDate) {
-                if (!isset($groupedByExpiry[$expiryDate])) {
-                    $groupedByExpiry[$expiryDate] = [];
-                }
-                $groupedByExpiry[$expiryDate][] = $code;
-            }
-            
-            foreach ($groupedByExpiry as $expiryDate => $codes) {
-                $resultStrings[] = implode(', ', $codes) . " [{$expiryDate}]";
-            }
-        } else {
-            // Pour les autres types, format "code [date]"
-            foreach ($groupedQualifications as $code => $expiryDate) {
-                $resultStrings[] = "{$code} [{$expiryDate}]";
-            }
+                                    // Calcul de la date d'expiration selon le type de licence
+if (in_array($demande->typeLicence->id, [31, 36, 39])) {
+    $typeExpiryDate = $typeStartDate
+        ->copy()
+        ->addMonths($demande->typeLicence->id == 39 ? 12 : 24)
+        ->endOfMonth();
+} else {
+    $typeExpiryDate = $typeStartDate->copy()->addMonths(12)->endOfMonth();
+}
+
+// SUPPRIMï¿½: if ($currentDate->lte($typeExpiryDate)) {
+$expiryFormatted = $typeExpiryDate->format('d-m-Y');
+
+// Grouper par codeAirCraft et garder la date d'expiration maximale
+                                    if (
+                                        !isset($groupedQualifications[$codeAirCraft]) ||
+                                        $typeExpiryDate->gt(
+                                            Carbon::createFromFormat('d-m-Y', $groupedQualifications[$codeAirCraft]),
+                                        )
+                                    ) {
+                                        $groupedQualifications[$codeAirCraft] = $expiryFormatted;
+                                    }
+                                    // SUPPRIMï¿½: }
+                                @endphp
+                            @endforeach
+
+                            @php
+                                $resultStrings = [];
+
+                                // Pour les types de licence 36 et 39, on regroupe tous les codes avec leurs dates
+                                if (in_array($demande->typeLicence->id, [36, 39])) {
+                                    // Pour le type 36 et 39, on peut avoir plusieurs codes avec diffï¿½rentes dates
+                                    // On les regroupe par date d'expiration
+    $groupedByExpiry = [];
+    foreach ($groupedQualifications as $code => $expiryDate) {
+        if (!isset($groupedByExpiry[$expiryDate])) {
+            $groupedByExpiry[$expiryDate] = [];
         }
-        
-        $typeString = implode('; ', $resultStrings);
-    @endphp
+        $groupedByExpiry[$expiryDate][] = $code;
+    }
 
-    <span>{{ $typeString }}</span>
-@endif
+    foreach ($groupedByExpiry as $expiryDate => $codes) {
+        $resultStrings[] = implode(', ', $codes) . " [{$expiryDate}]";
+    }
+} else {
+    // Pour les autres types, format "code [date]"
+    foreach ($groupedQualifications as $code => $expiryDate) {
+        $resultStrings[] = "{$code} [{$expiryDate}]";
+    }
+}
+
+$typeString = implode('; ', $resultStrings);
+                            @endphp
+
+                            <span>{{ $typeString }}</span>
+                        @endif
                         @php
                             $amtDetails = [];
                         @endphp
@@ -325,10 +330,10 @@
                                     $amtExpiryDate = $amtStartDate->copy()->addMonths(24)->endOfMonth();
                                     $amt = $qualification_amt->amt_display;
                                     $code = $qualification_amt->code;
-                                    // SUPPRIMÉ: if ($currentDate->lte($amtExpiryDate)) {
-                                        $amtExpiryDate = $amtExpiryDate->format('d-m-Y');
-                                        $amtDetails[] = "{$amt} {$code} [{$amtExpiryDate}]";
-                                    // SUPPRIMÉ: }
+                                    // SUPPRIMï¿½: if ($currentDate->lte($amtExpiryDate)) {
+                                    $amtExpiryDate = $amtExpiryDate->format('d-m-Y');
+                                    $amtDetails[] = "{$amt} {$code} [{$amtExpiryDate}]";
+                                    // SUPPRIMï¿½: }
                                 @endphp
                             @endforeach
                             @php
@@ -348,10 +353,10 @@
 
                                     $atc = $qualification_atc->atc_display;
 
-                                    // SUPPRIMÉ: if ($currentDate->lte($atcExpiryDate)) {
-                                        $atcExpiryDate = $atcExpiryDate->format('d-m-Y');
-                                        $atcDetails[] = "{$atc} [{$atcExpiryDate}]";
-                                    // SUPPRIMÉ: }
+                                    // SUPPRIMï¿½: if ($currentDate->lte($atcExpiryDate)) {
+                                    $atcExpiryDate = $atcExpiryDate->format('d-m-Y');
+                                    $atcDetails[] = "{$atc} [{$atcExpiryDate}]";
+                                    // SUPPRIMï¿½: }
                                 @endphp
                             @endforeach
                             @php
@@ -379,113 +384,142 @@
                             @endphp
                             <span> {{ $rpaString }}</span>
                         @endif
-                                                @if (!empty($qualification_ifr) || !empty($qualification_classe))
+                        @if (!empty($qualification_ifr) || $qualification_classe->isNotEmpty())
+
                             @php
                                 $ifrExpiryDate = null;
-
                                 $typeMoteur = '';
 
+                                // Qualification IFR
                                 if (!empty($qualification_ifr)) {
                                     $ifrStartDate = Carbon::parse($qualification_ifr->date_examen);
                                     $ifrExpiryDate = $ifrStartDate->copy()->addMonths(12)->endOfMonth();
-                                    // SUPPRIMÉ: if ($currentDate->gt($ifrExpiryDate)) {
-                                    // SUPPRIMÉ:     $ifrExpiryDate = null; // Ne pas afficher si expirée
-                                    // SUPPRIMÉ: } else {
+
+                                    if ($currentDate->gt($ifrExpiryDate)) {
+                                        $ifrExpiryDate = null;
+                                    } else {
                                         $ifrExpiryDate = $ifrExpiryDate->format('d-m-Y');
-                                    // SUPPRIMÉ: }
-                                }
-                                if (!empty($qualification_classe)) {
-                                    $typeMoteur = $qualification_classe->type_moteur;
+                                    }
                                 }
 
+                                // Plusieurs qualifications de classe
+                                if ($qualification_classe->isNotEmpty()) {
+                                    $typeMoteur = $qualification_classe
+                                        ->pluck('type_moteur')
+                                        ->filter()
+                                        ->unique()
+                                        ->implode('/');
+                                }
                             @endphp
-                            
+
                             <p>
                                 @if (!empty($qualification_ifr) && !empty($typeMoteur))
-                                    IR({{ $typeMoteur }}) @if ($ifrExpiryDate)
+                                    IR({{ $typeMoteur }})
+                                    @if ($ifrExpiryDate)
                                         [{{ $ifrExpiryDate }}]
                                     @endif
                                 @else
                                     @if (!empty($qualification_ifr))
-                                        IR @if ($ifrExpiryDate)
+                                        IR
+                                        @if ($ifrExpiryDate)
                                             [{{ $ifrExpiryDate }}]
                                         @endif
                                     @endif
-                                    @if (!empty($qualification_classe))
+
+                                    @if (!empty($typeMoteur))
                                         {{ $typeMoteur }}
                                     @endif
                                 @endif
                             </p>
+
                         @endif
-                                                
+
                         @if (!empty($qualification_instructeur))
                             @php
                                 $instructeurDetails = [];
                                 $groupedByExpiry = [];
                             @endphp
-                            
+
                             @foreach ($qualification_instructeur as $qualification_instructeur)
                                 @php
                                     $instructeurStartDate = $qualification_instructeur->date_examen;
                                     $instructeurStartDate = Carbon::parse($instructeurStartDate);
                                     $instExpiryDate = $instructeurStartDate->copy()->addMonths(24)->endOfMonth();
-                        
-                                    // SUPPRIMÉ: if ($currentDate->lte($instExpiryDate)) {
-                                        $instExpiryDateFormatted = $instExpiryDate->format('d-m-Y');
-                                        
-                                        // Créer une clé unique pour cette date d'expiration
-                                        if (!isset($groupedByExpiry[$instExpiryDateFormatted])) {
-                                            $groupedByExpiry[$instExpiryDateFormatted] = [
-                                                'types' => [],
-                                                'machines' => [],
-                                                'codes' => []
-                                            ];
-                                        }
-                                        
-                                        // Ajouter les détails uniquement s'ils existent et ne sont pas déjà présents
-                                        if (!empty($qualification_instructeur->type_privilege) && 
-                                            !in_array($qualification_instructeur->type_privilege, $groupedByExpiry[$instExpiryDateFormatted]['types'])) {
-                                            $groupedByExpiry[$instExpiryDateFormatted]['types'][] = $qualification_instructeur->type_privilege;
-                                        }
-                                        
-                                        if (!empty($qualification_instructeur->machine) && 
-                                            !in_array($qualification_instructeur->machine, $groupedByExpiry[$instExpiryDateFormatted]['machines'])) {
-                                            $groupedByExpiry[$instExpiryDateFormatted]['machines'][] = $qualification_instructeur->machine;
-                                        }
-                                        
-                                        if (!empty($qualification_instructeur->code) && 
-                                            !in_array($qualification_instructeur->code, $groupedByExpiry[$instExpiryDateFormatted]['codes'])) {
-                                            $groupedByExpiry[$instExpiryDateFormatted]['codes'][] = $qualification_instructeur->code;
-                                        }
-                                    // SUPPRIMÉ: }
+
+                                    // SUPPRIMï¿½: if ($currentDate->lte($instExpiryDate)) {
+                                    $instExpiryDateFormatted = $instExpiryDate->format('d-m-Y');
+
+                                    // Crï¿½er une clï¿½ unique pour cette date d'expiration
+if (!isset($groupedByExpiry[$instExpiryDateFormatted])) {
+    $groupedByExpiry[$instExpiryDateFormatted] = [
+        'types' => [],
+        'machines' => [],
+        'codes' => [],
+    ];
+}
+
+// Ajouter les dï¿½tails uniquement s'ils existent et ne sont pas dï¿½jï¿½ prï¿½sents
+                                    if (
+                                        !empty($qualification_instructeur->type_privilege) &&
+                                        !in_array(
+                                            $qualification_instructeur->type_privilege,
+                                            $groupedByExpiry[$instExpiryDateFormatted]['types'],
+                                        )
+                                    ) {
+                                        $groupedByExpiry[$instExpiryDateFormatted]['types'][] =
+                                            $qualification_instructeur->type_privilege;
+                                    }
+
+                                    if (
+                                        !empty($qualification_instructeur->machine) &&
+                                        !in_array(
+                                            $qualification_instructeur->machine,
+                                            $groupedByExpiry[$instExpiryDateFormatted]['machines'],
+                                        )
+                                    ) {
+                                        $groupedByExpiry[$instExpiryDateFormatted]['machines'][] =
+                                            $qualification_instructeur->machine;
+                                    }
+
+                                    if (
+                                        !empty($qualification_instructeur->code) &&
+                                        !in_array(
+                                            $qualification_instructeur->code,
+                                            $groupedByExpiry[$instExpiryDateFormatted]['codes'],
+                                        )
+                                    ) {
+                                        $groupedByExpiry[$instExpiryDateFormatted]['codes'][] =
+                                            $qualification_instructeur->code;
+                                    }
+                                    // SUPPRIMï¿½: }
                                 @endphp
                             @endforeach
-                            
+
                             @php
-                                // Construire la chaîne finale groupée par date d'expiration
-                                foreach ($groupedByExpiry as $expiryDate => $details) {
-                                    $parts = [];
-                                    
-                                    if (!empty($details['types'])) {
-                                        $parts[] = implode('/', $details['types']);
-                                    }
-                                    
-                                    if (!empty($details['codes'])) {
-                                        $parts[] = "(" . implode('/', $details['codes']) . ")";
-                                    }
-                                    
-                                    if (!empty($details['machines'])) {
-                                        $parts[] = "(" . implode('/', $details['machines']) . ")";
-                                    }
-                                    
-                                    if (!empty($parts)) {
-                                        $instructeurDetails[] = implode(' ', $parts) . " [{$expiryDate}]";
-                                    }
-                                }
-                                
-                                $instructeurString = implode('; ', $instructeurDetails);
+                                // Construire la chaï¿½ne finale groupï¿½e par date d'expiration
+foreach ($groupedByExpiry as $expiryDate => $details) {
+    $parts = [];
+
+    if (!empty($details['types'])) {
+        $parts[] = implode('/', $details['types']);
+    }
+
+    if (!empty($details['codes'])) {
+        $parts[] = '(' . implode('/', $details['codes']) . ')';
+    }
+
+    if (!empty($details['machines'])) {
+        $parts[] = '(' . implode('/', $details['machines']) . ')';
+    }
+
+    if (!empty($parts)) {
+        $instructeurDetails[] = implode(' ', $parts) . " [{$expiryDate}]";
+    }
+}
+
+$instructeurString = implode('; ', $instructeurDetails);
                             @endphp
-                            
+
                             @if (!empty($instructeurString))
                                 <p>{{ $instructeurString }}</p>
                             @endif
@@ -499,26 +533,28 @@
                                 @php
                                     $examinateurStartDate = $qualification_examinateur->date_examen;
                                     $examinateurStartDate = Carbon::parse($examinateurStartDate);
-                                    
-                                    if(in_array($demande->typeLicence->id, [31, 35])){
+
+                                    if (in_array($demande->typeLicence->id, [31, 35])) {
                                         $examExpiryDate = $examinateurStartDate->copy()->addMonths(24)->endOfMonth();
-                                    }else{
-                                    
+                                    } else {
                                         $examExpiryDate = $examinateurStartDate->copy()->addMonths(12)->endOfMonth();
                                     }
-                                    // SUPPRIMÉ: if ($currentDate->lte($examExpiryDate)) {
-                                        $examExpiryDateFormatted = $examExpiryDate->format('d-m-Y');
-                                        if(!empty($qualification_examinateur->machine) && !empty($qualification_examinateur->code)){
+                                    // SUPPRIMï¿½: if ($currentDate->lte($examExpiryDate)) {
+                                    $examExpiryDateFormatted = $examExpiryDate->format('d-m-Y');
+                                    if (
+                                        !empty($qualification_examinateur->machine) &&
+                                        !empty($qualification_examinateur->code)
+                                    ) {
                                         $examinateurDetails[] =
                                             "{$qualification_examinateur->type_privilege} " .
                                             "({$qualification_examinateur->machine}) " .
                                             "({$qualification_examinateur->code}) [{$examExpiryDateFormatted}]";
-                                        }else{
-                                            $examinateurDetails[] =
-                                                    "{$qualification_examinateur->type_privilege} " .
-                                                    "[{$examExpiryDateFormatted}]";
-                                        }
-                                    // SUPPRIMÉ: }
+                                    } else {
+                                        $examinateurDetails[] =
+                                            "{$qualification_examinateur->type_privilege} " .
+                                            "[{$examExpiryDateFormatted}]";
+                                    }
+                                    // SUPPRIMï¿½: }
                                 @endphp
                             @endforeach
                             @php
@@ -529,7 +565,7 @@
                             @endif
                         @endif
                     <ul class="no-bullets">
-                        
+
                         @if (!empty($qualification_ulm))
                             @php
                                 $ulmStartDate = $qualification_ulm->date_examen;
@@ -554,10 +590,10 @@
                                 $langStartDate = Carbon::parse($langStartDate);
                                 $langExpiryDate = $langStartDate->copy()->addMonths($competence_demandeur->validite);
 
-                                // SUPPRIMÉ: if ($currentDate->lte($langExpiryDate)) {
-                                    $showLang = true;
-                                    $langExpiryDateFormatted = $langExpiryDate->format('d-m-Y');
-                                // SUPPRIMÉ: }
+                                // SUPPRIMï¿½: if ($currentDate->lte($langExpiryDate)) {
+                                $showLang = true;
+                                $langExpiryDateFormatted = $langExpiryDate->format('d-m-Y');
+                                // SUPPRIMï¿½: }
                             } else {
                                 $showLang = true;
                             }
@@ -575,38 +611,36 @@
                     @if (!empty($medical_certificat))
                         @php
                             $medicalStartDate = Carbon::parse($medical_certificat->date_examen);
-                            
-                            // Date de base après ajout des mois de validité
+
+                            // Date de base aprï¿½s ajout des mois de validitï¿½
                             $medicalExpiryDate = $medicalStartDate->copy()->addMonths($medical_certificat->validite);
-                            
+
                             // Application du type de calcul choisi (un seul choix possible)
                             if ($licence->type_calcul == 'jours' && $licence->jours_supplementaires > 0) {
-                                // Ajouter des jours supplémentaires
+                                // Ajouter des jours supplï¿½mentaires
                                 $medicalExpiryDate->addDays($licence->jours_supplementaires);
-                                
                             } elseif ($licence->type_calcul == 'fin_mois') {
-                                // Prolonger jusqu'à la fin du mois
-                                $medicalExpiryDate->endOfMonth();
-                                
-                            }
-                            
-                            $medicalExpiryDateFormatted = $medicalExpiryDate->format('d-M-Y');
-                            
-                            // Détermination de la classe
-                            $class = '';
-                            $class1 = [27, 28, 29, 30];
-                            $class2 = [31, 32, 39];
-                            $class3 = [35, 36, 37, 38];
-                    
-                            if (in_array($licence->demande->typeLicence->id, $class1)) {
-                                $class = 'Class 1';
-                            } elseif (in_array($licence->demande->typeLicence->id, $class2)) {
-                                $class = 'Class 2';
-                            } elseif (in_array($licence->demande->typeLicence->id, $class3)) {
-                                $class = 'Class 3';
+                                // Prolonger jusqu'ï¿½ la fin du mois
+    $medicalExpiryDate->endOfMonth();
+}
+
+$medicalExpiryDateFormatted = $medicalExpiryDate->format('d-M-Y');
+
+// Dï¿½termination de la classe
+$class = '';
+$class1 = [27, 28, 29, 30];
+$class2 = [31, 32, 39];
+$class3 = [35, 36, 37, 38];
+
+if (in_array($licence->demande->typeLicence->id, $class1)) {
+    $class = 'Class 1';
+} elseif (in_array($licence->demande->typeLicence->id, $class2)) {
+    $class = 'Class 2';
+} elseif (in_array($licence->demande->typeLicence->id, $class3)) {
+    $class = 'Class 3';
                             }
                         @endphp
-                        
+
                         <p>
                             Medical certificat ({{ $class }} [{{ $medicalExpiryDateFormatted }}])
                         </p>

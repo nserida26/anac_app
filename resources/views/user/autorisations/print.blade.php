@@ -398,20 +398,18 @@
                         <div class="column">
                             <h4>Aéronef type / Aircraft type:</h4>
                             <label>
+                                {{ $typeString1 }}
                                 @if($tropAvions)
-                                    VOIR PIECE JOINTE
-                                @else
-                                    {{ $typeString1 }}
+                                    <span> OR SUB VOIR PIECE JOINTE </span>
                                 @endif
                             </label>
                         </div>
                         <div class="column">
                             <h4>Immatriculation / Registration:</h4>
                             <label>
+                                {{ $typeString2 }}
                                 @if($tropAvions)
-                                    VOIR PIECE JOINTE
-                                @else
-                                    {{ $typeString2 }}
+                                    <span> OR SUB VOIR PIECE JOINTE </span>
                                 @endif
                             </label>
                         </div>
@@ -453,10 +451,7 @@
         </span>
 
         <div style="font-weight:bold; word-break:break-word;">
-            @if($tropVols)
-                VOIR PIECE JOINTE
-            @else
-                @foreach ($autorisation->demande->vols as $vol)
+            @foreach ($autorisation->demande->vols as $vol)
 
                     @php
                         $itineraireParts = [];
@@ -496,6 +491,8 @@
                     </div>
 
                 @endforeach
+            @if($tropVols)
+                <span> OR SUB VOIR PIECE JOINTE </span>
             @endif
         </div>
     </div>
