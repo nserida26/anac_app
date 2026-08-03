@@ -671,7 +671,7 @@ class AdminController extends Controller
                 ->where('qualifications.libelle', 'Qualification de Class')
                 ->where('demandes.id', $id)
                 ->orderByDesc('qualification_demandeurs.date_examen')
-                ->first();
+                ->get();
             $qualification_instructeur = QualificationDemandeur::join('qualifications', 'qualifications.id', 'qualification_demandeurs.qualification_id')
                 ->join('demandes', 'demandes.id', 'qualification_demandeurs.demande_id')
                 ->leftJoin('type_avions', 'type_avions.id', 'qualification_demandeurs.type_avion_id')
