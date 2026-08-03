@@ -395,11 +395,11 @@ $typeString = implode('; ', $resultStrings);
                                     $ifrStartDate = Carbon::parse($qualification_ifr->date_examen);
                                     $ifrExpiryDate = $ifrStartDate->copy()->addMonths(12)->endOfMonth();
 
-                                    if ($currentDate->gt($ifrExpiryDate)) {
-                                        $ifrExpiryDate = null;
-                                    } else {
-                                        $ifrExpiryDate = $ifrExpiryDate->format('d-m-Y');
-                                    }
+                                    // SUPPRIM�: if ($currentDate->gt($ifrExpiryDate)) {
+                                    // SUPPRIM�:    $ifrExpiryDate = null;
+                                    // SUPPRIM�: } else {
+                                    $ifrExpiryDate = $ifrExpiryDate->format('d-m-Y');
+                                    // SUPPRIM�: }
                                 }
 
                                 // Plusieurs qualifications de classe
