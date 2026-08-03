@@ -395,19 +395,33 @@
                             $output1[] = " {$avion->type->code} ";
                             $output2[] = " {$avion->immatriculation} ";
                         }
-                        
-                        $typeString1 = implode(' / ', array_unique($output1));
+
+                        $uniqueTypes = array_unique($output1);
+                        $typeString1 = implode(' / ', $uniqueTypes);
                         $typeString2 = implode(' / ', $output2);
+                        $tropAvions = ($documentAvions) && (count($output2) > 5 || count($uniqueTypes) > 5);
                     @endphp
 
                     <div class="dual-column">
                         <div class="column">
                             <h4>Aéronef type / Aircraft type:</h4>
-                            <label>{{ $typeString1 }} @if($documentAvions)  <span> OR SUB VOIR PIECE JOINTE </span> @endif</label>
+                            <label>
+                                @if($tropAvions)
+                                    VOIR PIECE JOINTE
+                                @else
+                                    {{ $typeString1 }}
+                                @endif
+                            </label>
                         </div>
                         <div class="column">
                             <h4>Immatriculation / Registration:</h4>
-                            <label>{{ $typeString2 }} @if($documentAvions)  <span>  OR SUB VOIR PIECE JOINTE</span> @endif</label>
+                            <label>
+                                @if($tropAvions)
+                                    VOIR PIECE JOINTE
+                                @else
+                                    {{ $typeString2 }}
+                                @endif
+                            </label>
                         </div>
                     </div>
                 </td>
