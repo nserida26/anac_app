@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="fr">
-    @php
-    $documentAvions = $autorisation->demande->documents()
-        ->whereHas('typeDocument', function($query) {
+@php
+    $documentAvions = $autorisation->demande
+        ->documents()
+        ->whereHas('typeDocument', function ($query) {
             $query->where('nom_fr', 'Liste des avions');
         })
         ->first();
-    $documentVols = $autorisation->demande->documents()
-        ->whereHas('typeDocument', function($query) {
+    $documentVols = $autorisation->demande
+        ->documents()
+        ->whereHas('typeDocument', function ($query) {
             $query->where('nom_fr', 'Liste des Vols');
         })
         ->first();
-    @endphp
+@endphp
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -52,7 +55,8 @@
             display: block !important;
         }
 
-        h4, h6 {
+        h4,
+        h6 {
             color: #333;
             margin: 3px 0;
             font-size: 14px;
@@ -132,7 +136,8 @@
             border-collapse: collapse;
         }
 
-        table td, table th {
+        table td,
+        table th {
             border-left: none;
             border-right: none;
             border-top: none;
@@ -223,37 +228,38 @@
 <body>
     <div id="authorization">
         <img src="{{ asset('assets/admin/imgs/logo.png') }}" alt="Watermark" class="watermark">
-        
+
         <!-- Header with Arabic text and logo -->
         <table class="header-table">
             <tr>
                 <td style="text-align: center;">
-                    <img src="{{ asset('assets/admin/imgs/anac.png') }}" alt="Logo ANAC" style="display: block; margin: 5px auto; height: 100px; max-width: 100%;">
+                    <img src="{{ asset('assets/admin/imgs/anac.png') }}" alt="Logo ANAC"
+                        style="display: block; margin: 5px auto; height: 100px; max-width: 100%;">
                 </td>
             </tr>
         </table>
 
         <!-- Authorization header -->
         <table>
-                <tr>
-                    <td>
-                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-            <h1 style="margin-bottom: 1px; margin-top: 0;">Autorisation / Authorization</h1>
-            <div style="text-align: right;">
-                <h4 style="margin: 0;">DATE/DATED: {{ date('d/m/Y') }}</h4>
-            </div>
-        </div>
-                        <div style="align-items: baseline; margin-left: 20px; margin-top: 0;">
-                            <h4 style="margin: 0;">Autorisation numéro / authorization number:</h4>
-                            <h2 style="margin: 0; margin-left: 100px;">{{ $autorisation->code_autorisation }}</h2>
+            <tr>
+                <td>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <h1 style="margin-bottom: 1px; margin-top: 0;">Autorisation / Authorization</h1>
+                        <div style="text-align: right;">
+                            <h4 style="margin: 0;">DATE/DATED: {{ date('d/m/Y') }}</h4>
                         </div>
-                
-                        <div style="display: flex; align-items: baseline; margin-left: 20px; margin-top: 2px;">
-                            <h4 style="margin: 0;">Autorisation type / Authorization:</h4>
-                            <h2 style="margin: 0;">{{ $autorisation->demande->type->libelle }}</h2>
-                        </div>
-                    </td>
-                </tr>
+                    </div>
+                    <div style="align-items: baseline; margin-left: 20px; margin-top: 0;">
+                        <h4 style="margin: 0;">Autorisation numéro / authorization number:</h4>
+                        <h2 style="margin: 0; margin-left: 100px;">{{ $autorisation->code_autorisation }}</h2>
+                    </div>
+
+                    <div style="display: flex; align-items: baseline; margin-left: 20px; margin-top: 2px;">
+                        <h4 style="margin: 0;">Autorisation type / Authorization:</h4>
+                        <h2 style="margin: 0;">{{ $autorisation->demande->type->libelle }}</h2>
+                    </div>
+                </td>
+            </tr>
         </table>
 
         <!-- Issued by and To sections -->
@@ -309,45 +315,50 @@
                 <td>
                     <div class="signature-section">
                         @php
-                            $hasDta = !empty($autorisation->signature_dta) && file_exists(base_path('uploads/' . $autorisation->signature_dta));
-                            $hasSrta = !empty($autorisation->signature_srta) && file_exists(base_path('uploads/' . $autorisation->signature_srta));
+                            $hasDta =
+                                !empty($autorisation->signature_dta) &&
+                                file_exists(base_path('uploads/' . $autorisation->signature_dta));
+                            $hasSrta =
+                                !empty($autorisation->signature_srta) &&
+                                file_exists(base_path('uploads/' . $autorisation->signature_srta));
                         @endphp
-                        
 
-                        
+
+
                         <div style="display: flex; align-items: center; gap: 1px;">
                             <div style="font-weight: bold;">VISA/SRTA</div>
-                            @if($hasSrta)
-                                <img src="{{ asset('uploads/' . $autorisation->signature_srta) }}" 
-                                     class="signature-img" alt="Signature SRTA">
+                            @if ($hasSrta)
+                                <img src="{{ asset('uploads/' . $autorisation->signature_srta) }}"
+                                    class="signature-img" alt="Signature SRTA">
                             @endif
                         </div>
                         <div style="display: flex; align-items: center; gap: 1px;">
                             <div style="font-weight: bold;">VISA/DTA</div>
-                            @if($hasDta)
-                                <img src="{{ asset('uploads/' . $autorisation->signature_dta) }}" 
-                                     class="signature-img" alt="Signature DTA">
+                            @if ($hasDta)
+                                <img src="{{ asset('uploads/' . $autorisation->signature_dta) }}" class="signature-img"
+                                    alt="Signature DTA">
                             @endif
                         </div>
                     </div>
 
                     <div style="text-align: center; margin: 1px 0;">
                         <p style="font-size: 12px; margin: 0;">
-                            HONNEUR DE VOUS NOTIFIER NOTRE ACCORD @if (in_array($autorisation->demande->type->id, [1,2,3])) DE SURVOL DU TERRITOIRE MAURITANIEN
+                            HONNEUR DE VOUS NOTIFIER NOTRE ACCORD @if (in_array($autorisation->demande->type->id, [1, 2, 3]))
+                                DE SURVOL DU TERRITOIRE MAURITANIEN
                             @elseif(in_array($autorisation->demande->type->id, [4]))
-                            POUR LE TRANSPORT PAR VOTRE COMPAGNIE DE LA DEPOUILLE MORTELLE
+                                POUR LE TRANSPORT PAR VOTRE COMPAGNIE DE LA DEPOUILLE MORTELLE
                             @endif
                             @if ($autorisation->demande->type->id === 2)
                                 @php
                                     $output = [];
                                     $aeroportsUniques = []; // Tableau pour stocker les aéroports uniques
-                                    
-                                    if ($autorisation->demande->vols->isNotEmpty()){
-                                        foreach($autorisation->demande->vols as $vol){
+
+                                    if ($autorisation->demande->vols->isNotEmpty()) {
+                                        foreach ($autorisation->demande->vols as $vol) {
                                             // Aéroport d'arrivée
-                                            if (optional($vol->aeroportArrivee)->pays_id === 29) {
-                                                $aeroportName = mb_strtoupper($vol->aeroportArrivee->nom, 'UTF-8');
-                                                // Vérifier l'unicité
+        if (optional($vol->aeroportArrivee)->pays_id === 29) {
+            $aeroportName = mb_strtoupper($vol->aeroportArrivee->nom, 'UTF-8');
+            // Vérifier l'unicité
                                                 if (!in_array($aeroportName, $aeroportsUniques)) {
                                                     $aeroportsUniques[] = $aeroportName;
                                                     $output[] = " {$aeroportName} ";
@@ -357,16 +368,16 @@
                                             if (optional($vol->aeroportDepart)->pays_id === 29) {
                                                 $aeroportName = mb_strtoupper($vol->aeroportDepart->nom, 'UTF-8');
                                                 // Vérifier l'unicité
-                                                if (!in_array($aeroportName, $aeroportsUniques)) {
-                                                    $aeroportsUniques[] = $aeroportName;
-                                                    $output[] = " {$aeroportName} ";
-                                                }
-                                            }
-                                            // Escales
-                                            foreach ($vol->escales as $escale) {
-                                                if ($escale->aeroport->pays_id === 29) {
-                                                    $aeroportName = mb_strtoupper($escale->aeroport->nom, 'UTF-8');
-                                                    // Vérifier l'unicité
+            if (!in_array($aeroportName, $aeroportsUniques)) {
+                $aeroportsUniques[] = $aeroportName;
+                $output[] = " {$aeroportName} ";
+            }
+        }
+        // Escales
+        foreach ($vol->escales as $escale) {
+            if ($escale->aeroport->pays_id === 29) {
+                $aeroportName = mb_strtoupper($escale->aeroport->nom, 'UTF-8');
+                // Vérifier l'unicité
                                                     if (!in_array($aeroportName, $aeroportsUniques)) {
                                                         $aeroportsUniques[] = $aeroportName;
                                                         $output[] = " {$aeroportName} ";
@@ -375,19 +386,20 @@
                                             }
                                         }
                                     }
-                                    
+
                                     $aeroportString = implode(' ', $output);
                                 @endphp
                                 ET L'ATTERRISSAGE SUR LE(S) AÉROPORT(S) {{ $aeroportString }}
                             @endif
-                            
-                            @if (in_array($autorisation->demande->type->id, [1,2,3])) EN FAVEUR DE(S) AÉRONEF(S) SELON LES INFORMATIONS CI-APRÈS #:
+
+                            @if (in_array($autorisation->demande->type->id, [1, 2, 3]))
+                                EN FAVEUR DE(S) AÉRONEF(S) SELON LES INFORMATIONS CI-APRÈS #:
                             @elseif(in_array($autorisation->demande->type->id, [4]))
-                            SUIVANT LES INDICATIONS CI-APRÈS #:
+                                SUIVANT LES INDICATIONS CI-APRÈS #:
                             @endif
                         </p>
                     </div>
-                    
+
                     @php
                         $output1 = [];
                         $output2 = [];
@@ -399,14 +411,14 @@
                         $uniqueTypes = array_unique($output1);
                         $typeString1 = implode(' / ', $uniqueTypes);
                         $typeString2 = implode(' / ', $output2);
-                        $tropAvions = ($documentAvions) && (count($output2) > 5 || count($uniqueTypes) > 5);
+                        $tropAvions = $documentAvions && (count($output2) > 5 || count($uniqueTypes) > 5);
                     @endphp
 
                     <div class="dual-column">
                         <div class="column">
                             <h4>Aéronef type / Aircraft type:</h4>
                             <label>
-                                @if($tropAvions)
+                                @if ($tropAvions)
                                     VOIR PIECE JOINTE
                                 @else
                                     {{ $typeString1 }}
@@ -416,7 +428,7 @@
                         <div class="column">
                             <h4>Immatriculation / Registration:</h4>
                             <label>
-                                @if($tropAvions)
+                                @if ($tropAvions)
                                     VOIR PIECE JOINTE
                                 @else
                                     {{ $typeString2 }}
@@ -438,74 +450,73 @@
                         foreach ($autorisation->demande->personnes as $personne) {
                             $output1[] = " {$personne->nom_prenom} ";
                             $output2[] = " {$personne->numero_passport} ";
-                            
                         }
-                        
+
                         $typeString1 = implode(' / ', array_unique($output1));
                         $typeString2 = implode(' / ', array_unique($output2));
-                        
+
                     @endphp
                     <div style="display: flex; flex-direction: column; gap: 12px; margin: 15px 0;">
-                        @if(in_array($autorisation->demande->type->id, [4]))
-                           
-                        <!-- Last and first name -->
-                        <div style="display: flex;">
-                            <span style="font-weight: bold; min-width: 200px;">Nom et prénom/Last and first name:</span>
-                            <span style="font-weight: bold;">{{ strtoupper($typeString1) }}</span>
-                        </div>
-                        <!-- Passport -->
-                        <div style="display: flex;">
-                            <span style="font-weight: bold; min-width: 200px;">Numéro passeport/Passport:</span>
-                            <span style="font-weight: bold;">{{ strtoupper($typeString2) }}</span>
-                        </div>
-                         
-                            @endif
+                        @if (in_array($autorisation->demande->type->id, [4]))
+                            <!-- Last and first name -->
+                            <div style="display: flex;">
+                                <span style="font-weight: bold; min-width: 200px;">Nom et prénom/Last and first
+                                    name:</span>
+                                <span style="font-weight: bold;">{{ strtoupper($typeString1) }}</span>
+                            </div>
+                            <!-- Passport -->
+                            <div style="display: flex;">
+                                <span style="font-weight: bold; min-width: 200px;">Numéro passeport/Passport:</span>
+                                <span style="font-weight: bold;">{{ strtoupper($typeString2) }}</span>
+                            </div>
+                        @endif
                         @php
-                        $output1 = [];
-                        $output2 = [];
-                        $output3 = [];
-                        foreach ($autorisation->demande->mdns as $mdn) {
-                            $output1[] = date('m/d/Y',strtotime($mdn->date_autorisation));
-                            $output2[] = " {$mdn->numero_mdn} ";
-                            $output3[] = " {$mdn->pays->nom} ";
-                            
-                        }
-                        
-                        $typeString1 = implode(' / ', array_unique($output1));
-                        $typeString2 = implode(' / ', array_unique($output2));
-                        $typeString3 = implode(' / ', array_unique($output3));
-                        
-                    @endphp
-                        @if(in_array($autorisation->demande->type->id, [5,6,7]))
-                           
+                            $output1 = [];
+                            $output2 = [];
+                            $output3 = [];
+                            foreach ($autorisation->demande->mdns as $mdn) {
+                                $output1[] = date('m/d/Y', strtotime($mdn->date_autorisation));
+                                $output2[] = " {$mdn->numero_mdn} ";
+                                $output3[] = " {$mdn->pays->nom} ";
+                            }
 
-<div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: center;">
-    <!-- Date d'autorisation -->
-    <div style="display: flex; align-items: center;">
-        <span style="font-weight: bold; margin-right: 10px; min-width: 150px;">Date d'autorisation/Authorization date:</span>
-        <span style="font-weight: bold; padding: 5px 10px; ">{{ $typeString2 }}</span>
-    </div>
-    
-    <!-- Numéro MDN -->
-    <div style="display: flex; align-items: center;">
-        <span style="font-weight: bold; margin-right: 10px; min-width: 150px;">Numéro MDN/MDN number:</span>
-        <span style="font-weight: bold; padding: 5px 10px; ">{{ strtoupper($typeString1) }}</span>
-    </div>
-    
-    <!-- Nationalité -->
-    <div style="display: flex; align-items: center;">
-        <span style="font-weight: bold; margin-right: 10px; min-width: 150px;">Nationalité/Nationality:</span>
-        <span style="font-weight: bold; padding: 5px 10px; ">{{ strtoupper($typeString3) }}</span>
-    </div>
-</div>
+                            $typeString1 = implode(' / ', array_unique($output1));
+                            $typeString2 = implode(' / ', array_unique($output2));
+                            $typeString3 = implode(' / ', array_unique($output3));
 
-                            @endif
+                        @endphp
+                        @if (in_array($autorisation->demande->type->id, [5, 6, 7]))
+                            <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: center;">
+                                <!-- Date d'autorisation -->
+                                <div style="display: flex; align-items: center;">
+                                    <span style="font-weight: bold; margin-right: 10px; min-width: 150px;">Date
+                                        d'autorisation/Authorization date:</span>
+                                    <span style="font-weight: bold; padding: 5px 10px; ">{{ $typeString2 }}</span>
+                                </div>
+
+                                <!-- Numéro MDN -->
+                                <div style="display: flex; align-items: center;">
+                                    <span style="font-weight: bold; margin-right: 10px; min-width: 150px;">Numéro
+                                        MDN/MDN number:</span>
+                                    <span
+                                        style="font-weight: bold; padding: 5px 10px; ">{{ strtoupper($typeString1) }}</span>
+                                </div>
+
+                                <!-- Nationalité -->
+                                <div style="display: flex; align-items: center;">
+                                    <span
+                                        style="font-weight: bold; margin-right: 10px; min-width: 150px;">Nationalité/Nationality:</span>
+                                    <span
+                                        style="font-weight: bold; padding: 5px 10px; ">{{ strtoupper($typeString3) }}</span>
+                                </div>
+                            </div>
+                        @endif
                         <!-- Motif -->
-                        @if(!in_array($autorisation->demande->type->id, [5,6,7]))
-                        <div style="display: flex;">
-                            <span style="font-weight: bold; min-width: 200px;">Motif/Motif:</span>
-                            <span style="font-weight: bold;">{{ strtoupper($autorisation->demande->objet) }}</span>
-                        </div>
+                        @if (!in_array($autorisation->demande->type->id, [5, 6, 7]))
+                            <div style="display: flex;">
+                                <span style="font-weight: bold; min-width: 200px;">Motif/Motif:</span>
+                                <span style="font-weight: bold;">{{ strtoupper($autorisation->demande->objet) }}</span>
+                            </div>
                         @endif
 
                         <!-- Opérateur -->
@@ -518,112 +529,134 @@
                             </div>
                         @endif
 
-@if ($autorisation->demande->vols->isNotEmpty())
+                        @if ($autorisation->demande->vols->isNotEmpty())
 
-    @php
-        // Plus de 5 aéroports distincts dans l'itinéraire => renvoyer à la pièce jointe
-        $aeroportsItineraire = [];
-        foreach ($autorisation->demande->vols as $volItineraire) {
-            if ($volItineraire->aeroportDepart) $aeroportsItineraire[] = $volItineraire->aeroportDepart->id;
-            if ($volItineraire->aeroportArrivee) $aeroportsItineraire[] = $volItineraire->aeroportArrivee->id;
-            foreach ($volItineraire->escales as $escaleItineraire) {
-                if ($escaleItineraire->aeroport) $aeroportsItineraire[] = $escaleItineraire->aeroport->id;
-            }
-        }
-        $tropVols = ($documentVols) && (count(array_unique($aeroportsItineraire)) > 5);
-    @endphp
+                            @php
+                                // Plus de 5 aéroports distincts dans l'itinéraire => renvoyer à la pièce jointe
+                                $aeroportsItineraire = [];
+                                foreach ($autorisation->demande->vols as $volItineraire) {
+                                    if ($volItineraire->aeroportDepart) {
+                                        $aeroportsItineraire[] = $volItineraire->aeroportDepart->id;
+                                    }
+                                    if ($volItineraire->aeroportArrivee) {
+                                        $aeroportsItineraire[] = $volItineraire->aeroportArrivee->id;
+                                    }
+                                    foreach ($volItineraire->escales as $escaleItineraire) {
+                                        if ($escaleItineraire->aeroport) {
+                                            $aeroportsItineraire[] = $escaleItineraire->aeroport->id;
+                                        }
+                                    }
+                                }
+                                $tropVols = $documentVols && count(array_unique($aeroportsItineraire)) > 5;
+                            @endphp
 
-    <div style="display:flex;">
-        <span style="font-weight:bold; min-width:200px;">
-            Itinéraire / Itinerary :
-        </span>
+                            <div style="display:flex;">
+                                <span style="font-weight:bold; min-width:200px;">
+                                    Itinéraire / Itinerary :
+                                </span>
 
-        <div style="font-weight:bold; word-break:break-word;">
-            @if($tropVols)
-                VOIR PIECE JOINTE
-            @else
-                @foreach ($autorisation->demande->vols as $vol)
+                                <div style="font-weight:bold; word-break:break-word;">
+                                    @if ($tropVols)
+                                        VOIR PIECE JOINTE
+                                    @else
+                                        @foreach ($autorisation->demande->vols as $vol)
+                                            @php
+                                                $itineraireParts = [];
 
-                    @php
-                        $itineraireParts = [];
+                                                $departCode =
+                                                    optional($vol->aeroportDepart)->codeICAO ??
+                                                    ($vol->nom_piste_depart ?? 'N/A');
+                                                $arriveeCode =
+                                                    optional($vol->aeroportArrivee)->codeICAO ??
+                                                    ($vol->nom_piste_arrivee ?? 'N/A');
 
-                        $departCode  = optional($vol->aeroportDepart)->codeICAO ?? $vol->nom_piste_depart ?? 'N/A';
-                        $arriveeCode = optional($vol->aeroportArrivee)->codeICAO ?? $vol->nom_piste_arrivee ?? 'N/A';
+                                                $heureDepartVol = date('Hi', strtotime($vol->date_depart));
+                                                $heureArriveeVol = date('Hi', strtotime($vol->date_arrivee));
 
-                        $heureDepartVol  = date('Hi', strtotime($vol->date_depart));
-                        $heureArriveeVol = date('Hi', strtotime($vol->date_arrivee));
+                                                // Départ
+                                                $itineraireParts[] = "{$departCode} {$heureDepartVol}";
 
-                        // Départ
-                        $itineraireParts[] = "{$departCode} {$heureDepartVol}";
+                                                // Escales
+                                                if ($vol->escales->isNotEmpty()) {
+                                                    foreach ($vol->escales as $escale) {
+                                                        $heureArriveeEscale = date(
+                                                            'Hi',
+                                                            strtotime($escale->date_arrivee),
+                                                        );
+                                                        $heureDepartEscale = date(
+                                                            'Hi',
+                                                            strtotime($escale->date_depart),
+                                                        );
+                                                        $aeroportEscale = $escale->aeroport->codeICAO;
 
-                        // Escales
-                        if ($vol->escales->isNotEmpty()) {
-                            foreach ($vol->escales as $escale) {
-                                $heureArriveeEscale = date('Hi', strtotime($escale->date_arrivee));
-                                $heureDepartEscale  = date('Hi', strtotime($escale->date_depart));
-                                $aeroportEscale     = $escale->aeroport->codeICAO;
+                                                        $itineraireParts[] = "{$heureArriveeEscale} {$aeroportEscale} {$heureDepartEscale}";
+                                                    }
+                                                }
 
-                                $itineraireParts[] = "{$heureArriveeEscale} {$aeroportEscale} {$heureDepartEscale}";
-                            }
-                        }
+                                                // Arrivée
+                                                if ($departCode === $arriveeCode) {
+                                                    $itineraireParts[] = "{$heureArriveeVol} {$arriveeCode}";
+                                                } else {
+                                                    $itineraireParts[] = "{$heureArriveeVol} {$arriveeCode}";
+                                                }
 
-                        // Arrivée
-                        if ($departCode === $arriveeCode) {
-                            $itineraireParts[] = "{$heureArriveeVol} {$arriveeCode}";
-                        } else {
-                            $itineraireParts[] = "{$heureArriveeVol} {$arriveeCode}";
-                        }
+                                                $itineraireComplet = implode(' - ', $itineraireParts);
+                                            @endphp
 
-                        $itineraireComplet = implode(' - ', $itineraireParts);
-                    @endphp
+                                            <div>
+                                                {{ $vol->numero_vol }} {{ $itineraireComplet }}
+                                            </div>
+                                        @endforeach
+                                    @endif
+                                </div>
+                            </div>
 
-                    <div>
-                        {{ $vol->numero_vol }} {{ $itineraireComplet }}
-                    </div>
-
-                @endforeach
-            @endif
-        </div>
-    </div>
-
-@endif
+                        @endif
 
 
 
-<!-- Dates avec alignement parfait -->
-<div style="display: flex; margin: 5px 0;">
-    <div style="font-weight: bold; width: 300px;">Date début de validité/Validity Start Date:</div>
-    <div style="font-weight: bold; width: 150px; text-align: center;">
-        {{ date('d/m/Y', strtotime($autorisation->demande->date_debut)) }}
-    </div>
-</div>
+                        <!-- Dates avec alignement parfait -->
+                        <div style="display: flex; margin: 5px 0;">
+                            <div style="font-weight: bold; width: 300px;">Date début de validité/Validity Start Date:
+                            </div>
+                            <div style="font-weight: bold; width: 150px; text-align: center;">
+                                {{ date('d/m/Y', strtotime($autorisation->demande->date_debut)) }}
+                            </div>
+                        </div>
 
-<div style="display: flex; margin: 5px 0;">
-    <div style="font-weight: bold; width: 300px;">Date fin de validité/Validity End Date:</div>
-    <div style="font-weight: bold; width: 150px; text-align: center;">
-        {{ date('d/m/Y', strtotime($autorisation->demande->date_fin)) }}
+                        <div style="display: flex; margin: 5px 0;">
+                            <div style="font-weight: bold; width: 300px;">Date fin de validité/Validity End Date:</div>
+                            <div style="font-weight: bold; width: 150px; text-align: center;">
+                                {{ date('d/m/Y', strtotime($autorisation->demande->date_fin)) }}
 
-    </div>
-    <div style="font-weight: bold; width: 150px; text-align: center;">
-        @if (!empty($autorisation->demande->sous_validite))
-            <span style="margin-left: 10px;">+ {{ $autorisation->demande->sous_validite }} H</span>
-        @endif
-    </div>
-</div>
+                            </div>
+                            <div style="font-weight: bold; width: 150px; text-align: center;">
+                                @if (!empty($autorisation->demande->sous_validite))
+                                    <span style="margin-left: 10px;">+ {{ $autorisation->demande->sous_validite }}
+                                        H</span>
+                                @endif
+                            </div>
+                        </div>
                     </div>
 
                     <div style="margin: 10px 0;">
-                        <p class="note">Cette autorisation est délivrée sous réserve que/ This permit is issued subject to :</p>
+                        <p class="note">Cette autorisation est délivrée sous réserve que/ This permit is issued
+                            subject to :</p>
                         <ol style="margin: 10px 0; padding-left: 15px;">
-                            <li>Tous les documents de bord de l'aéronef soient en cours de validité pendant l'opération de vol ci-dessus autorisé/All aircraft's onboard documents be valid for the operation of authorized above flight.</li>
-                            <li>La réglementation aérienne mauritanienne soit scrupuleusement respectée/Mauritanian Aviation Regulation is scrupulously respected.</li>
+                            <li>Tous les documents de bord de l'aéronef soient en cours de validité pendant l'opération
+                                de vol ci-dessus autorisé/All aircraft's onboard documents be valid for the operation of
+                                authorized above flight.</li>
+                            <li>La réglementation aérienne mauritanienne soit scrupuleusement respectée/Mauritanian
+                                Aviation Regulation is scrupulously respected.</li>
                         </ol>
                     </div>
 
                     @if ($autorisation->demande->type->id === 2)
                         <div style="margin: 10px 0;">
-                            <p class="note">NB. Le paiement des frais et taxes relatifs à la délivrance de la présente autorisation sont dus dès la signature de celle-ci par l'ANAC.</p>
-                            <p class="note">NB. The payment of the fees and taxes relating to the issue of this authorization are due as soon as it is signed by the ANAC.</p>
+                            <p class="note">NB. Le paiement des frais et taxes relatifs à la délivrance de la présente
+                                autorisation sont dus dès la signature de celle-ci par l'ANAC.</p>
+                            <p class="note">NB. The payment of the fees and taxes relating to the issue of this
+                                authorization are due as soon as it is signed by the ANAC.</p>
                         </div>
                     @endif
 
@@ -676,11 +709,11 @@
                                 <div style="width: 75%; text-align: center;">
                                     @if (isset($autorisation->signature_dg))
                                         <img src="{{ asset('/uploads/' . $autorisation->signature_dg) }}"
-                                             style="height: 100px; margin-bottom: 1px;">
+                                            style="height: 100px; margin-bottom: 1px;">
                                     @endif
                                     @if (isset($autorisation->cachet))
                                         <img src="{{ asset('/uploads/' . $autorisation->cachet) }}"
-                                             style="height: 100px; opacity: 0.9;">
+                                            style="height: 100px; opacity: 0.9;">
                                     @endif
                                 </div>
                             </div>
@@ -691,50 +724,43 @@
         </table>
     </div>
 
-<div style="text-align: center; margin-top: 20px;" class="no-print">
-    <button onclick="window.print()" class="submit-btn">Imprimer PDF</button>
-    
+    <div style="text-align: center; margin-top: 20px;" class="no-print">
+        <button onclick="window.print()" class="submit-btn">Imprimer PDF</button>
 
-    
-    @if($documentAvions)
-        <a href="{{ asset('/uploads/' . $documentAvions->url) }}" 
-           class="submit-btn"
-           target="_blank"
-           onclick="setTimeout(() => { window.print(); }, 1000);"
-           style="margin-left: 10px; background-color: #4CAF50; text-decoration: none; display: inline-block; padding: 10px 20px; color: white; border-radius: 5px;">
-            Imprimer la liste des avions
-        </a>
-    @else
 
-        <button disabled 
-                class="submit-btn" 
+
+        @if ($documentAvions)
+            <a href="{{ asset('/uploads/documents/' . $documentAvions->url) }}" class="submit-btn" target="_blank"
+                onclick="setTimeout(() => { window.print(); }, 1000);"
+                style="margin-left: 10px; background-color: #4CAF50; text-decoration: none; display: inline-block; padding: 10px 20px; color: white; border-radius: 5px;">
+                Imprimer la liste des avions
+            </a>
+        @else
+            <button disabled class="submit-btn"
                 style="margin-left: 10px; background-color: #cccccc; cursor: not-allowed;"
                 title="Document non disponible">
-            Liste des avions non disponible
-        </button>
-    @endif
-    
-    @if($documentVols)
-        <a href="{{ asset('/uploads/' . $documentVols->url) }}" 
-           class="submit-btn"
-           target="_blank"
-           style="margin-left: 10px; background-color: #4CAF50; text-decoration: none; display: inline-block; padding: 10px 20px; color: white; border-radius: 5px;">
-            Imprimer la liste des vols
-        </a>
-    @else
+                Liste des avions non disponible
+            </button>
+        @endif
 
-        <button disabled 
-                class="submit-btn" 
+        @if ($documentVols)
+            <a href="{{ asset('/uploads/documents/' . $documentVols->url) }}" class="submit-btn" target="_blank"
+                style="margin-left: 10px; background-color: #4CAF50; text-decoration: none; display: inline-block; padding: 10px 20px; color: white; border-radius: 5px;">
+                Imprimer la liste des vols
+            </a>
+        @else
+            <button disabled class="submit-btn"
                 style="margin-left: 10px; background-color: #cccccc; cursor: not-allowed;"
                 title="Document non disponible">
-            Liste des vols non disponible
-        </button>
-    @endif
-</div>
+                Liste des vols non disponible
+            </button>
+        @endif
+    </div>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             window.print();
         });
     </script>
 </body>
+
 </html>
