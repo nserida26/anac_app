@@ -565,6 +565,7 @@ return [
 'error' => 'Erreur',
 'success' => 'Succès',
 'application_rejected' => 'Demande rejetée',
+'rejected_by' => 'Rejeté par',
 'global_comments' => 'Commentaires généraux',
 'global_comments_placeholder' => 'Saisissez vos commentaires généraux...',
 'items_to_validate' => 'Éléments à valider',

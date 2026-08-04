@@ -116,16 +116,8 @@
                         $hasRejectedItem = $demandeAutorisation->hasInvalidComponents();
                     @endphp
 
-                    @if(!empty($demandeAutorisation->rejection_reasons_list))
-                        <div class="alert alert-danger">
-                            <h6 class="mb-1"><i class="fas fa-ban"></i> @lang('trans.rejection_reasons')</h6>
-                            <ul class="mb-0">
-                                @foreach($demandeAutorisation->rejection_reasons_list as $reason)
-                                    <li>{{ $reason }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
+                    @include('dir.demandeAutorisations.partials.rejected-by', ['demande' => $demandeAutorisation])
+                    @include('dir.demandeAutorisations.partials.invalid-components', ['demande' => $demandeAutorisation])
 
                     <!-- BOUTON TOUT VALIDER - NOUVEAU -->
                     @if ($hasRejectedItem && auth()->user()->hasRole('dta'))

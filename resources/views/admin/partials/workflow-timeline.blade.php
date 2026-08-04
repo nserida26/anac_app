@@ -36,14 +36,9 @@
 </div>
 
 @if($etat === 'rejected')
-    <div class="alert alert-danger text-center mt-3">
-        <i class="fas fa-ban"></i> @lang('trans.application_rejected')
-        @if(!empty($demande->rejection_reasons_list))
-            <ul class="mb-0 text-left d-inline-block">
-                @foreach($demande->rejection_reasons_list as $reason)
-                    <li><small>{{ $reason }}</small></li>
-                @endforeach
-            </ul>
-        @endif
+    <div class="mt-3">
+        @include('dir.demandeAutorisations.partials.rejected-by', ['demande' => $demande])
     </div>
 @endif
+
+@include('dir.demandeAutorisations.partials.invalid-components', ['demande' => $demande])

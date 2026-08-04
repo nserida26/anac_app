@@ -17,7 +17,7 @@ class DemandeAutorisation extends Model
         'dg_motif', 'dta_motif', 'directions_annotees', 'points','type_vol_ids'
     ];
 
-    protected $appends = ['has_issues', 'invalid_reasons', 'rejection_reasons_list','etat_workflow'];
+    protected $appends = ['has_issues', 'invalid_reasons', 'rejection_reasons_list', 'rejected_by', 'etat_workflow'];
 
     // --- Relations ---
  public function typeVols()
@@ -84,6 +84,28 @@ class DemandeAutorisation extends Model
             $list[] = "[" . strtoupper($dept) . "] " . $data['motif'];
         }
         return $list;
+    }
+
+    /**
+     * Qui a rejetÃ© la demande, d'aprÃ¨s les indicateurs boolÃ©ens du workflow
+     * (etatDemande->dta_rejeter / dg_rejeter), et non la simple prÃ©sence d'un motif.
+     */
+    public function getRejectedByAttribute(): array
+    {
+        $state = $this->etatDemande;
+        if (!$state) {
+            return [];
+        }
+
+        $rejections = [];
+        if ($state->dta_rejeter) {
+            $rejections[] = ['dept' => 'DTA', 'motif' => $this->dta_motif];
+        }
+        if ($state->dg_rejeter) {
+            $rejections[] = ['dept' => 'DG', 'motif' => $this->dg_motif];
+        }
+
+        return $rejections;
     }
 
     // --- Validation & State Management ---
@@ -328,7 +350,7 @@ public function isValidatedByAll(): bool
 }
     
     /**
-     * Accesseur pour typeVol (simule la relation pour la compatibilité)
+     * Accesseur pour typeVol (simule la relation pour la compatibilitï¿½)
      */
     public function getTypeVolAttribute()
     {
@@ -336,7 +358,7 @@ public function isValidatedByAll(): bool
         if ($this->type_demande_autorisation_id == 3 && $this->type_vol_ids) {
             $ids = is_array($this->type_vol_ids) ? $this->type_vol_ids : json_decode($this->type_vol_ids, true);
             if ($ids && !empty($ids)) {
-                // Retourner le premier type de vol pour la compatibilité
+                // Retourner le premier type de vol pour la compatibilitï¿½
                 return TypeVol::find($ids[0]);
             }
         }
@@ -379,7 +401,7 @@ public function isValidatedByAll(): bool
     }
     
     /**
-     * Accesseur pour les noms des types de vol (formatés)
+     * Accesseur pour les noms des types de vol (formatï¿½s)
      */
     public function getTypeVolNamesAttribute()
     {

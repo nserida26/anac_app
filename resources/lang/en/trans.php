@@ -490,6 +490,7 @@ return [
     'error' => 'Error',
     'success' => 'Success',
     'application_rejected' => 'Application Rejected',
+    'rejected_by' => 'Rejected by',
     'global_comments' => 'General Comments',
     'global_comments_placeholder' => 'Enter your general comments...',
     'items_to_validate' => 'Items to Validate',
