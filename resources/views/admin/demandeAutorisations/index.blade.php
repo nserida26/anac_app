@@ -283,14 +283,25 @@
             }
         });
 
+        // Filtre par état : la cellule n'affiche que le libellé traduit (ex. "Rejetée"),
+        // donc on ne peut pas chercher la clé brute (ex. "rejected") dans le texte de la colonne.
+        // On filtre plutôt sur l'attribut data-etat de la ligne, qui contient toujours la clé brute.
+        let currentStatusFilter = '';
+        $.fn.dataTable.ext.search.push(function(settings, searchData, dataIndex, rowData, counter) {
+            if (settings.nTable.id !== 'applicationsTable') {
+                return true;
+            }
+            if (!currentStatusFilter) {
+                return true;
+            }
+            const row = table.row(dataIndex).node();
+            return $(row).data('etat') === currentStatusFilter;
+        });
+
         // Filtre par état
         $('#etatFilter').on('change', function() {
-            const etat = $(this).val();
-            if (etat) {
-                table.column(9).search('^' + etat + '$', true, false).draw();
-            } else {
-                table.column(9).search('').draw();
-            }
+            currentStatusFilter = $(this).val();
+            table.draw();
         });
 
         // Filtre par type
