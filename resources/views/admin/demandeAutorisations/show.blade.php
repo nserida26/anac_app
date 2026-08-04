@@ -449,11 +449,8 @@
             timeOut: 3000
         };
 
-        // Fonction pour ouvrir le modal de décision
-        window.openDecisionModal = function(table, id, demande, action) {
-            document.getElementById('modalTable').value = table;
-            document.getElementById('modalId').value = id;
-            document.getElementById('modalDemandeId').value = demande;
+        // Configuration commune du modal (titre, couleurs, bouton) selon l'action
+        function configureDecisionModal(action) {
             document.getElementById('modalActionType').value = action;
             document.getElementById('modalMotif').value = '';
 
@@ -479,7 +476,32 @@
             submitBtn.onclick = function() {
                 submitDecisionForm(action);
             };
+        }
 
+        // Fonction pour ouvrir le modal de décision (un seul élément)
+        window.openDecisionModal = function(table, id, demande, action) {
+            document.getElementById('modalTable').value = table;
+            document.getElementById('modalId').value = id;
+            document.getElementById('modalDemandeId').value = demande;
+            window.currentBulkIds = null;
+
+            configureDecisionModal(action);
+            $('#decisionModal').modal('show');
+        };
+
+        // Fonction pour ouvrir le modal de décision (plusieurs éléments sélectionnés)
+        window.openBulkDecisionModal = function(table, ids, demande, action) {
+            if (!ids || ids.length === 0) {
+                toastr.warning('@lang('trans.select_items_first')');
+                return;
+            }
+
+            document.getElementById('modalTable').value = table;
+            document.getElementById('modalId').value = '';
+            document.getElementById('modalDemandeId').value = demande;
+            window.currentBulkIds = ids;
+
+            configureDecisionModal(action);
             $('#decisionModal').modal('show');
         };
 
@@ -506,10 +528,16 @@
                 if (result.isConfirmed) {
                     // Désactiver le bouton
                     document.getElementById('modalSubmitBtn').disabled = true;
-                    
+
+                    const formData = new FormData(form);
+                    if (window.currentBulkIds && window.currentBulkIds.length) {
+                        formData.delete('id');
+                        window.currentBulkIds.forEach(id => formData.append('ids[]', id));
+                    }
+
                     fetch(form.action, {
                         method: 'POST',
-                        body: new FormData(form),
+                        body: formData,
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                         }
@@ -539,6 +567,46 @@
                 }
             });
         }
+
+        // Sélection multiple des lignes par section (avions, vols, équipage, ...)
+        function getCheckedIds(type) {
+            return $('.item-checkbox[data-type="' + type + '"]:checked')
+                .map(function() { return this.value; })
+                .get();
+        }
+
+        function refreshBulkButtons(type) {
+            const hasSelection = getCheckedIds(type).length > 0;
+            $('.bulk-approve-btn[data-type="' + type + '"], .bulk-reject-btn[data-type="' + type + '"]')
+                .prop('disabled', !hasSelection);
+        }
+
+        $(document).on('change', '.select-all-checkbox', function() {
+            const type = $(this).data('type');
+            const checked = $(this).prop('checked');
+            $('.item-checkbox[data-type="' + type + '"]').prop('checked', checked);
+            refreshBulkButtons(type);
+        });
+
+        $(document).on('change', '.item-checkbox', function() {
+            const type = $(this).data('type');
+            const allChecked = $('.item-checkbox[data-type="' + type + '"]').length ===
+                $('.item-checkbox[data-type="' + type + '"]:checked').length;
+            $('.select-all-checkbox[data-type="' + type + '"]').prop('checked', allChecked);
+            refreshBulkButtons(type);
+        });
+
+        $(document).on('click', '.bulk-approve-btn', function() {
+            const type = $(this).data('type');
+            const demandeId = $(this).data('demande-id');
+            window.openBulkDecisionModal(type, getCheckedIds(type), demandeId, 'approve');
+        });
+
+        $(document).on('click', '.bulk-reject-btn', function() {
+            const type = $(this).data('type');
+            const demandeId = $(this).data('demande-id');
+            window.openBulkDecisionModal(type, getCheckedIds(type), demandeId, 'reject');
+        });
 
         // Fonction pour valider tous les items
         window.validateAllItems = function() {

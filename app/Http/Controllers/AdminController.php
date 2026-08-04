@@ -2092,12 +2092,16 @@ class AdminController extends Controller
     {
         $action = $request->input('action_type');
         $table = $request->input('table');
-        $id = $request->input('id');
+        $ids = $request->input('ids', $request->filled('id') ? [$request->input('id')] : []);
         $demandeId = $request->input('demande_id');
         $motif = $request->input('motif');
 
         if (!DB::getSchemaBuilder()->hasTable($table)) {
             return response()->json(['success' => false, 'message' => 'Table not found'], 400);
+        }
+
+        if (empty($ids)) {
+            return response()->json(['success' => false, 'message' => 'No item selected'], 400);
         }
 
         $demande = DemandeAutorisation::findOrFail($demandeId);
@@ -2112,7 +2116,7 @@ class AdminController extends Controller
         $actorRole = auth()->user()->hasRole('dta') ? 'DTA' : 'ADMIN';
 
         if ($action === 'approve') {
-            DB::table($table)->where('id', $id)->update([
+            DB::table($table)->whereIn('id', $ids)->update([
                 'valider' => 1,
                 'motif' => null,
                 'valide_par_role' => $actorRole,
@@ -2125,7 +2129,7 @@ class AdminController extends Controller
         } else {
             $request->validate(['motif' => 'required|string|max:500']);
 
-            DB::table($table)->where('id', $id)->update([
+            DB::table($table)->whereIn('id', $ids)->update([
                 'valider' => 0,
                 'motif' => $motif,
                 'valide_par_role' => $actorRole,

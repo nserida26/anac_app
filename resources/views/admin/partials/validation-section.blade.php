@@ -11,10 +11,23 @@
     </div>
     <div class="card-body">
         @if($items->isNotEmpty())
+            @unless($hasRejection)
+                <div class="mb-2">
+                    <button type="button" class="btn btn-success btn-sm bulk-approve-btn" data-type="{{ $type }}" data-demande-id="{{ $demandeId }}" disabled>
+                        <i class="fas fa-check-double"></i> @lang('trans.approve_selected')
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm bulk-reject-btn" data-type="{{ $type }}" data-demande-id="{{ $demandeId }}" disabled>
+                        <i class="fas fa-times"></i> @lang('trans.reject_selected')
+                    </button>
+                </div>
+            @endunless
             <div class="table-responsive">
                 <table class="table table-striped table-bordered">
                     <thead>
                         <tr>
+                            <th>
+                                <input type="checkbox" class="select-all-checkbox" data-type="{{ $type }}" {{ $hasRejection ? 'disabled' : '' }}>
+                            </th>
                             @foreach($columns as $key => $label)
                                 <th>{{ $label }}</th>
                             @endforeach
@@ -25,6 +38,9 @@
                     <tbody>
                         @foreach($items as $item)
                             <tr id="{{ $type }}-{{ $item->id }}">
+                                <td>
+                                    <input type="checkbox" class="item-checkbox" data-type="{{ $type }}" value="{{ $item->id }}" {{ $hasRejection ? 'disabled' : '' }}>
+                                </td>
                                 @foreach($columns as $key => $label)
                                     <td>
                                         @switch($key)

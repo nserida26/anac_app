@@ -236,12 +236,25 @@
                            
 
 
+                            @if (auth()->user()->hasRole('dta') && !$hasRejectedItem)
+                            <div class="mb-2">
+                                <button type="button" class="btn btn-success btn-sm bulk-approve-btn" data-type="avions" data-demande-id="{{ $demandeAutorisation->id }}" disabled>
+                                    <i class="fas fa-check-double"></i> @lang('trans.approve_selected')
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm bulk-reject-btn" data-type="avions" data-demande-id="{{ $demandeAutorisation->id }}" disabled>
+                                    <i class="fas fa-times"></i> @lang('trans.reject_selected')
+                                </button>
+                            </div>
+                            @endif
                             <div class="row mt-4" id="avionsTableContainer">
                                 <div class="col-lg-12">
                                     <div class="table-responsive">
                                     <table class="table table-striped table-bordered" id="avionsTable">
                                         <thead>
                                             <tr>
+                                                @if (auth()->user()->hasRole('dta'))
+                                                <th><input type="checkbox" class="select-all-checkbox" data-type="avions" {{ $hasRejectedItem ? 'disabled' : '' }}></th>
+                                                @endif
                                                 <th>Immatriculation</th>
                                                 <th>Type</th>
                                                 <th>Opérateur</th>
@@ -254,6 +267,9 @@
                                         <tbody>
                                             @foreach ($avions as $avionItem)
                                             <tr id="avion-{{ $avionItem->id }}">
+                                                @if (auth()->user()->hasRole('dta'))
+                                                <td><input type="checkbox" class="item-checkbox" data-type="avions" value="{{ $avionItem->id }}" {{ $hasRejectedItem ? 'disabled' : '' }}></td>
+                                                @endif
                                                 <td>{{ $avionItem->immatriculation }}</td>
                                                 <td>{{ $avionItem->type->code ?? 'N/A' }}</td>
                                                 <td>{{ $avionItem->compagnie->nom_entreprise ?? 'N/A' }}</td>
@@ -352,12 +368,25 @@
                             
 
 
+                            @if (auth()->user()->hasRole('dta') && !$hasRejectedItem)
+                            <div class="mb-2">
+                                <button type="button" class="btn btn-success btn-sm bulk-approve-btn" data-type="vols" data-demande-id="{{ $demandeAutorisation->id }}" disabled>
+                                    <i class="fas fa-check-double"></i> @lang('trans.approve_selected')
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm bulk-reject-btn" data-type="vols" data-demande-id="{{ $demandeAutorisation->id }}" disabled>
+                                    <i class="fas fa-times"></i> @lang('trans.reject_selected')
+                                </button>
+                            </div>
+                            @endif
                             <div class="row mt-4" id="volsTableContainer">
                                 <div class="col-lg-12">
                                     <div class="table-responsive">
                                     <table class="table table-striped table-bordered" id="volsTable">
                                         <thead>
                                             <tr>
+                                                @if (auth()->user()->hasRole('dta'))
+                                                <th><input type="checkbox" class="select-all-checkbox" data-type="vols" {{ $hasRejectedItem ? 'disabled' : '' }}></th>
+                                                @endif
                                                 <th>@lang('trans.flight_number')</th>
 
                                                 <th>@lang('trans.start_aeroport')</th>
@@ -387,6 +416,9 @@
                                             $routeString .= ' → ' . (optional($volItem->aeroportArrivee)->codeICAO ?? $volItem->nom_piste_arrivee ?? 'N/A');
                                             @endphp
                                             <tr id="vol-{{ $volItem->id }}">
+                                                @if (auth()->user()->hasRole('dta'))
+                                                <td><input type="checkbox" class="item-checkbox" data-type="vols" value="{{ $volItem->id }}" {{ $hasRejectedItem ? 'disabled' : '' }}></td>
+                                                @endif
                                                 <td>{{ $volItem->numero_vol }}</td>
 
                                                 <td>{{ optional($volItem->aeroportDepart)->codeICAO ?? $volItem->nom_piste_depart ?? 'N/A' }}</td>
@@ -479,12 +511,25 @@
                             
 
 
+                            @if (auth()->user()->hasRole('dta') && !$hasRejectedItem)
+                            <div class="mb-2">
+                                <button type="button" class="btn btn-success btn-sm bulk-approve-btn" data-type="equipe_vols" data-demande-id="{{ $demandeAutorisation->id }}" disabled>
+                                    <i class="fas fa-check-double"></i> @lang('trans.approve_selected')
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm bulk-reject-btn" data-type="equipe_vols" data-demande-id="{{ $demandeAutorisation->id }}" disabled>
+                                    <i class="fas fa-times"></i> @lang('trans.reject_selected')
+                                </button>
+                            </div>
+                            @endif
                             <div class="row mt-4">
                                 <div class="col-lg-12">
                                     <div class="table-responsive">
                                     <table class="table table-striped table-bordered" id="crewTable">
                                         <thead>
                                             <tr>
+                                                @if (auth()->user()->hasRole('dta'))
+                                                <th><input type="checkbox" class="select-all-checkbox" data-type="equipe_vols" {{ $hasRejectedItem ? 'disabled' : '' }}></th>
+                                                @endif
                                                 <th>@lang('trans.role')</th>
                                                 <th>@lang('trans.license')</th>
                                                 <th>@lang('trans.proof')</th>
@@ -497,6 +542,9 @@
                                         <tbody>
                                             @foreach ($equipe_vols as $membre)
                                             <tr id="membre-{{ $membre->id }}">
+                                                @if (auth()->user()->hasRole('dta'))
+                                                <td><input type="checkbox" class="item-checkbox" data-type="equipe_vols" value="{{ $membre->id }}" {{ $hasRejectedItem ? 'disabled' : '' }}></td>
+                                                @endif
                                                 <td>{{ strtoupper($membre->fonction) }}</td>
                                                 <td>
                                                     @if ($membre->licence_numero)
@@ -587,12 +635,25 @@
                             
 
 
+                            @if (auth()->user()->hasRole('dta') && !$hasRejectedItem)
+                            <div class="mb-2">
+                                <button type="button" class="btn btn-success btn-sm bulk-approve-btn" data-type="fret_vols" data-demande-id="{{ $demandeAutorisation->id }}" disabled>
+                                    <i class="fas fa-check-double"></i> @lang('trans.approve_selected')
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm bulk-reject-btn" data-type="fret_vols" data-demande-id="{{ $demandeAutorisation->id }}" disabled>
+                                    <i class="fas fa-times"></i> @lang('trans.reject_selected')
+                                </button>
+                            </div>
+                            @endif
                             <div class="row mt-4">
                                 <div class="col-lg-12">
                                     <div class="table-responsive">
                                     <table class="table table-striped table-bordered" id="fretTable">
                                         <thead>
                                             <tr>
+                                                @if (auth()->user()->hasRole('dta'))
+                                                <th><input type="checkbox" class="select-all-checkbox" data-type="fret_vols" {{ $hasRejectedItem ? 'disabled' : '' }}></th>
+                                                @endif
                                                 <th>@lang('trans.nature')</th>
                                                 <th>@lang('trans.weight_kg')</th>
                                                 <th>@lang('trans.description')</th>
@@ -605,6 +666,9 @@
                                         <tbody>
                                             @foreach ($fretVols as $fret)
                                             <tr id="fret-{{ $fret->id }}">
+                                                @if (auth()->user()->hasRole('dta'))
+                                                <td><input type="checkbox" class="item-checkbox" data-type="fret_vols" value="{{ $fret->id }}" {{ $hasRejectedItem ? 'disabled' : '' }}></td>
+                                                @endif
                                                 <td>{{ strtoupper($fret->nature) }}</td>
                                                 <td>{{ $fret->poids }} kg</td>
                                                 <td>{{ $fret->instructions_speciales }}</td>
@@ -673,11 +737,22 @@
                         <h3 class="card-title">@lang('trans.deceased_persons')</h3>
                     </div>
                     <div class="card-body">
+                            @if (!$hasRejectedItem)
+                            <div class="mb-2">
+                                <button type="button" class="btn btn-success btn-sm bulk-approve-btn" data-type="personne_deces" data-demande-id="{{ $demandeAutorisation->id }}" disabled>
+                                    <i class="fas fa-check-double"></i> @lang('trans.approve_selected')
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm bulk-reject-btn" data-type="personne_deces" data-demande-id="{{ $demandeAutorisation->id }}" disabled>
+                                    <i class="fas fa-times"></i> @lang('trans.reject_selected')
+                                </button>
+                            </div>
+                            @endif
                             <div class="row mt-4">
                                 <div class="col-lg-12">
                                     <table class="table table-striped table-bordered" id="deceasedPersonsTable">
                                         <thead>
                                             <tr>
+                                                <th><input type="checkbox" class="select-all-checkbox" data-type="personne_deces" {{ $hasRejectedItem ? 'disabled' : '' }}></th>
                                                 <th>@lang('trans.full_name')</th>
                                                 <th>@lang('trans.passport_number')</th>
                                                 <th>@lang('trans.proof')</th>
@@ -687,6 +762,7 @@
                                         <tbody>
                                             @foreach ($personnesDeces as $personne)
                                                 <tr id="personne-{{ $personne->id }}">
+                                                    <td><input type="checkbox" class="item-checkbox" data-type="personne_deces" value="{{ $personne->id }}" {{ $hasRejectedItem ? 'disabled' : '' }}></td>
                                                     <td>{{ $personne->nom_prenom }}</td>
                                                     <td>{{ $personne->numero_passport ?? 'N/A' }}</td>
                                                     <td>
@@ -745,12 +821,23 @@
                                     
                         {{-- MDN List --}}
                         @if(isset($mdns) && $mdns->isNotEmpty())
+                            @if (!$hasRejectedItem)
+                            <div class="mb-2">
+                                <button type="button" class="btn btn-success btn-sm bulk-approve-btn" data-type="mdns" data-demande-id="{{ $demandeAutorisation->id }}" disabled>
+                                    <i class="fas fa-check-double"></i> @lang('trans.approve_selected')
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm bulk-reject-btn" data-type="mdns" data-demande-id="{{ $demandeAutorisation->id }}" disabled>
+                                    <i class="fas fa-times"></i> @lang('trans.reject_selected')
+                                </button>
+                            </div>
+                            @endif
                             <div class="row mt-4">
                                 <div class="col-lg-12">
                                     <div class="table-responsive">
                                     <table class="table table-striped table-bordered" id="mdnTable">
                                         <thead>
                                             <tr>
+                                                <th><input type="checkbox" class="select-all-checkbox" data-type="mdns" {{ $hasRejectedItem ? 'disabled' : '' }}></th>
                                                 <th>@lang('trans.authorization_date')</th>
                                                 <th>@lang('trans.mdn_number')</th>
                                                 <th>@lang('trans.nationality')</th>
@@ -760,6 +847,7 @@
                                         <tbody>
                                             @foreach ($mdns as $mdn)
                                                 <tr id="mdn-{{ $mdn->id }}">
+                                                    <td><input type="checkbox" class="item-checkbox" data-type="mdns" value="{{ $mdn->id }}" {{ $hasRejectedItem ? 'disabled' : '' }}></td>
                                                     <td>{{ $mdn->formatted_date_autorisation }}</td>
                                                     <td>{{ $mdn->numero_mdn }}</td>
                                                     <td>
@@ -820,12 +908,25 @@
                             
 
 
+                            @if (auth()->user()->hasRole('dta') && !$hasRejectedItem)
+                            <div class="mb-2">
+                                <button type="button" class="btn btn-success btn-sm bulk-approve-btn" data-type="receiving_parties" data-demande-id="{{ $demandeAutorisation->id }}" disabled>
+                                    <i class="fas fa-check-double"></i> @lang('trans.approve_selected')
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm bulk-reject-btn" data-type="receiving_parties" data-demande-id="{{ $demandeAutorisation->id }}" disabled>
+                                    <i class="fas fa-times"></i> @lang('trans.reject_selected')
+                                </button>
+                            </div>
+                            @endif
                             <div class="row mt-4">
                                 <div class="col-lg-12">
                                     <div class="table-responsive">
                                     <table class="table table-striped table-bordered">
                                         <thead>
                                             <tr>
+                                                @if (auth()->user()->hasRole('dta'))
+                                                <th><input type="checkbox" class="select-all-checkbox" data-type="receiving_parties" {{ $hasRejectedItem ? 'disabled' : '' }}></th>
+                                                @endif
                                                 <th>Contact</th>
                                                 <th>Téléphone</th>
                                                 <th>Email</th>
@@ -840,6 +941,9 @@
                                         <tbody>
                                             @foreach ($receivingParties as $party)
                                             <tr id="party-{{ $party->id }}">
+                                                @if (auth()->user()->hasRole('dta'))
+                                                <td><input type="checkbox" class="item-checkbox" data-type="receiving_parties" value="{{ $party->id }}" {{ $hasRejectedItem ? 'disabled' : '' }}></td>
+                                                @endif
                                                 <td>{{ $party->nom_contact }}</td>
                                                 <td>{{ $party->telephone_contact }}</td>
                                                 <td>{{ $party->email_contact }}</td>
@@ -920,12 +1024,25 @@
                            
 
 
+                            @if (auth()->user()->hasRole('dta') && !$hasRejectedItem)
+                            <div class="mb-2">
+                                <button type="button" class="btn btn-success btn-sm bulk-approve-btn" data-type="document_autorisations" data-demande-id="{{ $demandeAutorisation->id }}" disabled>
+                                    <i class="fas fa-check-double"></i> @lang('trans.approve_selected')
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm bulk-reject-btn" data-type="document_autorisations" data-demande-id="{{ $demandeAutorisation->id }}" disabled>
+                                    <i class="fas fa-times"></i> @lang('trans.reject_selected')
+                                </button>
+                            </div>
+                            @endif
                             <div class="row mt-4">
                                 <div class="col-12">
                                     <div class="table-responsive">
                                     <table class="table table-striped" id="documentsTable">
                                         <thead>
                                             <tr>
+                                                @if (auth()->user()->hasRole('dta'))
+                                                <th><input type="checkbox" class="select-all-checkbox" data-type="document_autorisations" {{ $hasRejectedItem ? 'disabled' : '' }}></th>
+                                                @endif
                                                 <th>Type</th>
                                                 <th>Document</th>
                                                 @if (auth()->user()->hasRole('dta'))
@@ -937,6 +1054,9 @@
                                         <tbody>
                                             @foreach ($demandeAutorisation->documents as $document)
                                             <tr id="document-{{ $document->id }}">
+                                                @if (auth()->user()->hasRole('dta'))
+                                                <td><input type="checkbox" class="item-checkbox" data-type="document_autorisations" value="{{ $document->id }}" {{ $hasRejectedItem ? 'disabled' : '' }}></td>
+                                                @endif
                                                 <td>
                                                     {{ LaravelLocalization::getCurrentLocale() == 'fr' ? optional($document->typeDocument)->nom_fr : optional($document->typeDocument)->nom_en }}
                                                 </td>
@@ -1048,18 +1168,11 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script>
-        // Fonction pour ouvrir la modale et définir les valeurs du formulaire
-        function openDecisionModal(table, id, demande, action) {
-            // Set modal values
-            document.getElementById('modalTable').value = table;
-            document.getElementById('modalId').value = id;
-            document.getElementById('modalDemandeId').value = demande;
+        // Configuration commune du modal (titre, couleurs, bouton) selon l'action
+        function configureDecisionModal(action) {
             document.getElementById('modalActionType').value = action;
-
-            // Clear previous reason
             document.getElementById('modalMotif').value = '';
 
-            // Configure modal based on action type
             if (action === 'approve') {
                 document.getElementById('decisionModalLabel').textContent = '@lang('trans.confirm_approval')';
                 document.getElementById('modalSubmitBtn').textContent = '@lang('trans.approve')';
@@ -1072,14 +1185,37 @@
                 document.getElementById('reasonFieldGroup').style.display = 'block';
             }
 
-            // Set submit handler
             document.getElementById('modalSubmitBtn').onclick = function() {
                 submitDecisionForm(action);
             };
+        }
 
-            // Show modal
+        // Fonction pour ouvrir la modale (un seul élément)
+        function openDecisionModal(table, id, demande, action) {
+            document.getElementById('modalTable').value = table;
+            document.getElementById('modalId').value = id;
+            document.getElementById('modalDemandeId').value = demande;
+            window.currentBulkIds = null;
+
+            configureDecisionModal(action);
             new bootstrap.Modal(document.getElementById('decisionModal')).show();
         }
+
+        // Fonction pour ouvrir la modale (plusieurs éléments sélectionnés)
+        window.openBulkDecisionModal = function(table, ids, demande, action) {
+            if (!ids || ids.length === 0) {
+                alert('@lang('trans.select_items_first')');
+                return;
+            }
+
+            document.getElementById('modalTable').value = table;
+            document.getElementById('modalId').value = '';
+            document.getElementById('modalDemandeId').value = demande;
+            window.currentBulkIds = ids;
+
+            configureDecisionModal(action);
+            new bootstrap.Modal(document.getElementById('decisionModal')).show();
+        };
 
         function submitDecisionForm(action) {
             const form = document.getElementById('decisionForm');
@@ -1094,12 +1230,16 @@
                     '@lang('trans.confirm_approval_question')' :
                     '@lang('trans.confirm_rejection_question')')) {
 
-
+                const formData = new FormData(form);
+                if (window.currentBulkIds && window.currentBulkIds.length) {
+                    formData.delete('id');
+                    window.currentBulkIds.forEach(id => formData.append('ids[]', id));
+                }
 
                 // Submit via AJAX
                 fetch(form.action, {
                         method: 'POST',
-                        body: new FormData(form),
+                        body: formData,
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                         }
@@ -1118,6 +1258,46 @@
                     });
             }
         }
+
+        // Sélection multiple des lignes par section (avions, vols, équipage, ...)
+        function getCheckedIds(type) {
+            return $('.item-checkbox[data-type="' + type + '"]:checked')
+                .map(function() { return this.value; })
+                .get();
+        }
+
+        function refreshBulkButtons(type) {
+            const hasSelection = getCheckedIds(type).length > 0;
+            $('.bulk-approve-btn[data-type="' + type + '"], .bulk-reject-btn[data-type="' + type + '"]')
+                .prop('disabled', !hasSelection);
+        }
+
+        $(document).on('change', '.select-all-checkbox', function() {
+            const type = $(this).data('type');
+            const checked = $(this).prop('checked');
+            $('.item-checkbox[data-type="' + type + '"]').prop('checked', checked);
+            refreshBulkButtons(type);
+        });
+
+        $(document).on('change', '.item-checkbox', function() {
+            const type = $(this).data('type');
+            const allChecked = $('.item-checkbox[data-type="' + type + '"]').length ===
+                $('.item-checkbox[data-type="' + type + '"]:checked').length;
+            $('.select-all-checkbox[data-type="' + type + '"]').prop('checked', allChecked);
+            refreshBulkButtons(type);
+        });
+
+        $(document).on('click', '.bulk-approve-btn', function() {
+            const type = $(this).data('type');
+            const demandeId = $(this).data('demande-id');
+            window.openBulkDecisionModal(type, getCheckedIds(type), demandeId, 'approve');
+        });
+
+        $(document).on('click', '.bulk-reject-btn', function() {
+            const type = $(this).data('type');
+            const demandeId = $(this).data('demande-id');
+            window.openBulkDecisionModal(type, getCheckedIds(type), demandeId, 'reject');
+        });
     </script>
 <script>
     $(document).ready(function() {
