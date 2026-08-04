@@ -711,11 +711,6 @@ class DgDsvController extends Controller
     public function indexAutorisation()
     {
 $demandeAutorisations = DemandeAutorisation::with(['type', 'user', 'etatDemande'])
-    ->whereHas('etatDemande', function ($q) {
-        $q->where('compagnie_cree_demande', true)
-        ->orWhere('dg_rejeter', true)
-                     ->orWhere('dta_rejeter', true);
-    })
     ->orderBy('created_at', 'desc')
     ->get();
         $demandeAutorisations->map(function ($demande) {
