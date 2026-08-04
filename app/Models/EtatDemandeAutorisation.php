@@ -200,9 +200,9 @@ class EtatDemandeAutorisation extends Model
             'dg_annoter'             => false,
             'dg_annoter_admin'       => false, // Nouveau
             'dta_dg_annoter'         => false,
-            //'dg_rejeter'             => false,
+            'dg_rejeter'             => false,
             'dta_annoter'            => false,
-            //'dta_rejeter'            => false,
+            'dta_rejeter'            => false,
             'service_annoter'        => false,
             'service_valider'        => false,
             'dta_valider'            => false,

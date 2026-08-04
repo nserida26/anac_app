@@ -309,6 +309,7 @@ return [
         'blocked' => 'Blocked'
     ],
     'view_issues' => 'View Issues',
+    'issues' => 'Issues',
     'issues_for' => 'Issues for',
     'invalid_components' => 'Invalid Components',
     'rejection_reasons' => 'Rejection Reasons',

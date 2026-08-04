@@ -698,6 +698,14 @@ class DemandeAutorisationController extends Controller
             // Traitement des actions
             switch ($action) {
                 case 'compagnie_cree_demande':
+                    // Si la demande était rejetée, on réinitialise les validations/motifs
+                    // des lignes et de l'état de workflow pour repartir sur "submitted".
+                    $demande->resetAllValidations();
+                    $demande->resetAllMotifs();
+                    if ($demande->etatDemande) {
+                        $demande->etatDemande->resetAllApprovalStates();
+                    }
+
                     $demande->update([
                         'date_soumission' => now(),
                         'statut' => 'in_progress',

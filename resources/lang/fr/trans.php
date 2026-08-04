@@ -375,6 +375,7 @@ return [
         'blocked' => 'Bloqué'
     ],
     'view_issues' => 'Voir les problèmes',
+    'issues' => 'Problèmes',
     'issues_for' => 'Problèmes pour',
     'invalid_components' => 'Composants invalides',
     'rejection_reasons' => 'Motifs de rejet',
