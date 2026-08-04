@@ -759,10 +759,9 @@ class DemandeAutorisationController extends Controller
                             $request->motif
                         );
                     }
-                    if ($demande->etatDemande) {
-                        $demande->etatDemande->resetAllApprovalStates();
-                        $demande->etatDemande->update(['compagnie_cree_demande' => false, 'dg_rejeter' => true]);
-                    }
+                    $state = $demande->etatDemande()->firstOrCreate([]);
+                    $state->resetAllApprovalStates();
+                    $state->update(['compagnie_cree_demande' => false, 'dg_rejeter' => true]);
                     $demande->update(['dg_motif' => $request->motif]);
                     break;
 
@@ -783,11 +782,9 @@ class DemandeAutorisationController extends Controller
                             $request->motif
                         );
                     }
-                    if ($demande->etatDemande) {
-
-                        $demande->etatDemande->resetAllApprovalStates();
-                        $demande->etatDemande->update(['compagnie_cree_demande' => false, 'dta_rejeter' => true]);
-                    }
+                    $state = $demande->etatDemande()->firstOrCreate([]);
+                    $state->resetAllApprovalStates();
+                    $state->update(['compagnie_cree_demande' => false, 'dta_rejeter' => true]);
                     $demande->update(['dta_motif' => $request->motif]);
 
                     break;
@@ -914,10 +911,9 @@ class DemandeAutorisationController extends Controller
                         'DTA',
                         $demande->rejection_reasons_list
                     );
-                    if ($demande->etatDemande) {
-                        $demande->etatDemande->resetAllApprovalStates();
-                        $demande->etatDemande->update(['compagnie_cree_demande' => false, 'dta_rejeter' => true]);
-                    }
+                    $state = $demande->etatDemande()->firstOrCreate([]);
+                    $state->resetAllApprovalStates();
+                    $state->update(['compagnie_cree_demande' => false, 'dta_rejeter' => true]);
                     break;
 
                 case 'dsv_valider':
