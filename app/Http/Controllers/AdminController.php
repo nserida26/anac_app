@@ -2108,10 +2108,13 @@ class AdminController extends Controller
             ], 422);
         }
 
+        $actorRole = auth()->user()->hasRole('dta') ? 'DTA' : 'ADMIN';
+
         if ($action === 'approve') {
             DB::table($table)->where('id', $id)->update([
                 'valider' => 1,
                 'motif' => null,
+                'valide_par_role' => $actorRole,
                 'updated_at' => now()
             ]);
 
@@ -2124,6 +2127,7 @@ class AdminController extends Controller
             DB::table($table)->where('id', $id)->update([
                 'valider' => 0,
                 'motif' => $motif,
+                'valide_par_role' => $actorRole,
                 'updated_at' => now()
             ]);
 

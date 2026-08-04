@@ -7,6 +7,9 @@
                 <li>
                     <strong>{{ ucfirst(str_replace('_', ' ', $reason['type'] ?? '')) }}</strong> :
                     {{ $reason['motif'] ?? 'N/A' }}
+                    @if(!empty($reason['role']))
+                        <span class="badge badge-secondary">{{ $reason['role'] }}</span>
+                    @endif
                 </li>
             @endforeach
         </ul>

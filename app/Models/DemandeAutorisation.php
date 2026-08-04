@@ -223,6 +223,7 @@ public function isValidatedByAll(): bool
                         'id' => $item->id,
                         'identifier' => $item->{$config['id']},
                         'motif' => $item->motif,
+                        'role' => $item->valide_par_role ?? null,
                     ];
                 }
             }
