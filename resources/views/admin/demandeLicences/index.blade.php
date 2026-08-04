@@ -178,6 +178,14 @@
                                             @endif
                                          </td>
                                         <td>
+                                            @if ($demande->has_issues)
+                                                <button type="button" class="btn btn-info btn-sm" data-toggle="modal"
+                                                        data-target="#issuesModal-{{ $demande->id }}"
+                                                        title="@lang('trans.view_issues')">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </button>
+                                            @endif
+
                                             @if (optional($demande->etatDemande)->demandeur_cree_demande && empty($demande->licence) && !isset($demande->licence))
                                             <form action="{{ route('admin.destroy', $demande->id) }}"
                                                   method="POST"
@@ -338,6 +346,11 @@
                                             @endif
                                          </td>
                                     </tr>
+
+                                    <!-- Modal des Erreurs/Issues -->
+                                    @if ($demande->has_issues)
+                                        @include('dir.demandeLicences.modals.issues', ['demande' => $demande])
+                                    @endif
                                     @endforeach
                                 </tbody>
                             </table>
