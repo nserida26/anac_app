@@ -2091,17 +2091,33 @@ class AdminController extends Controller
     public function handleApproval(Request $request)
     {
         $action = $request->input('action_type');
-        $table = $request->input('table');
-        $ids = $request->input('ids', $request->filled('id') ? [$request->input('id')] : []);
         $demandeId = $request->input('demande_id');
         $motif = $request->input('motif');
 
-        if (!DB::getSchemaBuilder()->hasTable($table)) {
-            return response()->json(['success' => false, 'message' => 'Table not found'], 400);
+        // Format multi-sections : items = [{table: 'avions', ids: [1,2]}, {table: 'vols', ids: [3]}, ...]
+        // permet d'approuver/rejeter en une seule fois des lignes venant de plusieurs sections
+        // (avions, vols, équipage, ...). Reste rétro-compatible avec l'ancien format table + id/ids.
+        $itemsInput = $request->input('items');
+        if ($itemsInput) {
+            $groups = is_string($itemsInput) ? json_decode($itemsInput, true) : $itemsInput;
+        } else {
+            $table = $request->input('table');
+            $ids = $request->input('ids', $request->filled('id') ? [$request->input('id')] : []);
+            $groups = $table ? [['table' => $table, 'ids' => $ids]] : [];
         }
 
-        if (empty($ids)) {
+        if (empty($groups)) {
             return response()->json(['success' => false, 'message' => 'No item selected'], 400);
+        }
+
+        foreach ($groups as $group) {
+            $groupTable = $group['table'] ?? null;
+            if (!$groupTable || !DB::getSchemaBuilder()->hasTable($groupTable)) {
+                return response()->json(['success' => false, 'message' => 'Table not found'], 400);
+            }
+            if (empty($group['ids'])) {
+                return response()->json(['success' => false, 'message' => 'No item selected'], 400);
+            }
         }
 
         $demande = DemandeAutorisation::findOrFail($demandeId);
@@ -2116,12 +2132,14 @@ class AdminController extends Controller
         $actorRole = auth()->user()->hasRole('dta') ? 'DTA' : 'ADMIN';
 
         if ($action === 'approve') {
-            DB::table($table)->whereIn('id', $ids)->update([
-                'valider' => 1,
-                'motif' => null,
-                'valide_par_role' => $actorRole,
-                'updated_at' => now()
-            ]);
+            foreach ($groups as $group) {
+                DB::table($group['table'])->whereIn('id', $group['ids'])->update([
+                    'valider' => 1,
+                    'motif' => null,
+                    'valide_par_role' => $actorRole,
+                    'updated_at' => now()
+                ]);
+            }
 
             Activity::log('approved', $demande->id);
 
@@ -2129,12 +2147,14 @@ class AdminController extends Controller
         } else {
             $request->validate(['motif' => 'required|string|max:500']);
 
-            DB::table($table)->whereIn('id', $ids)->update([
-                'valider' => 0,
-                'motif' => $motif,
-                'valide_par_role' => $actorRole,
-                'updated_at' => now()
-            ]);
+            foreach ($groups as $group) {
+                DB::table($group['table'])->whereIn('id', $group['ids'])->update([
+                    'valider' => 0,
+                    'motif' => $motif,
+                    'valide_par_role' => $actorRole,
+                    'updated_at' => now()
+                ]);
+            }
 
             $demande->update(['mise_a_jour' => true]);
             $state = $demande->etatDemande()->firstOrCreate([]);

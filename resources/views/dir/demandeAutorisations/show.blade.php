@@ -122,6 +122,21 @@
                     @include('dir.demandeAutorisations.partials.rejection-reasons-list', ['demande' => $demandeAutorisation])
                     @include('dir.demandeAutorisations.partials.invalid-components', ['demande' => $demandeAutorisation])
 
+                    @unless($hasRejectedItem)
+                        <!-- Barre d'action groupée multi-sections (avions, vols, équipage, ...) -->
+                        <div class="alert alert-secondary d-flex justify-content-between align-items-center" id="globalBulkBar" style="display:none !important;">
+                            <span><i class="fas fa-layer-group"></i> <span id="globalBulkCount">0</span> @lang('trans.items_selected_across_sections')</span>
+                            <span>
+                                <button type="button" class="btn btn-success btn-sm" id="globalApproveBtn" disabled>
+                                    <i class="fas fa-check-double"></i> @lang('trans.approve_selected')
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm" id="globalRejectBtn" disabled>
+                                    <i class="fas fa-times"></i> @lang('trans.reject_selected')
+                                </button>
+                            </span>
+                        </div>
+                    @endunless
+
                     <!-- BOUTON TOUT VALIDER - NOUVEAU -->
                     @if ($hasRejectedItem && auth()->user()->hasRole('dta'))
                     <div class="row mb-4">
@@ -1196,12 +1211,13 @@
             document.getElementById('modalId').value = id;
             document.getElementById('modalDemandeId').value = demande;
             window.currentBulkIds = null;
+            window.currentBulkGroups = null;
 
             configureDecisionModal(action);
             new bootstrap.Modal(document.getElementById('decisionModal')).show();
         }
 
-        // Fonction pour ouvrir la modale (plusieurs éléments sélectionnés)
+        // Fonction pour ouvrir la modale (plusieurs éléments d'une même section)
         window.openBulkDecisionModal = function(table, ids, demande, action) {
             if (!ids || ids.length === 0) {
                 alert('@lang('trans.select_items_first')');
@@ -1212,6 +1228,25 @@
             document.getElementById('modalId').value = '';
             document.getElementById('modalDemandeId').value = demande;
             window.currentBulkIds = ids;
+            window.currentBulkGroups = null;
+
+            configureDecisionModal(action);
+            new bootstrap.Modal(document.getElementById('decisionModal')).show();
+        };
+
+        // Fonction pour ouvrir la modale (éléments sélectionnés dans plusieurs sections à la fois)
+        window.openGlobalBulkDecisionModal = function(demande, action) {
+            const groups = getAllCheckedGroups();
+            if (groups.length === 0) {
+                alert('@lang('trans.select_items_first')');
+                return;
+            }
+
+            document.getElementById('modalTable').value = '';
+            document.getElementById('modalId').value = '';
+            document.getElementById('modalDemandeId').value = demande;
+            window.currentBulkIds = null;
+            window.currentBulkGroups = groups;
 
             configureDecisionModal(action);
             new bootstrap.Modal(document.getElementById('decisionModal')).show();
@@ -1231,7 +1266,11 @@
                     '@lang('trans.confirm_rejection_question')')) {
 
                 const formData = new FormData(form);
-                if (window.currentBulkIds && window.currentBulkIds.length) {
+                if (window.currentBulkGroups && window.currentBulkGroups.length) {
+                    formData.delete('id');
+                    formData.delete('table');
+                    formData.append('items', JSON.stringify(window.currentBulkGroups));
+                } else if (window.currentBulkIds && window.currentBulkIds.length) {
                     formData.delete('id');
                     window.currentBulkIds.forEach(id => formData.append('ids[]', id));
                 }
@@ -1266,10 +1305,30 @@
                 .get();
         }
 
+        // Sélection multiple tous types confondus (avions + vols + ... en même temps)
+        function getAllCheckedGroups() {
+            const groups = {};
+            $('.item-checkbox:checked').each(function() {
+                const type = $(this).data('type');
+                if (!groups[type]) {
+                    groups[type] = [];
+                }
+                groups[type].push(this.value);
+            });
+            return Object.keys(groups).map(table => ({ table: table, ids: groups[table] }));
+        }
+
         function refreshBulkButtons(type) {
             const hasSelection = getCheckedIds(type).length > 0;
             $('.bulk-approve-btn[data-type="' + type + '"], .bulk-reject-btn[data-type="' + type + '"]')
                 .prop('disabled', !hasSelection);
+        }
+
+        function refreshGlobalBulkBar() {
+            const total = $('.item-checkbox:checked').length;
+            $('#globalBulkCount').text(total);
+            $('#globalApproveBtn, #globalRejectBtn').prop('disabled', total === 0);
+            $('#globalBulkBar').toggle(total > 0);
         }
 
         $(document).on('change', '.select-all-checkbox', function() {
@@ -1277,6 +1336,7 @@
             const checked = $(this).prop('checked');
             $('.item-checkbox[data-type="' + type + '"]').prop('checked', checked);
             refreshBulkButtons(type);
+            refreshGlobalBulkBar();
         });
 
         $(document).on('change', '.item-checkbox', function() {
@@ -1285,6 +1345,15 @@
                 $('.item-checkbox[data-type="' + type + '"]:checked').length;
             $('.select-all-checkbox[data-type="' + type + '"]').prop('checked', allChecked);
             refreshBulkButtons(type);
+            refreshGlobalBulkBar();
+        });
+
+        $('#globalApproveBtn').on('click', function() {
+            window.openGlobalBulkDecisionModal('{{ $demandeAutorisation->id }}', 'approve');
+        });
+
+        $('#globalRejectBtn').on('click', function() {
+            window.openGlobalBulkDecisionModal('{{ $demandeAutorisation->id }}', 'reject');
         });
 
         $(document).on('click', '.bulk-approve-btn', function() {

@@ -573,6 +573,7 @@ return [
 'select_all' => 'Tout sélectionner',
 'approve_selected' => 'Approuver la sélection',
 'reject_selected' => 'Rejeter la sélection',
+'items_selected_across_sections' => 'élément(s) sélectionné(s) (toutes sections)',
 'validate_all_confirmation' => 'Vous êtes sur le point de valider tous les éléments de cette demande. Voulez-vous continuer ?',
 'validation_blocked_by_rejection' => 'Une ligne a été rejetée. La validation globale et les actions d\'approbation/rejet sont désactivées.',
 'no_items_found' => 'Aucun élément trouvé',
