@@ -2017,10 +2017,10 @@
                 $('#compagnie_aerienne_id').val($(this).data('compagnie_aerienne_id')).trigger('change');
 
                 // Afficher le formulaire
-                //$('#avionForm').show();
-                //$('#avionsTableContainer, #noAvionsAlert').hide();
-                //$('#showAvionFormBtn').hide();
-                //$('#formActionText').text('Mettre à jour');
+                $('#avionForm').show();
+                $('#avionsTableContainer, #noAvionsAlert').hide();
+                $('#showAvionFormBtn').hide();
+                $('#formActionText').text(@json(__('trans.update')));
 
                 // Scroller vers le formulaire
                 $('html, body').animate({

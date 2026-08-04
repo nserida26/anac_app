@@ -1009,13 +1009,11 @@ function loadDemandeForEdit(button) {
     }, 300);
     
     // Mettre à jour l'URL du formulaire pour la modification
+    // Note: la route user.autorisations.update est un POST (pas de route PUT dédiée) ;
+    // la distinction création/modification se fait via edit_mode + demande_id, pas via le verbe HTTP.
     $('#applicationForm').attr('action', "{{ route('user.autorisations.update', ':id') }}".replace(':id', demandeId));
-    
-    // Ajouter le champ _method pour Laravel (PUT)
-    if ($('#applicationForm input[name="_method"]').length === 0) {
-        $('#applicationForm').append('<input type="hidden" name="_method" value="PUT">');
-    }
-    
+    $('#applicationForm input[name="_method"]').remove();
+
     // Ouvrir le modal
     $('#applicationModal').modal('show');
 }

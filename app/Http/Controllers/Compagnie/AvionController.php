@@ -169,6 +169,15 @@ public function storeMultiple(Request $request)
     {
         $avion = Avion::findOrFail($id);
 
+        // Le formulaire d'édition réutilise le select multiple "immatriculations[]"
+        // même pour la modification d'un seul avion : on ramène ça à "immatriculation".
+        if (!$request->filled('immatriculation') && $request->has('immatriculations')) {
+            $immatriculations = $request->input('immatriculations');
+            $request->merge([
+                'immatriculation' => is_array($immatriculations) ? reset($immatriculations) : $immatriculations,
+            ]);
+        }
+
         $validator = Validator::make($request->all(), [
             'immatriculation' => 'required|string|max:50',
             'type_avion_id' => 'required|exists:type_avions,id',
@@ -186,7 +195,7 @@ public function storeMultiple(Request $request)
 
         try {
 
-            $avion->update(array_merge($request->all(), ['valider' => 1, 'motif' => null]));
+            $avion->update(array_merge($request->only(['immatriculation', 'type_avion_id', 'compagnie_aerienne_id']), ['valider' => 1, 'motif' => null]));
 
             return response()->json([
                 'status' => 'success',

@@ -399,7 +399,7 @@ $(document).ready(function() {
         const whatsapps = $(`#whatsapp_recipients-${demandeId}`).val() || [];
 
         
-        if (whatsapps.length === 0) {
+        if (emails.length === 0 && whatsapps.length === 0) {
             toastr.error('Veuillez sélectionner au moins un destinataire');
             return false;
         }

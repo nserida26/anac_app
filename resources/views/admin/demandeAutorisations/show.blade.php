@@ -343,7 +343,7 @@
         @include('admin.partials.validation-section', [
             'title' => trans('trans.deceased_persons'),
             'items' => $personnesDeces ?? collect(),
-            'type' => 'deceased_persons',
+            'type' => 'personne_deces',
             'demandeId' => $demandeAutorisation->id,
             'columns' => [
                 'nom_prenom' => trans('trans.full_name'),

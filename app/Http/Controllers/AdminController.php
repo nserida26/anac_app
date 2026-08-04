@@ -1648,6 +1648,16 @@ class AdminController extends Controller
                 }
             }
 
+            // Valider toutes les personnes décédées
+            if ($demande->personnes->isNotEmpty()) {
+                foreach ($demande->personnes as $personne) {
+                    $personne->update([
+                        'valider' => true,
+                        //'motif' => $request->global_comments
+                    ]);
+                }
+            }
+
             // Valider toutes les receiving parties
             if ($demande->receivingParties->isNotEmpty()) {
                 foreach ($demande->receivingParties as $party) {
