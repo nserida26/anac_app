@@ -5,7 +5,11 @@
         <ul class="mb-0">
             @foreach($demande->invalid_reasons as $reason)
                 <li>
-                    <strong>{{ ucfirst(str_replace('_', ' ', $reason['type'] ?? '')) }}</strong> :
+                    <strong>{{ ucfirst(str_replace('_', ' ', $reason['type'] ?? '')) }}</strong>
+                    @if(!empty($reason['identifier']))
+                        ({{ $reason['identifier'] }})
+                    @endif
+                    :
                     {{ $reason['motif'] ?? 'N/A' }}
                     @if(!empty($reason['role']))
                         <span class="badge badge-secondary">{{ $reason['role'] }}</span>

@@ -210,7 +210,8 @@ public function isValidatedByAll(): bool
             'vol' => ['rel' => $this->vols, 'id' => 'numero_vol'],
             'equipage' => ['rel' => $this->equipe, 'id' => 'fonction'],
             'fret' => ['rel' => $this->fret, 'id' => 'nature'],
-            'personne' => ['rel' => $this->mdns, 'id' => 'numero_mdn'],
+            'personne' => ['rel' => $this->personnes, 'id' => 'nom_prenom'],
+            'mdn' => ['rel' => $this->mdns, 'id' => 'numero_mdn'],
             'receiving_party' => ['rel' => $this->receivingParties, 'id' => 'nom_contact'],
             'document' => ['rel' => $this->documents, 'id' => 'id'],
         ];
