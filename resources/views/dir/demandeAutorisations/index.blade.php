@@ -206,14 +206,15 @@
                                                 
                                                 <!-- Actions spécifiques au rôle -->
                                                 @include('dir.demandeAutorisations.partials.role-actions', ['demande' => $demande])
-                                                
+
+                                                @if ($hasIssues)
+                                                    <button class="btn btn-warning btn-sm mb-1" data-toggle="modal" data-target="#issuesModal-{{ $demande->id }}">
+                                                        <i class="fas fa-exclamation-circle"></i> @lang('trans.issues')
+                                                    </button>
+                                                @endif
+
                                                 <!-- Bouton d'annotation pour DTA -->
                                                 @if(auth()->user()->hasRole('dta'))
-                                                    @if ($hasIssues)
-                                                        <button class="btn btn-warning btn-sm mb-1" data-toggle="modal" data-target="#issuesModal-{{ $demande->id }}">
-                                                            <i class="fas fa-exclamation-circle"></i> @lang('trans.issues')
-                                                        </button>
-                                                    @endif
                                                     @include('dir.demandeAutorisations.partials.annotation-button', ['demande' => $demande])
                                                 @endif
                                             </div>
