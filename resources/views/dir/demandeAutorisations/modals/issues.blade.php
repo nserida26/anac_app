@@ -16,16 +16,7 @@
                 @include('dir.demandeAutorisations.partials.invalid-components', ['demande' => $demande])
 
                 {{-- Motifs de rejet (Administratif) --}}
-                @if (!empty($demande->rejection_reasons_list))
-                    <div class="alert alert-danger">
-                        <h6><i class="fas fa-ban"></i> @lang('trans.rejection_reasons')</h6>
-                        <ul class="mb-0">
-                            @foreach ($demande->rejection_reasons_list as $reason)
-                                <li>{{ $reason }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+                @include('dir.demandeAutorisations.partials.rejection-reasons-list', ['demande' => $demande])
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('trans.close')</button>

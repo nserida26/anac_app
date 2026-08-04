@@ -117,6 +117,9 @@
                     @endphp
 
                     @include('dir.demandeAutorisations.partials.rejected-by', ['demande' => $demandeAutorisation])
+                    {{-- Filet de sécurité : affiche le motif même si le flag dta_rejeter/dg_rejeter
+                         n'est pas synchronisé avec le motif enregistré. --}}
+                    @include('dir.demandeAutorisations.partials.rejection-reasons-list', ['demande' => $demandeAutorisation])
                     @include('dir.demandeAutorisations.partials.invalid-components', ['demande' => $demandeAutorisation])
 
                     <!-- BOUTON TOUT VALIDER - NOUVEAU -->
