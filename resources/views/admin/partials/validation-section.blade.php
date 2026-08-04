@@ -1,4 +1,7 @@
 {{-- resources/views/admin/partials/validation-section.blade.php --}}
+@php
+    $hasRejection = $hasRejection ?? false;
+@endphp
 <div class="card card-primary">
     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <h3 class="card-title">{{ $title }}</h3>
@@ -134,11 +137,13 @@
                                 <td>
                                     @if(is_null($item->valider))
                                         <button class="btn btn-success btn-sm me-1"
+                                                {{ $hasRejection ? 'disabled' : '' }}
                                                 onclick="openDecisionModal('{{ $type }}', '{{ $item->id }}', '{{ $demandeId }}', 'approve')"
                                                 title="@lang('trans.approve')">
                                             <i class="fas fa-check"></i>
                                         </button>
                                         <button class="btn btn-danger btn-sm"
+                                                {{ $hasRejection ? 'disabled' : '' }}
                                                 onclick="openDecisionModal('{{ $type }}', '{{ $item->id }}', '{{ $demandeId }}', 'reject')"
                                                 title="@lang('trans.reject')">
                                             <i class="fas fa-times"></i>
@@ -148,6 +153,7 @@
                                             <i class="fas fa-check-circle"></i> @lang('trans.approved')
                                         </span>
                                         <button class="btn btn-danger btn-sm ms-2"
+                                                {{ $hasRejection ? 'disabled' : '' }}
                                                 onclick="openDecisionModal('{{ $type }}', '{{ $item->id }}', '{{ $demandeId }}', 'reject')"
                                                 title="@lang('trans.reject')">
                                             <i class="fas fa-times"></i>
@@ -157,6 +163,7 @@
                                             <i class="fas fa-times-circle"></i> @lang('trans.rejected')
                                         </span>
                                         <button class="btn btn-success btn-sm ms-2"
+                                                {{ $hasRejection ? 'disabled' : '' }}
                                                 onclick="openDecisionModal('{{ $type }}', '{{ $item->id }}', '{{ $demandeId }}', 'approve')"
                                                 title="@lang('trans.approve')">
                                             <i class="fas fa-check"></i>

@@ -1608,6 +1608,13 @@ class AdminController extends Controller
         try {
             $demande = DemandeAutorisation::findOrFail($request->demande_id);
 
+            if ($demande->hasInvalidComponents()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => trans('trans.validation_blocked_by_rejection')
+                ], 422);
+            }
+
             // Valider tous les avions
             if ($demande->avions->isNotEmpty()) {
                 foreach ($demande->avions as $avion) {
@@ -2093,6 +2100,13 @@ class AdminController extends Controller
         }
 
         $demande = DemandeAutorisation::findOrFail($demandeId);
+
+        if ($demande->hasInvalidComponents()) {
+            return response()->json([
+                'success' => false,
+                'message' => trans('trans.validation_blocked_by_rejection')
+            ], 422);
+        }
 
         if ($action === 'approve') {
             DB::table($table)->where('id', $id)->update([

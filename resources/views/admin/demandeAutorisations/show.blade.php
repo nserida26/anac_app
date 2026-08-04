@@ -194,8 +194,20 @@
         <!-- Workflow Timeline -->
         @include('admin.partials.workflow-timeline', ['demande' => $demandeAutorisation])
 
+        @php
+            $hasRejectedItem = $demandeAutorisation->hasInvalidComponents();
+        @endphp
+
         <!-- BOUTON TOUT VALIDER -->
-        @if(!$demandeAutorisation->isFullyValidated())
+        @if($hasRejectedItem)
+            <div class="row mb-4">
+                <div class="col-md-12 text-center">
+                    <div class="alert alert-warning d-inline-block">
+                        <i class="fas fa-exclamation-triangle"></i> @lang('trans.validation_blocked_by_rejection')
+                    </div>
+                </div>
+            </div>
+        @elseif(!$demandeAutorisation->isFullyValidated())
             <div class="row mb-4">
                 <div class="col-md-12 text-center">
                     <button type="button" class="btn btn-success btn-lg" onclick="validateAllItems()">
@@ -296,6 +308,7 @@
             'items' => $avions ?? collect(),
             'type' => 'avions',
             'demandeId' => $demandeAutorisation->id,
+            'hasRejection' => $hasRejectedItem,
             'columns' => [
                 'immatriculation' => trans('trans.registration'),
                 'type' => trans('trans.type'),
@@ -308,6 +321,7 @@
             'items' => $vols ?? collect(),
             'type' => 'vols',
             'demandeId' => $demandeAutorisation->id,
+            'hasRejection' => $hasRejectedItem,
             'columns' => [
                 'numero_vol' => trans('trans.flight_number'),
                 'depart' => trans('trans.departure'),
@@ -321,6 +335,7 @@
             'items' => $equipe_vols ?? collect(),
             'type' => 'equipe_vols',
             'demandeId' => $demandeAutorisation->id,
+            'hasRejection' => $hasRejectedItem,
             'columns' => [
                 'fonction' => trans('trans.role'),
                 'licence' => trans('trans.license'),
@@ -333,6 +348,7 @@
             'items' => $fretVols ?? collect(),
             'type' => 'fret_vols',
             'demandeId' => $demandeAutorisation->id,
+            'hasRejection' => $hasRejectedItem,
             'columns' => [
                 'nature' => trans('trans.nature'),
                 'poids' => trans('trans.weight_kg'),
@@ -345,6 +361,7 @@
             'items' => $personnesDeces ?? collect(),
             'type' => 'personne_deces',
             'demandeId' => $demandeAutorisation->id,
+            'hasRejection' => $hasRejectedItem,
             'columns' => [
                 'nom_prenom' => trans('trans.full_name'),
                 'numero_passport' => trans('trans.passport_number'),
@@ -357,6 +374,7 @@
             'items' => $receivingParties ?? collect(),
             'type' => 'receiving_parties',
             'demandeId' => $demandeAutorisation->id,
+            'hasRejection' => $hasRejectedItem,
             'columns' => [
                 'nom_contact' => trans('trans.contact'),
                 'telephone' => trans('trans.phone'),
@@ -371,6 +389,7 @@
             'items' => $demandeAutorisation->documents ?? collect(),
             'type' => 'document_autorisations',
             'demandeId' => $demandeAutorisation->id,
+            'hasRejection' => $hasRejectedItem,
             'columns' => [
                 'type' => trans('trans.type'),
                 'document' => trans('trans.document')

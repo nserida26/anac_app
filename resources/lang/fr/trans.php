@@ -568,6 +568,7 @@ return [
 'global_comments_placeholder' => 'Saisissez vos commentaires généraux...',
 'items_to_validate' => 'Éléments à valider',
 'validate_all_confirmation' => 'Vous êtes sur le point de valider tous les éléments de cette demande. Voulez-vous continuer ?',
+'validation_blocked_by_rejection' => 'Une ligne a été rejetée. La validation globale et les actions d\'approbation/rejet sont désactivées.',
 'no_items_found' => 'Aucun élément trouvé',
 'aircraft_information' => 'Informations sur l\'aéronef',
 'flight_information' => 'Informations sur le vol',

@@ -493,6 +493,7 @@ return [
     'global_comments_placeholder' => 'Enter your general comments...',
     'items_to_validate' => 'Items to Validate',
     'validate_all_confirmation' => 'You are about to validate all items in this application. Do you want to continue?',
+    'validation_blocked_by_rejection' => 'An item has been rejected. Global validation and approve/reject actions are disabled.',
     'no_items_found' => 'No Items Found',
     'aircraft_information' => 'Aircraft Information',
     'flight_information' => 'Flight Information',

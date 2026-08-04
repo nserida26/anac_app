@@ -112,8 +112,20 @@
                         @endif
                     </h6>
 
+                    @php
+                        $hasRejectedItem = $demandeAutorisation->hasInvalidComponents();
+                    @endphp
+
                     <!-- BOUTON TOUT VALIDER - NOUVEAU -->
-                    @if (auth()->user()->hasRole('dta') && !$demandeAutorisation->isFullyValidated())
+                    @if ($hasRejectedItem && auth()->user()->hasRole('dta'))
+                    <div class="row mb-4">
+                        <div class="col-md-12 text-center">
+                            <div class="alert alert-warning d-inline-block">
+                                <i class="fas fa-exclamation-triangle"></i> @lang('trans.validation_blocked_by_rejection')
+                            </div>
+                        </div>
+                    </div>
+                    @elseif (auth()->user()->hasRole('dta') && !$demandeAutorisation->isFullyValidated())
                     <div class="row mb-4">
                         <div class="col-md-12 text-center">
 
@@ -257,6 +269,7 @@
                                                     @if (is_null($avionItem->valider))
                                                     {{-- Etat NULL : pas encore traité --}}
                                                     <button type="button" class="btn btn-success btn-sm me-1"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal(
                 'avions',
                 '{{ $avionItem->id }}',
@@ -267,6 +280,7 @@
                                                     </button>
 
                                                     <button type="button" class="btn btn-danger btn-sm"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal(
                 'avions',
                 '{{ $avionItem->id }}',
@@ -281,6 +295,7 @@
                                                     <span class="badge bg-success">@lang('trans.approved')</span>
 
                                                     <button type="button" class="btn btn-danger btn-sm ms-2"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal(
                 'avions',
                 '{{ $avionItem->id }}',
@@ -295,6 +310,7 @@
                                                     <span class="badge bg-danger">@lang('trans.rejected')</span>
 
                                                     <button type="button" class="btn btn-success btn-sm ms-2"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal(
                 'avions',
                 '{{ $avionItem->id }}',
@@ -402,11 +418,13 @@
                                                 <td>
                                                     @if (is_null($volItem->valider))
                                                     <button class="btn btn-success btn-sm me-1"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('vols', '{{ $volItem->id }}', '{{ $demandeAutorisation->id }}', 'approve')">
                                                         @lang('trans.approve')
                                                     </button>
 
                                                     <button class="btn btn-danger btn-sm"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('vols', '{{ $volItem->id }}', '{{ $demandeAutorisation->id }}', 'reject')">
                                                         @lang('trans.reject')
                                                     </button>
@@ -415,6 +433,7 @@
                                                     <span class="badge bg-success">@lang('trans.approved')</span>
 
                                                     <button class="btn btn-danger btn-sm ms-2"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('vols', '{{ $volItem->id }}', '{{ $demandeAutorisation->id }}', 'reject')">
                                                         @lang('trans.reject')
                                                     </button>
@@ -423,6 +442,7 @@
                                                     <span class="badge bg-danger">@lang('trans.rejected')</span>
 
                                                     <button class="btn btn-success btn-sm ms-2"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('vols', '{{ $volItem->id }}', '{{ $demandeAutorisation->id }}', 'approve')">
                                                         @lang('trans.approve')
                                                     </button>
@@ -506,11 +526,13 @@
                                                 <td>
                                                     @if (is_null($membre->valider))
                                                     <button class="btn btn-success btn-sm me-1"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('equipe_vols', '{{ $membre->id }}', '{{ $demandeAutorisation->id }}', 'approve')">
                                                         @lang('trans.approve')
                                                     </button>
 
                                                     <button class="btn btn-danger btn-sm"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('equipe_vols', '{{ $membre->id }}', '{{ $demandeAutorisation->id }}', 'reject')">
                                                         @lang('trans.reject')
                                                     </button>
@@ -519,6 +541,7 @@
                                                     <span class="badge bg-success">@lang('trans.approved')</span>
 
                                                     <button class="btn btn-danger btn-sm ms-2"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('equipe_vols', '{{ $membre->id }}', '{{ $demandeAutorisation->id }}', 'reject')">
                                                         @lang('trans.reject')
                                                     </button>
@@ -527,6 +550,7 @@
                                                     <span class="badge bg-danger">@lang('trans.rejected')</span>
 
                                                     <button class="btn btn-success btn-sm ms-2"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('equipe_vols', '{{ $membre->id }}', '{{ $demandeAutorisation->id }}', 'approve')">
                                                         @lang('trans.approve')
                                                     </button>
@@ -594,11 +618,13 @@
                                                 <td>
                                                     @if (is_null($fret->valider))
                                                     <button class="btn btn-success btn-sm me-1"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('fret_vols', '{{ $fret->id }}', '{{ $demandeAutorisation->id }}', 'approve')">
                                                         @lang('trans.approve')
                                                     </button>
 
                                                     <button class="btn btn-danger btn-sm"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('fret_vols', '{{ $fret->id }}', '{{ $demandeAutorisation->id }}', 'reject')">
                                                         @lang('trans.reject')
                                                     </button>
@@ -607,6 +633,7 @@
                                                     <span class="badge bg-success">@lang('trans.approved')</span>
 
                                                     <button class="btn btn-danger btn-sm ms-2"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('fret_vols', '{{ $fret->id }}', '{{ $demandeAutorisation->id }}', 'reject')">
                                                         @lang('trans.reject')
                                                     </button>
@@ -615,6 +642,7 @@
                                                     <span class="badge bg-danger">@lang('trans.rejected')</span>
 
                                                     <button class="btn btn-success btn-sm ms-2"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('fret_vols', '{{ $fret->id }}', '{{ $demandeAutorisation->id }}', 'approve')">
                                                         @lang('trans.approve')
                                                     </button>
@@ -668,11 +696,13 @@
 <td>
                                                     @if (is_null($personne->valider))
                                                     <button class="btn btn-success btn-sm me-1"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('personne_deces', '{{ $personne->id }}', '{{ $demandeAutorisation->id }}', 'approve')">
                                                         @lang('trans.approve')
                                                     </button>
 
                                                     <button class="btn btn-danger btn-sm"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('personne_deces', '{{ $personne->id }}', '{{ $demandeAutorisation->id }}', 'reject')">
                                                         @lang('trans.reject')
                                                     </button>
@@ -681,6 +711,7 @@
                                                     <span class="badge bg-success">@lang('trans.approved')</span>
 
                                                     <button class="btn btn-danger btn-sm ms-2"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('personne_deces', '{{ $personne->id }}', '{{ $demandeAutorisation->id }}', 'reject')">
                                                         @lang('trans.reject')
                                                     </button>
@@ -689,6 +720,7 @@
                                                     <span class="badge bg-danger">@lang('trans.rejected')</span>
 
                                                     <button class="btn btn-success btn-sm ms-2"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('personne_deces', '{{ $personne->id }}', '{{ $demandeAutorisation->id }}', 'approve')">
                                                         @lang('trans.approve')
                                                     </button>
@@ -732,11 +764,13 @@
                                                     <td>
                                                     @if (is_null($mdn->valider))
                                                     <button class="btn btn-success btn-sm me-1"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('mdns', '{{ $mdn->id }}', '{{ $demandeAutorisation->id }}', 'approve')">
                                                         @lang('trans.approve')
                                                     </button>
 
                                                     <button class="btn btn-danger btn-sm"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('mdns', '{{ $mdn->id }}', '{{ $demandeAutorisation->id }}', 'reject')">
                                                         @lang('trans.reject')
                                                     </button>
@@ -745,6 +779,7 @@
                                                     <span class="badge bg-success">@lang('trans.approved')</span>
 
                                                     <button class="btn btn-danger btn-sm ms-2"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('mdns', '{{ $mdn->id }}', '{{ $demandeAutorisation->id }}', 'reject')">
                                                         @lang('trans.reject')
                                                     </button>
@@ -753,6 +788,7 @@
                                                     <span class="badge bg-danger">@lang('trans.rejected')</span>
 
                                                     <button class="btn btn-success btn-sm ms-2"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('mdns', '{{ $mdn->id }}', '{{ $demandeAutorisation->id }}', 'approve')">
                                                         @lang('trans.approve')
                                                     </button>
@@ -824,11 +860,13 @@
                                                 <td>
                                                     @if (is_null($party->valider))
                                                     <button class="btn btn-success btn-sm me-1"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('receiving_parties', '{{ $party->id }}', '{{ $demandeAutorisation->id }}', 'approve')">
                                                         @lang('trans.approve')
                                                     </button>
 
                                                     <button class="btn btn-danger btn-sm"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('receiving_parties', '{{ $party->id }}', '{{ $demandeAutorisation->id }}', 'reject')">
                                                         @lang('trans.reject')
                                                     </button>
@@ -837,6 +875,7 @@
                                                     <span class="badge bg-success">@lang('trans.approved')</span>
 
                                                     <button class="btn btn-danger btn-sm ms-2"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('receiving_parties', '{{ $party->id }}', '{{ $demandeAutorisation->id }}', 'reject')">
                                                         @lang('trans.reject')
                                                     </button>
@@ -845,6 +884,7 @@
                                                     <span class="badge bg-danger">@lang('trans.rejected')</span>
 
                                                     <button class="btn btn-success btn-sm ms-2"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('receiving_parties', '{{ $party->id }}', '{{ $demandeAutorisation->id }}', 'approve')">
                                                         @lang('trans.approve')
                                                     </button>
@@ -917,11 +957,13 @@
                                                 <td>
                                                     @if (is_null($document->valider))
                                                     <button class="btn btn-success btn-sm me-1"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('document_autorisations', '{{ $document->id }}', '{{ $demandeAutorisation->id }}', 'approve')">
                                                         @lang('trans.approve')
                                                     </button>
 
                                                     <button class="btn btn-danger btn-sm"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('document_autorisations', '{{ $document->id }}', '{{ $demandeAutorisation->id }}', 'reject')">
                                                         @lang('trans.reject')
                                                     </button>
@@ -930,6 +972,7 @@
                                                     <span class="badge bg-success">@lang('trans.approved')</span>
 
                                                     <button class="btn btn-danger btn-sm ms-2"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('document_autorisations', '{{ $document->id }}', '{{ $demandeAutorisation->id }}', 'reject')">
                                                         @lang('trans.reject')
                                                     </button>
@@ -938,6 +981,7 @@
                                                     <span class="badge bg-danger">@lang('trans.rejected')</span>
 
                                                     <button class="btn btn-success btn-sm ms-2"
+                                                        {{ $hasRejectedItem ? 'disabled' : '' }}
                                                         onclick="openDecisionModal('document_autorisations', '{{ $document->id }}', '{{ $demandeAutorisation->id }}', 'approve')">
                                                         @lang('trans.approve')
                                                     </button>
