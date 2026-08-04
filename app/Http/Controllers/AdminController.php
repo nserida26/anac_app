@@ -1616,6 +1616,13 @@ class AdminController extends Controller
                 ], 422);
             }
 
+            if (!empty($demande->autorisation($demande->id))) {
+                return response()->json([
+                    'success' => false,
+                    'message' => trans('trans.autorisation_already_issued')
+                ], 422);
+            }
+
             // Valider tous les avions
             if ($demande->avions->isNotEmpty()) {
                 foreach ($demande->avions as $avion) {
@@ -2126,6 +2133,13 @@ class AdminController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => trans('trans.validation_blocked_by_rejection')
+            ], 422);
+        }
+
+        if (!empty($demande->autorisation($demande->id))) {
+            return response()->json([
+                'success' => false,
+                'message' => trans('trans.autorisation_already_issued')
             ], 422);
         }
 

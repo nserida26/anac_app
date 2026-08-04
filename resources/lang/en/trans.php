@@ -499,6 +499,7 @@ return [
     'approve_selected' => 'Approve selected',
     'reject_selected' => 'Reject selected',
     'items_selected_across_sections' => 'item(s) selected (all sections)',
+    'autorisation_already_issued' => 'An authorization has already been issued for this application. All validation actions are disabled.',
     'validate_all_confirmation' => 'You are about to validate all items in this application. Do you want to continue?',
     'validation_blocked_by_rejection' => 'An item has been rejected. Global validation and approve/reject actions are disabled.',
     'no_items_found' => 'No Items Found',

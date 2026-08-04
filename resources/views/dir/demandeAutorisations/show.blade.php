@@ -113,7 +113,12 @@
                     </h6>
 
                     @php
-                        $hasRejectedItem = $demandeAutorisation->hasInvalidComponents();
+                        $hasInvalidItems = $demandeAutorisation->hasInvalidComponents();
+                        $autorisation = $demandeAutorisation->autorisation($demandeAutorisation->id);
+                        $hasAutorisation = !empty($autorisation);
+                        // Verrouille toutes les actions (checkboxes, boutons individuels, actions groupées)
+                        // dès qu'une ligne est rejetée OU qu'une autorisation a déjà été délivrée pour cette demande.
+                        $hasRejectedItem = $hasInvalidItems || $hasAutorisation;
                     @endphp
 
                     @include('dir.demandeAutorisations.partials.rejected-by', ['demande' => $demandeAutorisation])
@@ -138,7 +143,15 @@
                     @endunless
 
                     <!-- BOUTON TOUT VALIDER - NOUVEAU -->
-                    @if ($hasRejectedItem && auth()->user()->hasRole('dta'))
+                    @if ($hasAutorisation && auth()->user()->hasRole('dta'))
+                    <div class="row mb-4">
+                        <div class="col-md-12 text-center">
+                            <div class="alert alert-info d-inline-block">
+                                <i class="fas fa-lock"></i> @lang('trans.autorisation_already_issued')
+                            </div>
+                        </div>
+                    </div>
+                    @elseif ($hasInvalidItems && auth()->user()->hasRole('dta'))
                     <div class="row mb-4">
                         <div class="col-md-12 text-center">
                             <div class="alert alert-warning d-inline-block">

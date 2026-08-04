@@ -195,7 +195,12 @@
         @include('admin.partials.workflow-timeline', ['demande' => $demandeAutorisation])
 
         @php
-            $hasRejectedItem = $demandeAutorisation->hasInvalidComponents();
+            $hasInvalidItems = $demandeAutorisation->hasInvalidComponents();
+            $autorisation = $demandeAutorisation->autorisation($demandeAutorisation->id);
+            $hasAutorisation = !empty($autorisation);
+            // Verrouille toutes les actions (checkboxes, boutons individuels, actions groupées)
+            // dès qu'une ligne est rejetée OU qu'une autorisation a déjà été délivrée pour cette demande.
+            $hasRejectedItem = $hasInvalidItems || $hasAutorisation;
         @endphp
 
         @unless($hasRejectedItem)
@@ -214,7 +219,15 @@
         @endunless
 
         <!-- BOUTON TOUT VALIDER -->
-        @if($hasRejectedItem)
+        @if($hasAutorisation)
+            <div class="row mb-4">
+                <div class="col-md-12 text-center">
+                    <div class="alert alert-info d-inline-block">
+                        <i class="fas fa-lock"></i> @lang('trans.autorisation_already_issued')
+                    </div>
+                </div>
+            </div>
+        @elseif($hasInvalidItems)
             <div class="row mb-4">
                 <div class="col-md-12 text-center">
                     <div class="alert alert-warning d-inline-block">
