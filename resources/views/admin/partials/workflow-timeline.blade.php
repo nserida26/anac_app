@@ -38,11 +38,12 @@
 @if($etat === 'rejected')
     <div class="alert alert-danger text-center mt-3">
         <i class="fas fa-ban"></i> @lang('trans.application_rejected')
-        @if($demande->dg_motif)
-            <br><small>DG: {{ $demande->dg_motif }}</small>
-        @endif
-        @if($demande->dta_motif)
-            <br><small>DTA: {{ $demande->dta_motif }}</small>
+        @if(!empty($demande->rejection_reasons_list))
+            <ul class="mb-0 text-left d-inline-block">
+                @foreach($demande->rejection_reasons_list as $reason)
+                    <li><small>{{ $reason }}</small></li>
+                @endforeach
+            </ul>
         @endif
     </div>
 @endif

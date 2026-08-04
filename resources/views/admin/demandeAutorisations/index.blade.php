@@ -163,9 +163,10 @@
                                                         @endif
 
                                                         @if($demande->has_issues ?? false)
-                                                            <button type="button" 
-                                                                    class="btn btn-warning btn-sm" 
-                                                                    onclick="showIssues({{ $demande->id }})"
+                                                            <button type="button"
+                                                                    class="btn btn-warning btn-sm"
+                                                                    data-toggle="modal"
+                                                                    data-target="#issuesModal-{{ $demande->id }}"
                                                                     title="@lang('trans.view_issues')">
                                                                 <i class="fas fa-exclamation-triangle"></i>
                                                             </button>
@@ -204,6 +205,11 @@
                                                     </div>
                                                 </td>
                                             </tr>
+
+                                            <!-- Modal des Erreurs/Issues -->
+                                            @if($demande->has_issues ?? false)
+                                                @include('dir.demandeAutorisations.modals.issues', ['demande' => $demande])
+                                            @endif
                                         @endforeach
                                     </tbody>
                                 </table>
@@ -223,30 +229,6 @@
                 </div>
             </div>
         @endif
-    </div>
-
-    <!-- Modal des issues -->
-    <div class="modal fade" id="issuesModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-warning">
-                    <h5 class="modal-title">
-                        <i class="fas fa-exclamation-triangle"></i> @lang('trans.application_issues')
-                    </h5>
-                    <button type="button" class="close" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body" id="issuesModalBody">
-                    <!-- Contenu chargé dynamiquement -->
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        @lang('trans.close')
-                    </button>
-                </div>
-            </div>
-        </div>
     </div>
 @endsection
 
@@ -348,23 +330,6 @@
         $('html, body').animate({
             scrollTop: $('#applicationsTable').offset().top - 100
         }, 500);
-    };
-
-    // Fonction pour afficher les issues
-    window.showIssues = function(demandeId) {
-        // Ici vous pouvez faire un appel AJAX pour récupérer les détails des issues
-        // Ou utiliser les données déjà chargées
-        $.ajax({
-            url: `/demande-autorisations/${demandeId}/issues`,
-            method: 'GET',
-            success: function(response) {
-                $('#issuesModalBody').html(response);
-                $('#issuesModal').modal('show');
-            },
-            error: function() {
-                toastr.error('@lang('trans.error_loading_issues')');
-            }
-        });
     };
 
     // Configuration de Toastr
