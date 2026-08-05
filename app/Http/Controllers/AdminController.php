@@ -2171,9 +2171,6 @@ class AdminController extends Controller
             }
 
             $demande->update(['mise_a_jour' => true]);
-            $state = $demande->etatDemande()->firstOrCreate([]);
-            $state->resetAllApprovalStates();
-            $state->update(['compagnie_cree_demande' => false, 'dta_rejeter' => true]);
             $demande->update(['date_soumission' => null]);
 
             Activity::log('rejected', $demande->id);
