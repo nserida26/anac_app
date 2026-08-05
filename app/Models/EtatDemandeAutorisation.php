@@ -25,6 +25,7 @@ class EtatDemandeAutorisation extends Model
         'dsna_valider',
         'dsad_valider',
         'service_valider',
+        'srta_valider',
         'service_tout_valider',
         'dta_valider',
         'dg_valider',
@@ -32,7 +33,7 @@ class EtatDemandeAutorisation extends Model
         'daf_demande_pay',
         'compagnie_payer',
         'daf_confirme_pay',
-        
+
         'service_envoyer',
         'user_id',
         'demande_id',
@@ -54,6 +55,7 @@ class EtatDemandeAutorisation extends Model
         'dsna_valider'           => 'boolean',
         'dsad_valider'           => 'boolean',
         'service_valider'        => 'boolean',
+        'srta_valider'           => 'boolean',
         'service_tout_valider'   => 'boolean',
         'dta_valider'            => 'boolean',
         'dg_valider'             => 'boolean',
@@ -176,8 +178,8 @@ class EtatDemandeAutorisation extends Model
         } elseif ($state->compagnie_payer) {
             $status = 'paid';
         } elseif (
-            $state->service_valider || $state->dsv_valider || 
-            $state->dsna_valider || $state->dsad_valider || 
+            $state->service_valider || $state->srta_valider || $state->dsv_valider ||
+            $state->dsna_valider || $state->dsad_valider ||
             $state->dta_valider || $state->dg_valider || $state->dta_dg_valider
         ) {
             $status = 'service_approved';
@@ -205,6 +207,7 @@ class EtatDemandeAutorisation extends Model
             'dta_rejeter'            => false,
             'service_annoter'        => false,
             'service_valider'        => false,
+            'srta_valider'           => false,
             'dta_valider'            => false,
             'dg_valider'             => false,
             'dta_dg_valider'         => false,

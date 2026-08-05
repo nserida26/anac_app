@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 
-class CreateQualificationsTable extends Migration
+class CreateQualificationsTable20250228174913 extends Migration
 {
     /**
      * Run the migrations.

@@ -307,6 +307,7 @@
                                                                     data-date-fin="{{ $dateFin }}"
                                                                     data-sous-validite="{{ $sousValidite }}"
                                                                     data-objet="{{ $objet }}"
+                                                                    data-autorisation-annulee="{{ $demande->autorisation_annulee }}"
                                                                     title="@lang('trans.modify')">
                                                                     <i class="fas fa-edit"></i>
                                                                 </button>
@@ -535,6 +536,18 @@
                                 <textarea class="form-control" id="objet" name="objet" rows="2"
                                     placeholder="Décrivez l'objet du vol..."></textarea>
                                 <div class="invalid-feedback" id="objet_error"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Autorisation annulée / remplacée -->
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <label for="autorisation_annulee" class="form-label">Cette demande annule et remplace l'autorisation n°</label>
+                                <input type="text" class="form-control" id="autorisation_annulee" name="autorisation_annulee"
+                                    placeholder="Laisser vide si non applicable">
+                                <div class="invalid-feedback" id="autorisation_annulee_error"></div>
                             </div>
                         </div>
                     </div>
@@ -922,7 +935,8 @@ function loadDemandeForEdit(button) {
         dateDebut: button.data('date-debut'),
         dateFin: button.data('date-fin'),
         sousValidite: button.data('sous-validite'),
-        objet: button.data('objet')
+        objet: button.data('objet'),
+        autorisationAnnulee: button.data('autorisation-annulee')
     };
     
     console.log('Chargement demande pour modification:', demandeId, demandeData);
@@ -937,6 +951,7 @@ function loadDemandeForEdit(button) {
     $('#date_fin').val(demandeData.dateFin);
     $('#sous_validite').val(demandeData.sousValidite);
     $('#objet').val(demandeData.objet);
+    $('#autorisation_annulee').val(demandeData.autorisationAnnulee);
     
     // Déclencher le changement de type (important pour configurer le select type_vol)
     $('#type_demande_autorisation_id').val(demandeData.type).trigger('change');

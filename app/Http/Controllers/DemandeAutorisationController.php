@@ -120,6 +120,7 @@ class DemandeAutorisationController extends Controller
                 ],
                 'sous_validite' => 'nullable|integer|min:12|max:72',
                 'objet' => 'nullable|string|max:500',
+                'autorisation_annulee' => 'nullable|string|max:100',
             ];
 
             // Validation du type_vol selon le type de demande
@@ -156,6 +157,7 @@ class DemandeAutorisationController extends Controller
                 'sous_validite.max' => 'La sous-validité maximale est de 72 heures.',
                 'objet.string' => 'L\'objet doit être une chaîne de caractères.',
                 'objet.max' => 'L\'objet ne doit pas dépasser 500 caractères.',
+                'autorisation_annulee.max' => 'Le numéro d\'autorisation ne doit pas dépasser 100 caractères.',
             ];
 
             // Valider les données
@@ -174,6 +176,7 @@ class DemandeAutorisationController extends Controller
                     'type_demande_autorisation_id' => $typeId,
                     'objet' => $request->objet,
                     'sous_validite' => $request->sous_validite,
+                    'autorisation_annulee' => $request->autorisation_annulee,
                 ];
 
                 // Gérer type_vol selon le type
@@ -226,6 +229,7 @@ class DemandeAutorisationController extends Controller
                     'type_demande_autorisation_id' => $typeId,
                     'objet' => $request->objet,
                     'sous_validite' => $request->sous_validite,
+                    'autorisation_annulee' => $request->autorisation_annulee,
                     'statut' => 'on_hold',
                     'user_id' => auth()->id(),
                     'code' => $code,
@@ -312,7 +316,7 @@ class DemandeAutorisationController extends Controller
                 ->get();
         }
         $aeroports = Aeroport::all();
-        $pays = Pays::all();
+        $pays = Pays::orderBy('nom')->get();
         $compagnies = Compagnie::all();
         return view('user.autorisations.edit', compact('mdns', 'personnesDeces', 'pays', 'vols', 'type_vols', 'compagnies', 'avions', 'proprietaires', 'type_avions', 'receivingParties', 'requiredDocs', 'demandeAutorisation', 'equipe_vols', 'fretVols', 'aeroports'));
     }
@@ -666,7 +670,7 @@ class DemandeAutorisationController extends Controller
 
             // Validation de base
             $validated = $request->validate([
-                'action' => 'required|string|in:compagnie_cree_demande,compagnie_rectifie_demande,dg_annoter,dg_annoter_admin,dg_rejeter,dta_dg_annoter,dta_annoter,dta_annoter_admin,dta_rejeter,dta_notifier,service_annoter,service_raturer,dsv_valider,dsna_valider,dsad_valider,dsf_valider,service_valider,service_tout_valider,dta_valider,dg_valider,dta_dg_valider,compagnie_payer,daf_confirme_pay,dg_signer,service_envoyer',
+                'action' => 'required|string|in:compagnie_cree_demande,compagnie_rectifie_demande,dg_annoter,dg_annoter_admin,dg_rejeter,dta_dg_annoter,dta_annoter,dta_annoter_admin,dta_rejeter,dta_notifier,service_annoter,service_raturer,dsv_valider,dsna_valider,dsad_valider,dsf_valider,service_valider,srta_valider,service_tout_valider,dta_valider,dg_valider,dta_dg_valider,compagnie_payer,daf_confirme_pay,dg_signer,service_envoyer',
                 'is_approved' => 'sometimes|boolean',
                 'is_rejected' => 'sometimes|boolean',
                 'motif' => 'required_if:action,dg_rejeter,dta_rejeter|nullable|string',
@@ -928,6 +932,22 @@ class DemandeAutorisationController extends Controller
                     break;
 
                 case 'service_valider':
+                    if ($dta && !empty($dta->whatsapp)) {
+                        $notificationService->sendSRTAValidationNotification($demande, $dta);
+                    }
+
+                    $demande->update([
+                        'date_validation' => now(),
+                        'statut' => 'validated',
+                        'dsv_motif' => null,
+                        'dsna_motif' => null,
+                        'dsad_motif' => null,
+                        'dg_motif' => null,
+                        'dta_motif' => null
+                    ]);
+                    break;
+
+                case 'srta_valider':
                     if ($dta && !empty($dta->whatsapp)) {
                         $notificationService->sendSRTAValidationNotification($demande, $dta);
                     }

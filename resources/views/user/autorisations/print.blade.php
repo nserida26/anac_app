@@ -247,7 +247,15 @@
                             <h4 style="margin: 0;">Autorisation numéro / authorization number:</h4>
                             <h2 style="margin: 0; margin-left: 100px;">{{ $autorisation->code_autorisation }}</h2>
                         </div>
-                
+
+                        @if (!empty($autorisation->demande->autorisation_annulee))
+                            <div style="align-items: baseline; margin-left: 20px; margin-top: 2px;">
+                                <h4 style="margin: 0; font-style: italic;">
+                                    Cette autorisation annule et remplace l'autorisation numéro : {{ $autorisation->demande->autorisation_annulee }}
+                                </h4>
+                            </div>
+                        @endif
+
                         <div style="display: flex; align-items: baseline; margin-left: 20px; margin-top: 2px;">
                             <h4 style="margin: 0;">Autorisation type / Authorization:</h4>
                             <h2 style="margin: 0;">{{ $autorisation->demande->type->libelle }}</h2>
@@ -310,7 +318,9 @@
                     <div class="signature-section">
                         @php
                             $hasDta = !empty($autorisation->signature_dta) && file_exists(base_path('uploads/' . $autorisation->signature_dta));
-                            $hasSrta = !empty($autorisation->signature_srta) && file_exists(base_path('uploads/' . $autorisation->signature_srta));
+                            $hasSrta = !empty($autorisation->signature_srta)
+                                && file_exists(base_path('uploads/' . $autorisation->signature_srta))
+                                && (bool) optional($autorisation->demande->etatDemande)->srta_valider;
                         @endphp
                         
 

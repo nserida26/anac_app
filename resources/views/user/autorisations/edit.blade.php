@@ -221,7 +221,7 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <button type="submit" class="btn btn-success float-right" id="submitAvionBtn">
-                                        <i class="fas fa-save"></i> <span id="formActionText">@lang('trans.add_planes')</span>
+                                        <i class="fas fa-save"></i> <span id="formActionText">@lang('trans.send')</span>
                                     </button>
                                     <button type="button" class="btn btn-secondary float-right mr-2"
                                         id="cancelAvionFormBtn">
@@ -464,7 +464,7 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <button type="submit" class="btn btn-success float-right" id="submitVolBtn">
-                                        <i class="fas fa-save"></i> <span id="volFormAction">@lang('trans.add_action')</span>
+                                        <i class="fas fa-save"></i> <span id="volFormAction">@lang('trans.send')</span>
                                     </button>
                                     <button type="button" class="btn btn-secondary float-right mr-2"
                                         id="cancelVolFormBtn">
@@ -1685,6 +1685,35 @@
                     </div>
                 </div>
 
+                <!-- Envoi de la demande -->
+                @php
+                    $etatDemande = $demandeAutorisation->etatDemande;
+                    $documentCount = $demandeAutorisation->documents->count();
+                    $canSubmit = $etatDemande && !$etatDemande->compagnie_cree_demande && $documentCount > 0;
+                @endphp
+                @if ($etatDemande && !$etatDemande->compagnie_cree_demande)
+                    <div class="card card-success">
+                        <div class="card-body text-center">
+                            @if ($canSubmit)
+                                <form action="{{ route('update-state', $demandeAutorisation->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <input type="hidden" name="action" value="compagnie_cree_demande">
+                                    <input type="hidden" name="is_approved" value="1">
+                                    <button type="submit" class="btn btn-success btn-lg"
+                                            onclick="return confirm('@lang('trans.confirm_submission')')">
+                                        <i class="fas fa-paper-plane"></i> @lang('trans.send')
+                                        <span class="badge badge-light">{{ $documentCount }}</span>
+                                    </button>
+                                </form>
+                            @else
+                                <button class="btn btn-secondary btn-lg" disabled title="@lang('trans.add_docs_first')">
+                                    <i class="fas fa-paper-plane"></i> @lang('trans.send')
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
             </div>
         </div>
     </div>
@@ -1730,7 +1759,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="pays_id">@lang('trans.country')</label>
-                                    <select class="form-control" id="pays_id" name="pays_id" required>
+                                    <select class="form-control select2-pays" id="pays_id" name="pays_id" required>
                                         <option value="">@lang('trans.select_country')</option>
                                         @foreach ($pays as $pay)
                                             <option value="{{ $pay->id }}">{{ $pay->nom }}
@@ -1989,7 +2018,7 @@
                 $('#avionsTableContainer, #noAvionsAlert').hide();
                 $('#showAvionFormBtn').hide();
                 $('#avion_id').val(''); // Reset l'ID pour une nouvelle création
-                $('#formActionText').text(@json(__('trans.add_action')));
+                $('#formActionText').text(@json(__('trans.send')));
                 $('#avionForm')[0].reset(); // Reset le formulaire
                 $('.invalid-feedback').text(''); // Effacer les messages d'erreur
                 $('.is-invalid').removeClass('is-invalid'); // Enlever les classes d'erreur
@@ -2361,7 +2390,7 @@
                 $('#volsTableContainer, #noVolsAlert').hide();
                 $('#showVolFormBtn').hide();
                 $('#vol_id').val('');
-                $('#volFormAction').text(@json(__('trans.add_action')));
+                $('#volFormAction').text(@json(__('trans.send')));
                 $('#volForm')[0].reset();
                 $('.invalid-feedback').text('');
                 $('.is-invalid').removeClass('is-invalid');
@@ -2622,6 +2651,10 @@
                     return null;
                 },
                 minimumInputLength: 1
+            });
+            $('.select2-pays').select2({
+                width: '100%',
+                dropdownParent: $('#addAeroportModal')
             });
         });
     </script>
@@ -3346,7 +3379,7 @@
                 $('#immatriculations_select').empty().trigger('change');
                 $('#type_avion_id').val('').trigger('change');
                 $('#compagnie_aerienne_id').val('').trigger('change');
-                $('#formActionText').text('Ajouter les avions');
+                $('#formActionText').text(@json(__('trans.send')));
 
                 $('#previewSection').fadeOut(300);
 

@@ -108,7 +108,8 @@
                                             @php
                                                 $etat = $demande->etat_workflow;
                                                 $canView = (optional($demande->etatDemande)->compagnie_cree_demande ?? false)
-                                                    && (optional($demande->etatDemande)->dta_annoter ?? false);
+                                                    && ((optional($demande->etatDemande)->dta_annoter ?? false)
+                                                        || (optional($demande->etatDemande)->dg_annoter_admin ?? false));
                                             @endphp
                                             <tr data-etat="{{ $etat }}" data-type="{{ $demande->type->id }}">
                                                 <td data-order="{{ $demande->created_at ? strtotime($demande->created_at) : 0 }}">
@@ -174,10 +175,10 @@
                                                     
                                                         @if(optional($demande->etatDemande)->dta_annoter &&
                                                             $demande->isValidatedByAll() &&
-                                                            !optional($demande->etatDemande)->service_valider)
+                                                            !optional($demande->etatDemande)->srta_valider)
                                                             <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline">
                                                                 @csrf
-                                                                <input type="hidden" name="action" value="service_valider">
+                                                                <input type="hidden" name="action" value="srta_valider">
                                                                 <input type="hidden" name="is_approved" value="1">
                                                                 <button type="submit" class="btn btn-success btn-sm mb-1"
                                                                         onclick="return confirm('Confirmer la validation ?')">
