@@ -43,6 +43,24 @@
                             @if(isset($demande->user) && $demande->user->email)
                                 <option value="{{ $demande->user->email }}" selected>{{ $demande->user->email }} (@lang('trans.demandeur'))</option>
                             @endif
+                            <!-- Destinataires par défaut -->
+                            <option value="uniteaim@gmail.com" selected>Uniteaim (ASECNA)</option>
+                            <option value="maroufmohamedehlou@gmail.com" selected>maroufmohamedehlou@gmail.com (ASECNA)</option>
+                            <option value="anacndb@gmail.com" selected>ANAC NDB (ASECNA)</option>
+                            <option value="aimndbasecna@gmail.com" selected>AIM-NDB ASECNA (ASECNA)</option>
+                            <option value="c3iatc@gmail.com" selected>C3I ATC (C3I)</option>
+                            <option value="scheduling@terminalsholding.com" selected>Scheduling (AFROPORT)</option>
+                            <option value="e.elaoun@gmail.com" selected>e.elaoun@gmail.com (ASECNA)</option>
+                            <option value="fleurmahmoud18@gmail.com" selected>fleurmahmoud18@gmail.com (DOUANE AINO)</option>
+                            <option value="gendrimcta@gmail.com" selected>gendrimcta@gmail.com (GENDARMERIE AINO)</option>
+                            <option value="metsec18@gmail.com" selected>metsec18@gmail.com (MET)</option>
+                            <option value="secmdnmrt@gmail.com" selected>Secrétaire MDN (MDN)</option>
+                            <option value="alphabeyatt@gmail.com" selected>Ahmed Beyatt (RCC)</option>
+                            <option value="cabinet@emaa.mr" selected>Cabinet Cemaa (EMAA)</option>
+                            <option value="sasbekrin@yahoo.com" selected>sasbekrin@yahoo.com (CDT GENDARMERIE)</option>
+                            <option value="Konetah6819@gmail.com" selected>Konetah6819@gmail.com (POLICE AINO)</option>
+                            <option value="Medali2109@gmail.com" selected>Mouhamedali Ahmed (ADJ CDT AINO)</option>
+                            <option value="atarsaoe@gmail.com" selected>atarsaoe@gmail.com (ASECNA)</option>
                         </select>
                         <small class="form-text text-muted">
                             <i class="fas fa-info-circle"></i> @lang('trans.email_format_info')
