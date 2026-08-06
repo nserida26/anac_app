@@ -173,7 +173,7 @@
                                                             </button>
                                                         @endif
                                                     
-                                                        @if(optional($demande->etatDemande)->dta_annoter &&
+                                                        @if((optional($demande->etatDemande)->dta_annoter || optional($demande->etatDemande)->dg_annoter_admin) &&
                                                             $demande->isValidatedByAll() &&
                                                             !optional($demande->etatDemande)->srta_valider)
                                                             <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline">

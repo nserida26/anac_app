@@ -43,7 +43,7 @@
 
 @elseif($role == 'dta')
     {{-- Actions pour DTA --}}
-    @if($etat->compagnie_cree_demande && !$etat->dg_annoter && !$etat->dta_dg_annoter && !$etat->dg_rejeter)
+    @if($etat->compagnie_cree_demande && !$etat->dg_annoter && !$etat->dta_dg_annoter && !$etat->dg_annoter_admin && !$etat->dg_rejeter)
         <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline">
             @csrf
             <input type="hidden" name="action" value="dta_dg_annoter">
@@ -56,7 +56,7 @@
     @endif
     
 
-    @if($etat->compagnie_cree_demande && ($etat->dg_annoter || $etat->dta_dg_annoter) && !$etat->dta_annoter && !$etat->dg_rejeter && !$etat->dta_valider)
+    @if($etat->compagnie_cree_demande && ($etat->dg_annoter || $etat->dta_dg_annoter || $etat->dg_annoter_admin) && !$etat->dta_annoter && !$etat->dg_rejeter && !$etat->dta_valider)
         <button type="button" class="btn btn-primary btn-sm mb-1 dta-annotation-btn"
                 data-toggle="modal" 
                 data-target="#dtaAnnotationModal"
@@ -82,7 +82,7 @@
         </form>
     @endif
 
-    @if($etat->compagnie_cree_demande && ($etat->dg_annoter || $etat->dta_dg_annoter) && $etat->dta_annoter && !$etat->service_valider && !$etat->dta_valider)
+    @if($etat->compagnie_cree_demande && ($etat->dg_annoter || $etat->dta_dg_annoter || $etat->dg_annoter_admin) && $etat->dta_annoter && !$etat->service_valider && !$etat->dta_valider)
         <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline">
             @csrf
             <input type="hidden" name="action" value="service_valider">
@@ -94,7 +94,7 @@
         </form>
     @endif
 
-    @if($etat->compagnie_cree_demande && ($etat->dg_annoter || $etat->dta_dg_annoter) && !$etat->dta_annoter && !$etat->service_tout_valider)
+    @if($etat->compagnie_cree_demande && ($etat->dg_annoter || $etat->dta_dg_annoter || $etat->dg_annoter_admin) && !$etat->dta_annoter && !$etat->service_tout_valider)
         <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline">
             @csrf
             <input type="hidden" name="action" value="service_tout_valider">
@@ -106,7 +106,7 @@
         </form>
     @endif
 
-    @if($etat->compagnie_cree_demande && ($etat->dg_annoter || $etat->dta_dg_annoter) && $demande->isValidatedByAll() && $demande->isFullyValidated() && !$etat->dta_valider)
+    @if($etat->compagnie_cree_demande && ($etat->dg_annoter || $etat->dta_dg_annoter || $etat->dg_annoter_admin) && $demande->isValidatedByAll() && $demande->isFullyValidated() && !$etat->dta_valider)
         <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline">
             @csrf
             <input type="hidden" name="action" value="dta_valider">
