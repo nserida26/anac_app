@@ -509,6 +509,7 @@ return [
     'confirm_service_validation' => 'Confirmer la validation service ?',
     'confirm_validate_all' => 'Confirmer la validation à la place des directions ?',
     'confirm_dta_validation' => 'Confirmer la validation DTA ?',
+    'autorisation_annulee_prompt' => 'Numéro de l\'autorisation annulée et remplacée (laisser vide si non applicable) :',
     'confirm_dg_validation' => 'Confirmer la validation DG par DTA ?',
     'confirm_backward' => 'Annuler lannotation et ramener la demande ?',
     'confirm_achievement' => 'Confirmer lachievement de cette demande ?',

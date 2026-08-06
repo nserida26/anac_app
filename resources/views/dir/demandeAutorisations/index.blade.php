@@ -727,6 +727,20 @@ $(document).ready(function() {
         });
     }
 
+    function promptAutorisationAnnulee(formId, inputId) {
+        if (!confirm('@lang("trans.confirm_dta_validation")')) {
+            return false;
+        }
+
+        const numero = prompt("@lang('trans.autorisation_annulee_prompt')", '');
+        if (numero === null) {
+            return false;
+        }
+
+        document.getElementById(inputId).value = numero.trim();
+        document.getElementById(formId).submit();
+    }
+
     function submitForm(form, successMessage) {
         const $form = $(form);
         

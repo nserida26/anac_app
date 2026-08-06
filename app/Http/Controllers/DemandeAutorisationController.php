@@ -120,7 +120,6 @@ class DemandeAutorisationController extends Controller
                 ],
                 'sous_validite' => 'nullable|integer|min:12|max:72',
                 'objet' => 'nullable|string|max:500',
-                'autorisation_annulee' => 'nullable|string|max:100',
             ];
 
             // Validation du type_vol selon le type de demande
@@ -157,7 +156,6 @@ class DemandeAutorisationController extends Controller
                 'sous_validite.max' => 'La sous-validité maximale est de 72 heures.',
                 'objet.string' => 'L\'objet doit être une chaîne de caractères.',
                 'objet.max' => 'L\'objet ne doit pas dépasser 500 caractères.',
-                'autorisation_annulee.max' => 'Le numéro d\'autorisation ne doit pas dépasser 100 caractères.',
             ];
 
             // Valider les données
@@ -176,7 +174,6 @@ class DemandeAutorisationController extends Controller
                     'type_demande_autorisation_id' => $typeId,
                     'objet' => $request->objet,
                     'sous_validite' => $request->sous_validite,
-                    'autorisation_annulee' => $request->autorisation_annulee,
                 ];
 
                 // Gérer type_vol selon le type
@@ -229,7 +226,6 @@ class DemandeAutorisationController extends Controller
                     'type_demande_autorisation_id' => $typeId,
                     'objet' => $request->objet,
                     'sous_validite' => $request->sous_validite,
-                    'autorisation_annulee' => $request->autorisation_annulee,
                     'statut' => 'on_hold',
                     'user_id' => auth()->id(),
                     'code' => $code,
@@ -677,6 +673,7 @@ class DemandeAutorisationController extends Controller
                 'directions' => 'required_if:action,service_annoter|nullable|array',
                 'directions.*' => 'in:dsv,dsad,dsna,dsf',
                 'points' => 'nullable|string',
+                'autorisation_annulee' => 'nullable|string|max:100',
             ]);
 
 
@@ -1037,6 +1034,11 @@ class DemandeAutorisationController extends Controller
                     break;
 
                 case 'dta_valider':
+                    // Seul le DTA peut renseigner le numéro d'autorisation annulée/remplacée
+                    if ($request->filled('autorisation_annulee')) {
+                        $demande->update(['autorisation_annulee' => $request->input('autorisation_annulee')]);
+                    }
+
                     // DTA valide la demande pour signature DG
                     if ($dg && !empty($dg->whatsapp)) {
                         $notificationService->sendDTAValidationForDGSignatureNotification($demande, $dg);

@@ -437,6 +437,7 @@ return [
     'confirm_service_validation' => 'Confirm Service Validation?',
     'confirm_validate_all' => 'Confirm Validation on Behalf of Directorates?',
     'confirm_dta_validation' => 'Confirm DTA Validation?',
+    'autorisation_annulee_prompt' => 'Number of the authorization being cancelled and replaced (leave empty if not applicable):',
     'confirm_dg_validation' => 'Confirm DG Validation by DTA?',
     'confirm_backward' => 'Cancel Annotation and Withdraw Application?',
     'confirm_achievement' => 'Confirm Achievement of this Application?',

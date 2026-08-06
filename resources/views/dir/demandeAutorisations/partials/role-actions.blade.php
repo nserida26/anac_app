@@ -107,12 +107,13 @@
     @endif
 
     @if($etat->compagnie_cree_demande && ($etat->dg_annoter || $etat->dta_dg_annoter || $etat->dg_annoter_admin) && $etat->srta_valider && $demande->isValidatedByAll() && $demande->isFullyValidated() && !$etat->dta_valider)
-        <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline">
+        <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline" id="dtaValiderForm-{{ $demande->id }}">
             @csrf
             <input type="hidden" name="action" value="dta_valider">
             <input type="hidden" name="is_approved" value="1">
-            <button type="submit" class="btn btn-success btn-sm mb-1"
-                    onclick="return confirm('@lang("trans.confirm_dta_validation")')">
+            <input type="hidden" name="autorisation_annulee" id="dtaAutorisationAnnulee-{{ $demande->id }}">
+            <button type="button" class="btn btn-success btn-sm mb-1"
+                    onclick="promptAutorisationAnnulee('dtaValiderForm-{{ $demande->id }}', 'dtaAutorisationAnnulee-{{ $demande->id }}')">
                 <i class="fas fa-check"></i> @lang('trans.validate')
             </button>
         </form>
