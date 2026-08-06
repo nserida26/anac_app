@@ -176,12 +176,13 @@
                                                         @if((optional($demande->etatDemande)->dta_annoter || optional($demande->etatDemande)->dg_annoter_admin) &&
                                                             $demande->isValidatedByAll() &&
                                                             !optional($demande->etatDemande)->srta_valider)
-                                                            <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline">
+                                                            <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline" id="srtaValiderForm-{{ $demande->id }}">
                                                                 @csrf
                                                                 <input type="hidden" name="action" value="srta_valider">
                                                                 <input type="hidden" name="is_approved" value="1">
-                                                                <button type="submit" class="btn btn-success btn-sm mb-1"
-                                                                        onclick="return confirm('Confirmer la validation ?')">
+                                                                <input type="hidden" name="autorisation_annulee" id="srtaAutorisationAnnulee-{{ $demande->id }}">
+                                                                <button type="button" class="btn btn-success btn-sm mb-1"
+                                                                        onclick="promptAutorisationAnnulee('srtaValiderForm-{{ $demande->id }}', 'srtaAutorisationAnnulee-{{ $demande->id }}')">
                                                                     <i class="fas fa-check-double"></i> @lang('trans.validate')
                                                                 </button>
                                                             </form>
@@ -245,6 +246,20 @@
 
 @push('custom')
 <script>
+    function promptAutorisationAnnulee(formId, inputId) {
+        if (!confirm('Confirmer la validation ?')) {
+            return false;
+        }
+
+        const numero = prompt("@lang('trans.autorisation_annulee_prompt')", '');
+        if (numero === null) {
+            return false;
+        }
+
+        document.getElementById(inputId).value = numero.trim();
+        document.getElementById(formId).submit();
+    }
+
     $(document).ready(function() {
         // Initialisation des Select2
         $('.select2').select2({

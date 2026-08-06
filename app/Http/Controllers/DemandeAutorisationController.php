@@ -949,7 +949,7 @@ class DemandeAutorisationController extends Controller
                         $notificationService->sendSRTAValidationNotification($demande, $dta);
                     }
 
-                    $demande->update([
+                    $updateFields = [
                         'date_validation' => now(),
                         'statut' => 'validated',
                         'dsv_motif' => null,
@@ -957,7 +957,14 @@ class DemandeAutorisationController extends Controller
                         'dsad_motif' => null,
                         'dg_motif' => null,
                         'dta_motif' => null
-                    ]);
+                    ];
+
+                    // L'Administrateur peut également renseigner le numéro d'autorisation annulée/remplacée
+                    if ($request->filled('autorisation_annulee')) {
+                        $updateFields['autorisation_annulee'] = $request->input('autorisation_annulee');
+                    }
+
+                    $demande->update($updateFields);
                     break;
 
                 case 'service_tout_valider':
