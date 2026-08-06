@@ -106,7 +106,7 @@
         </form>
     @endif
 
-    @if($etat->compagnie_cree_demande && ($etat->dg_annoter || $etat->dta_dg_annoter || $etat->dg_annoter_admin) && $demande->isValidatedByAll() && $demande->isFullyValidated() && !$etat->dta_valider)
+    @if($etat->compagnie_cree_demande && ($etat->dg_annoter || $etat->dta_dg_annoter || $etat->dg_annoter_admin) && $etat->srta_valider && $demande->isValidatedByAll() && $demande->isFullyValidated() && !$etat->dta_valider)
         <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline">
             @csrf
             <input type="hidden" name="action" value="dta_valider">
