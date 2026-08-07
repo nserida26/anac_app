@@ -1925,13 +1925,29 @@
                         // Reset form
                         $('#addAeroportForm')[0].reset();
 
-                        // Refresh the table or add the new row
-                        if (typeof refreshAeroportsTable === 'function') {
-                            refreshAeroportsTable();
-                        } else {
-                            // Fallback: reload the page
-                            window.location.reload();
+                        var nouvelAeroport = response.aeroport;
+
+                        // Ajouter la nouvelle option aux selects de départ/arrivée
+                        $('#aeroport_depart_id, #aeroport_arrivee_id').append($('<option>', {
+                            value: nouvelAeroport.id,
+                            text: nouvelAeroport.codeICAO
+                        }));
+                        $('#aeroport_depart_id, #aeroport_arrivee_id').trigger('change');
+
+                        // Ajouter le nouvel aéroport au tableau utilisé pour les escales
+                        if (typeof aeroports !== 'undefined') {
+                            aeroports.push({
+                                id: nouvelAeroport.id,
+                                codeICAO: nouvelAeroport.codeICAO,
+                                nom: nouvelAeroport.nom
+                            });
                         }
+
+                        // Ajouter aussi l'option aux escales déjà affichées sur la page
+                        $('.escale-aeroport').append($('<option>', {
+                            value: nouvelAeroport.id,
+                            text: nouvelAeroport.codeICAO
+                        }));
                     },
                     error: function(xhr) {
                         // Show error message
@@ -2674,8 +2690,10 @@
                         // Ajouter la nouvelle option au select
                         $('#type_avion_id').append($('<option>', {
                             value: response.id,
-                            text: response.code,
-                            selected: true
+                            text: response.code + ' (' + (response.data.capacite || 0) + ' places)',
+                            selected: true,
+                            'data-code': response.code,
+                            'data-capacite': response.data.capacite || 0
                         }));
 
                         // Réinitialiser Select2 pour afficher la nouvelle valeur
@@ -2691,10 +2709,6 @@
                             timer: 2000,
                             showConfirmButton: false
                         });
-
-                        // Rafraîchir la page si nécessaire
-                        location.reload();
-
                     },
                     error: function(xhr) {
                         let errors = xhr.responseJSON.errors;
@@ -2726,11 +2740,17 @@
                     type: 'POST',
                     data: $('#companyForm').serialize(),
                     success: function(response) {
+                        var nouvelleCompagnie = response.data;
+                        var texteOption = nouvelleCompagnie.code ?
+                            nouvelleCompagnie.code + ' ' + nouvelleCompagnie.nom_entreprise :
+                            nouvelleCompagnie.nom_entreprise;
+
                         // Ajouter la nouvelle option au select
                         $('#compagnie_aerienne_id').append($('<option>', {
-                            value: response.id,
-                            text: response.nom,
-                            selected: true
+                            value: nouvelleCompagnie.id,
+                            text: texteOption,
+                            selected: true,
+                            'data-code': nouvelleCompagnie.code
                         }));
 
                         // Réinitialiser Select2 pour afficher la nouvelle valeur
@@ -2746,8 +2766,6 @@
                             timer: 2000,
                             showConfirmButton: false
                         });
-                        location.reload();
-
                     },
                     error: function(xhr) {
                         let errors = xhr.responseJSON.errors;
