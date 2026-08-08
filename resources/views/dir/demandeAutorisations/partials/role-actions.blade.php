@@ -7,15 +7,31 @@
 
 @if($role == 'dg')
     {{-- Actions pour DG --}}
-    @if($etat->compagnie_cree_demande && !$etat->dg_annoter && !$etat->dg_annoter_admin && !$etat->dta_dg_annoter  && !$etat->dg_rejeter )
+    @if($etat->compagnie_cree_demande && !$etat->dg_annoter && !$etat->dg_annoter_admin && !$etat->dta_dg_annoter  && !$etat->dg_rejeter && !$etat->dg_valider && !$etat->dta_dg_valider)
         <button type="button" class="btn btn-primary btn-sm mb-1 dg-annotation-btn"
-                data-toggle="modal" 
+                data-toggle="modal"
                 data-target="#dgAnnotationModal"
                 data-demande-id="{{ $demande->id }}"
                 data-demande-code="{{ $demande->code }}">
             <i class="fas fa-user-tie"></i> @lang('trans.dg_annotate')
         </button>
-        
+
+        @if($demande->vols->isNotEmpty() && $demande->avions->isNotEmpty())
+            <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline">
+                @csrf
+                <input type="hidden" name="action" value="dg_valider">
+                <input type="hidden" name="is_approved" value="1">
+                <input type="hidden" name="type_autorisation" value="{{ $demande->type->libelle }}">
+                <input type="hidden" name="type_autorisation_id" value="{{ $demande->type->id }}">
+                <input type="hidden" name="type_vol_id" value="{{ $demande->typeVol->id }}">
+
+                <button type="submit" class="btn btn-success btn-sm mb-1"
+                        onclick="return confirm('@lang("trans.confirm_validation")')">
+                    <i class="fas fa-check"></i> @lang('trans.validate')
+                </button>
+            </form>
+        @endif
+
         <button type="button" class="btn btn-danger btn-sm mb-1"
                 onclick="openRejectionModal('demande_autorisations','{{ $demande->id }}')">
             <i class="fas fa-times-circle"></i> @lang('trans.reject')

@@ -720,8 +720,8 @@ class DemandeAutorisationController extends Controller
                     // Notification au demandeur (accusé)
                     $notificationService->sendAcknowledgmentNotification($demande, auth()->user());
 
-                    // Notifications au DG et DTA
-                    foreach ([$dg, $dta] as $user) {
+                    // Notifications au DG, DTA et SRTA (admin)
+                    foreach ([$dg, $dta, $srta] as $user) {
                         if ($user && !empty($user->whatsapp)) {
                             if (!$demande->mise_a_jour) {
                                 $notificationService->sendNewDemandeNotification($demande, $user);
