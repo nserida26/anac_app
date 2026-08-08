@@ -143,7 +143,7 @@
                     @endunless
 
                     <!-- BOUTON TOUT VALIDER - NOUVEAU -->
-                    @if ($hasAutorisation && auth()->user()->hasRole('dta'))
+                    @if ($hasAutorisation && auth()->user()->hasRole(['dta', 'dg']))
                     <div class="row mb-4">
                         <div class="col-md-12 text-center">
                             <div class="alert alert-info d-inline-block">
@@ -151,7 +151,7 @@
                             </div>
                         </div>
                     </div>
-                    @elseif ($hasInvalidItems && auth()->user()->hasRole('dta'))
+                    @elseif ($hasInvalidItems && auth()->user()->hasRole(['dta', 'dg']))
                     <div class="row mb-4">
                         <div class="col-md-12 text-center">
                             <div class="alert alert-warning d-inline-block">
@@ -159,7 +159,7 @@
                             </div>
                         </div>
                     </div>
-                    @elseif (auth()->user()->hasRole('dta') && !$demandeAutorisation->isFullyValidated())
+                    @elseif (auth()->user()->hasRole(['dta', 'dg']) && !$demandeAutorisation->isFullyValidated())
                     <div class="row mb-4">
                         <div class="col-md-12 text-center">
 
@@ -264,7 +264,7 @@
                            
 
 
-                            @if (auth()->user()->hasRole('dta') && !$hasRejectedItem)
+                            @if (auth()->user()->hasRole(['dta', 'dg']) && !$hasRejectedItem)
                             <div class="mb-2">
                                 <button type="button" class="btn btn-success btn-sm bulk-approve-btn" data-type="avions" data-demande-id="{{ $demandeAutorisation->id }}" disabled>
                                     <i class="fas fa-check-double"></i> @lang('trans.approve_selected')
@@ -280,13 +280,13 @@
                                     <table class="table table-striped table-bordered" id="avionsTable">
                                         <thead>
                                             <tr>
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <th><input type="checkbox" class="select-all-checkbox" data-type="avions" {{ $hasRejectedItem ? 'disabled' : '' }}></th>
                                                 @endif
                                                 <th>Immatriculation</th>
                                                 <th>Type</th>
                                                 <th>Opérateur</th>
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <th>Statut</th>
                                                 <th>Actions</th>
                                                 @endif
@@ -295,13 +295,13 @@
                                         <tbody>
                                             @foreach ($avions as $avionItem)
                                             <tr id="avion-{{ $avionItem->id }}">
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <td><input type="checkbox" class="item-checkbox" data-type="avions" value="{{ $avionItem->id }}" {{ $hasRejectedItem ? 'disabled' : '' }}></td>
                                                 @endif
                                                 <td>{{ $avionItem->immatriculation }}</td>
                                                 <td>{{ $avionItem->type->code ?? 'N/A' }}</td>
                                                 <td>{{ $avionItem->compagnie->nom_entreprise ?? 'N/A' }}</td>
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <td>
                                                     @if ($avionItem->valider)
                                                     <span class="validation-badge validated">Validé</span>
@@ -396,7 +396,7 @@
                             
 
 
-                            @if (auth()->user()->hasRole('dta') && !$hasRejectedItem)
+                            @if (auth()->user()->hasRole(['dta', 'dg']) && !$hasRejectedItem)
                             <div class="mb-2">
                                 <button type="button" class="btn btn-success btn-sm bulk-approve-btn" data-type="vols" data-demande-id="{{ $demandeAutorisation->id }}" disabled>
                                     <i class="fas fa-check-double"></i> @lang('trans.approve_selected')
@@ -412,7 +412,7 @@
                                     <table class="table table-striped table-bordered" id="volsTable">
                                         <thead>
                                             <tr>
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <th><input type="checkbox" class="select-all-checkbox" data-type="vols" {{ $hasRejectedItem ? 'disabled' : '' }}></th>
                                                 @endif
                                                 <th>@lang('trans.flight_number')</th>
@@ -424,7 +424,7 @@
                                                 <th>@lang('trans.nb_passagers')</th>
                                                 <th>Itinéraire</th>
 
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <th>@lang('trans.status')</th>
                                                 <th>@lang('trans.actions')</th>
                                                 @endif
@@ -444,7 +444,7 @@
                                             $routeString .= ' → ' . (optional($volItem->aeroportArrivee)->codeICAO ?? $volItem->nom_piste_arrivee ?? 'N/A');
                                             @endphp
                                             <tr id="vol-{{ $volItem->id }}">
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <td><input type="checkbox" class="item-checkbox" data-type="vols" value="{{ $volItem->id }}" {{ $hasRejectedItem ? 'disabled' : '' }}></td>
                                                 @endif
                                                 <td>{{ $volItem->numero_vol }}</td>
@@ -468,7 +468,7 @@
                                                         @endif
                                                     </small>
                                                 </td>
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <td>
                                                     @if ($volItem->valider)
                                                     <span class="validation-badge validated">Validé</span>
@@ -539,7 +539,7 @@
                             
 
 
-                            @if (auth()->user()->hasRole('dta') && !$hasRejectedItem)
+                            @if (auth()->user()->hasRole(['dta', 'dg']) && !$hasRejectedItem)
                             <div class="mb-2">
                                 <button type="button" class="btn btn-success btn-sm bulk-approve-btn" data-type="equipe_vols" data-demande-id="{{ $demandeAutorisation->id }}" disabled>
                                     <i class="fas fa-check-double"></i> @lang('trans.approve_selected')
@@ -555,13 +555,13 @@
                                     <table class="table table-striped table-bordered" id="crewTable">
                                         <thead>
                                             <tr>
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <th><input type="checkbox" class="select-all-checkbox" data-type="equipe_vols" {{ $hasRejectedItem ? 'disabled' : '' }}></th>
                                                 @endif
                                                 <th>@lang('trans.role')</th>
                                                 <th>@lang('trans.license')</th>
                                                 <th>@lang('trans.proof')</th>
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <th>Statut</th>
                                                 <th>Actions</th>
                                                 @endif
@@ -570,7 +570,7 @@
                                         <tbody>
                                             @foreach ($equipe_vols as $membre)
                                             <tr id="membre-{{ $membre->id }}">
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <td><input type="checkbox" class="item-checkbox" data-type="equipe_vols" value="{{ $membre->id }}" {{ $hasRejectedItem ? 'disabled' : '' }}></td>
                                                 @endif
                                                 <td>{{ strtoupper($membre->fonction) }}</td>
@@ -592,7 +592,7 @@
                                                     N/A
                                                     @endif
                                                 </td>
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <td>
                                                     @if ($membre->valider)
                                                     <span class="validation-badge validated">Validé</span>
@@ -663,7 +663,7 @@
                             
 
 
-                            @if (auth()->user()->hasRole('dta') && !$hasRejectedItem)
+                            @if (auth()->user()->hasRole(['dta', 'dg']) && !$hasRejectedItem)
                             <div class="mb-2">
                                 <button type="button" class="btn btn-success btn-sm bulk-approve-btn" data-type="fret_vols" data-demande-id="{{ $demandeAutorisation->id }}" disabled>
                                     <i class="fas fa-check-double"></i> @lang('trans.approve_selected')
@@ -679,13 +679,13 @@
                                     <table class="table table-striped table-bordered" id="fretTable">
                                         <thead>
                                             <tr>
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <th><input type="checkbox" class="select-all-checkbox" data-type="fret_vols" {{ $hasRejectedItem ? 'disabled' : '' }}></th>
                                                 @endif
                                                 <th>@lang('trans.nature')</th>
                                                 <th>@lang('trans.weight_kg')</th>
                                                 <th>@lang('trans.description')</th>
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <th>Statut</th>
                                                 <th>Actions</th>
                                                 @endif
@@ -694,13 +694,13 @@
                                         <tbody>
                                             @foreach ($fretVols as $fret)
                                             <tr id="fret-{{ $fret->id }}">
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <td><input type="checkbox" class="item-checkbox" data-type="fret_vols" value="{{ $fret->id }}" {{ $hasRejectedItem ? 'disabled' : '' }}></td>
                                                 @endif
                                                 <td>{{ strtoupper($fret->nature) }}</td>
                                                 <td>{{ $fret->poids }} kg</td>
                                                 <td>{{ $fret->instructions_speciales }}</td>
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <td>
                                                     @if ($fret->valider)
                                                     <span class="validation-badge validated">Validé</span>
@@ -936,7 +936,7 @@
                             
 
 
-                            @if (auth()->user()->hasRole('dta') && !$hasRejectedItem)
+                            @if (auth()->user()->hasRole(['dta', 'dg']) && !$hasRejectedItem)
                             <div class="mb-2">
                                 <button type="button" class="btn btn-success btn-sm bulk-approve-btn" data-type="receiving_parties" data-demande-id="{{ $demandeAutorisation->id }}" disabled>
                                     <i class="fas fa-check-double"></i> @lang('trans.approve_selected')
@@ -952,7 +952,7 @@
                                     <table class="table table-striped table-bordered">
                                         <thead>
                                             <tr>
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <th><input type="checkbox" class="select-all-checkbox" data-type="receiving_parties" {{ $hasRejectedItem ? 'disabled' : '' }}></th>
                                                 @endif
                                                 <th>Contact</th>
@@ -960,7 +960,7 @@
                                                 <th>Email</th>
                                                 <th>Fonction</th>
                                                 <th>Piece d'identité</th>
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <th>Statut</th>
                                                 <th>Actions</th>
                                                 @endif
@@ -969,7 +969,7 @@
                                         <tbody>
                                             @foreach ($receivingParties as $party)
                                             <tr id="party-{{ $party->id }}">
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <td><input type="checkbox" class="item-checkbox" data-type="receiving_parties" value="{{ $party->id }}" {{ $hasRejectedItem ? 'disabled' : '' }}></td>
                                                 @endif
                                                 <td>{{ $party->nom_contact }}</td>
@@ -982,7 +982,7 @@
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                 </td>
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <td>
                                                     @if ($party->valider)
                                                     <span class="validation-badge validated">Validé</span>
@@ -1052,7 +1052,7 @@
                            
 
 
-                            @if (auth()->user()->hasRole('dta') && !$hasRejectedItem)
+                            @if (auth()->user()->hasRole(['dta', 'dg']) && !$hasRejectedItem)
                             <div class="mb-2">
                                 <button type="button" class="btn btn-success btn-sm bulk-approve-btn" data-type="document_autorisations" data-demande-id="{{ $demandeAutorisation->id }}" disabled>
                                     <i class="fas fa-check-double"></i> @lang('trans.approve_selected')
@@ -1068,12 +1068,12 @@
                                     <table class="table table-striped" id="documentsTable">
                                         <thead>
                                             <tr>
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <th><input type="checkbox" class="select-all-checkbox" data-type="document_autorisations" {{ $hasRejectedItem ? 'disabled' : '' }}></th>
                                                 @endif
                                                 <th>Type</th>
                                                 <th>Document</th>
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <th>Statut</th>
                                                 <th>Actions</th>
                                                 @endif
@@ -1082,7 +1082,7 @@
                                         <tbody>
                                             @foreach ($demandeAutorisation->documents as $document)
                                             <tr id="document-{{ $document->id }}">
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <td><input type="checkbox" class="item-checkbox" data-type="document_autorisations" value="{{ $document->id }}" {{ $hasRejectedItem ? 'disabled' : '' }}></td>
                                                 @endif
                                                 <td>
@@ -1094,7 +1094,7 @@
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                 </td>
-                                                @if (auth()->user()->hasRole('dta'))
+                                                @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <td>
                                                     @if ($document->valider)
                                                     <span class="validation-badge validated">Validé</span>

@@ -494,7 +494,7 @@ Route::get('/rapports/compagnie/{id}', [App\Http\Controllers\DgDsvController::cl
     Route::get('/demandeur/demandeur-details', [DetenteurLicenceController::class, 'getDemandeurDetails'])->name('demandeur.get.details');
             });
 
-        Route::middleware(['auth:web', 'verified', 'role:admin|dta'])
+        Route::middleware(['auth:web', 'verified', 'role:admin|dta|dg'])
             ->prefix('vr')
             ->group(function () {
                 Route::post('/validate/avion', [AdminController::class, 'validateAvion'])->name('validate.avion');
