@@ -23,7 +23,7 @@
                 <input type="hidden" name="is_approved" value="1">
                 <input type="hidden" name="type_autorisation" value="{{ $demande->type->libelle }}">
                 <input type="hidden" name="type_autorisation_id" value="{{ $demande->type->id }}">
-                <input type="hidden" name="type_vol_id" value="{{ $demande->typeVol->id }}">
+                <input type="hidden" name="type_vol_id" value="{{ $demande->typeVol?->id }}">
 
                 <button type="submit" class="btn btn-success btn-sm mb-1"
                         onclick="return confirm('@lang("trans.confirm_validation")')">
@@ -46,7 +46,7 @@
                 <input type="hidden" name="is_approved" value="1">
                 <input type="hidden" name="type_autorisation" value="{{ $demande->type->libelle }}">
                 <input type="hidden" name="type_autorisation_id" value="{{ $demande->type->id }}">
-                <input type="hidden" name="type_vol_id" value="{{ $demande->typeVol->id }}">
+                <input type="hidden" name="type_vol_id" value="{{ $demande->typeVol?->id }}">
                 
                 <button type="submit" class="btn btn-success btn-sm mb-1"
                         onclick="return confirm('@lang("trans.confirm_validation")')">
@@ -143,7 +143,7 @@
                 <input type="hidden" name="is_approved" value="1">
                 <input type="hidden" name="type_autorisation" value="{{ $demande->type->libelle }}">
                 <input type="hidden" name="type_autorisation_id" value="{{ $demande->type->id }}">
-                <input type="hidden" name="type_vol_id" value="{{ $demande->typeVol->id }}">
+                <input type="hidden" name="type_vol_id" value="{{ $demande->typeVol?->id }}">
                 
                 <button type="submit" class="btn btn-success btn-sm mb-1"
                         onclick="return confirm('@lang("trans.confirm_dg_validation")')">
