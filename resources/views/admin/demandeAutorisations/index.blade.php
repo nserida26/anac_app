@@ -175,6 +175,7 @@
                                                     
                                                         @if((optional($demande->etatDemande)->dta_annoter || optional($demande->etatDemande)->dg_annoter_admin) &&
                                                             $demande->isValidatedByAll() &&
+                                                            $demande->isFullyValidated() &&
                                                             !optional($demande->etatDemande)->srta_valider)
                                                             <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline" id="srtaValiderForm-{{ $demande->id }}">
                                                                 @csrf
