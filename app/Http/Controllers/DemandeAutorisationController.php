@@ -666,7 +666,7 @@ class DemandeAutorisationController extends Controller
 
             // Validation de base
             $validated = $request->validate([
-                'action' => 'required|string|in:compagnie_cree_demande,compagnie_rectifie_demande,dg_annoter,dg_annoter_admin,dg_rejeter,dta_dg_annoter,dta_annoter,dta_annoter_admin,dta_rejeter,dta_notifier,service_annoter,service_raturer,dsv_valider,dsna_valider,dsad_valider,dsf_valider,service_valider,srta_valider,service_tout_valider,dta_valider,dg_valider,dta_dg_valider,compagnie_payer,daf_confirme_pay,dg_signer,service_envoyer',
+                'action' => 'required|string|in:compagnie_cree_demande,compagnie_rectifie_demande,dg_annoter,dg_annoter_admin,dg_rejeter,dta_dg_annoter,dta_annoter,dta_annoter_admin,dta_rejeter,dta_notifier,service_annoter,service_raturer,dsv_valider,dsna_valider,dsad_valider,dsf_valider,service_valider,srta_valider,service_tout_valider,dta_valider,dg_valider,dta_dg_valider,compagnie_payer,daf_confirme_pay,dg_signer,service_envoyer,reset_to_dta_stage,reset_to_admin_stage',
                 'is_approved' => 'sometimes|boolean',
                 'is_rejected' => 'sometimes|boolean',
                 'motif' => 'required_if:action,dg_rejeter,dta_rejeter|nullable|string',
@@ -1181,6 +1181,104 @@ class DemandeAutorisationController extends Controller
                         }
                     }
                     break;
+
+                case 'reset_to_dta_stage':
+                    // Le DTA peut remettre la demande au point où il doit l'annoter,
+                    // comme si le DG venait de l'annoter (défait toute annotation/validation ultérieure).
+                    if (!auth()->user()?->hasRole('dta')) {
+                        throw new \Exception('Action non autorisée.');
+                    }
+
+                    $state = $demande->etatDemande()->firstOrCreate([]);
+                    $state->update([
+                        'compagnie_cree_demande' => true,
+                        'dg_rejeter'             => false,
+                        'dta_rejeter'            => false,
+                        'dta_annoter'            => false,
+                        'service_annoter'        => false,
+                        'service_raturer'        => false,
+                        'dsv_valider'            => false,
+                        'dsna_valider'           => false,
+                        'dsad_valider'           => false,
+                        'service_valider'        => false,
+                        'srta_valider'           => false,
+                        'service_tout_valider'   => false,
+                        'dta_valider'            => false,
+                        'dg_valider'             => false,
+                        'dta_dg_valider'         => false,
+                        'daf_demande_pay'        => false,
+                        'compagnie_payer'        => false,
+                        'daf_confirme_pay'       => false,
+                        'service_envoyer'        => false,
+                        'dta_notifier'           => false,
+                    ]);
+
+                    $demande->update([
+                        'dsv_motif' => null,
+                        'dsna_motif' => null,
+                        'dsad_motif' => null,
+                        'dg_motif' => null,
+                        'dta_motif' => null,
+                    ]);
+
+                    EtatDemandeAutorisation::updateGlobalStatus($demande->id);
+
+                    $motifReset = $request->input('motif');
+                    Activity::log($motifReset ? "reset_to_dta_stage: {$motifReset}" : 'reset_to_dta_stage', $demande->id);
+
+                    DB::commit();
+                    return redirect()->back()->with('success', 'Demande remise au stade DTA.');
+
+                case 'reset_to_admin_stage':
+                    // L'admin (SRTA) peut remettre la demande à l'étape d'annotation admin,
+                    // en repartant de dg_annoter_admin (défait toute annotation/validation ultérieure).
+                    if (!auth()->user()?->hasRole('admin')) {
+                        throw new \Exception('Action non autorisée.');
+                    }
+
+                    $state = $demande->etatDemande()->firstOrCreate([]);
+                    $state->update([
+                        'compagnie_cree_demande'     => true,
+                        'compagnie_rectifie_demande' => false,
+                        'dg_annoter'                 => false,
+                        'dg_annoter_admin'           => true,
+                        'dta_dg_annoter'             => false,
+                        'dg_rejeter'                 => false,
+                        'dta_annoter'                => false,
+                        'dta_rejeter'                => false,
+                        'service_annoter'            => false,
+                        'service_raturer'            => false,
+                        'dsv_valider'                => false,
+                        'dsna_valider'               => false,
+                        'dsad_valider'               => false,
+                        'service_valider'            => false,
+                        'srta_valider'               => false,
+                        'service_tout_valider'       => false,
+                        'dta_valider'                => false,
+                        'dg_valider'                 => false,
+                        'dta_dg_valider'             => false,
+                        'daf_demande_pay'            => false,
+                        'compagnie_payer'            => false,
+                        'daf_confirme_pay'           => false,
+                        'service_envoyer'            => false,
+                        'dta_notifier'               => false,
+                    ]);
+
+                    $demande->update([
+                        'dsv_motif' => null,
+                        'dsna_motif' => null,
+                        'dsad_motif' => null,
+                        'dg_motif' => null,
+                        'dta_motif' => null,
+                    ]);
+
+                    EtatDemandeAutorisation::updateGlobalStatus($demande->id);
+
+                    $motifReset = $request->input('motif');
+                    Activity::log($motifReset ? "reset_to_admin_stage: {$motifReset}" : 'reset_to_admin_stage', $demande->id);
+
+                    DB::commit();
+                    return redirect()->back()->with('success', 'Demande remise au stade Admin.');
 
                     /*case 'dg_signer':
                 // DG signe l'autorisation

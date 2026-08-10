@@ -741,6 +741,20 @@ $(document).ready(function() {
         document.getElementById(formId).submit();
     }
 
+    function promptResetStage(formId, motifInputId, confirmMessage) {
+        if (!confirm(confirmMessage)) {
+            return false;
+        }
+
+        const motif = prompt("@lang('trans.enter_motif')", '');
+        if (motif === null) {
+            return false;
+        }
+
+        document.getElementById(motifInputId).value = motif.trim();
+        document.getElementById(formId).submit();
+    }
+
     function submitForm(form, successMessage) {
         const $form = $(form);
         

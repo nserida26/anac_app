@@ -122,7 +122,7 @@
         </form>
     @endif
 
-    @if($etat->compagnie_cree_demande && ($etat->dg_annoter || $etat->dta_dg_annoter || $etat->dg_annoter_admin) && $etat->srta_valider && $demande->isValidatedByAll() && $demande->isFullyValidated() && !$etat->dta_valider)
+    @if($etat->compagnie_cree_demande && ($etat->dg_annoter || $etat->dta_dg_annoter || $etat->dg_annoter_admin) && ($etat->srta_valider || $etat->service_valider) && $demande->isValidatedByAll() && $demande->isFullyValidated() && !$etat->dta_valider)
         <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline" id="dtaValiderForm-{{ $demande->id }}">
             @csrf
             <input type="hidden" name="action" value="dta_valider">
@@ -158,11 +158,23 @@
            class="btn btn-warning btn-sm mb-1">
             <i class="fas fa-print"></i> @lang('trans.print')
         </a>
-<button type="button" class="btn btn-success btn-sm mb-1" 
-                data-toggle="modal" 
+<button type="button" class="btn btn-success btn-sm mb-1"
+                data-toggle="modal"
                 data-target="#sendNotificationModal-{{ $demande->id }}">
             <i class="fas fa-bell"></i> @lang('trans.send_notification')
         </button>
+    @endif
+
+    @if($etat->compagnie_cree_demande && !$etat->dg_valider && !$etat->dta_dg_valider)
+        <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline" id="resetDtaForm-{{ $demande->id }}">
+            @csrf
+            <input type="hidden" name="action" value="reset_to_dta_stage">
+            <input type="hidden" name="motif" id="resetDtaMotif-{{ $demande->id }}">
+            <button type="button" class="btn btn-outline-secondary btn-sm mb-1"
+                    onclick="promptResetStage('resetDtaForm-{{ $demande->id }}', 'resetDtaMotif-{{ $demande->id }}', '@lang('trans.confirm_reset_to_dta_stage')')">
+                <i class="fas fa-undo"></i> @lang('trans.reset_to_dta_stage')
+            </button>
+        </form>
     @endif
 
 @elseif(in_array($role, ['dsv', 'dsna', 'dsad', 'dsf']))

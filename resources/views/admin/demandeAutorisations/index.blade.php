@@ -198,11 +198,26 @@
 
                                                         @if($demande->paiement && $demande->paiement->statut == 'on_hold')
                                                             <a href="{{ route('daf.invoiceAutorisation', $demande->paiement->id) }}"
-                                                               class="btn btn-warning btn-sm" 
+                                                               class="btn btn-warning btn-sm"
                                                                target="_blank"
                                                                title="@lang('trans.view_invoice')">
                                                                 <i class="fas fa-file-invoice"></i>
                                                             </a>
+                                                        @endif
+
+                                                        @if((optional($demande->etatDemande)->compagnie_cree_demande) &&
+                                                            !(optional($demande->etatDemande)->dg_valider) &&
+                                                            !(optional($demande->etatDemande)->dta_dg_valider))
+                                                            <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline" id="resetAdminForm-{{ $demande->id }}">
+                                                                @csrf
+                                                                <input type="hidden" name="action" value="reset_to_admin_stage">
+                                                                <input type="hidden" name="motif" id="resetAdminMotif-{{ $demande->id }}">
+                                                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                                                        onclick="promptResetStage('resetAdminForm-{{ $demande->id }}', 'resetAdminMotif-{{ $demande->id }}', '@lang('trans.confirm_reset_to_admin_stage')')"
+                                                                        title="@lang('trans.reset_to_admin_stage')">
+                                                                    <i class="fas fa-undo"></i>
+                                                                </button>
+                                                            </form>
                                                         @endif
                                                     </div>
                                                 </td>
@@ -257,6 +272,20 @@
         }
 
         document.getElementById(inputId).value = numero.trim();
+        document.getElementById(formId).submit();
+    }
+
+    function promptResetStage(formId, motifInputId, confirmMessage) {
+        if (!confirm(confirmMessage)) {
+            return false;
+        }
+
+        const motif = prompt("@lang('trans.enter_motif')", '');
+        if (motif === null) {
+            return false;
+        }
+
+        document.getElementById(motifInputId).value = motif.trim();
         document.getElementById(formId).submit();
     }
 
