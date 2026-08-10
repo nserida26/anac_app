@@ -2173,6 +2173,10 @@ class AdminController extends Controller
             $demande->update(['mise_a_jour' => true]);
             $demande->update(['date_soumission' => null]);
 
+            if ($demande->etatDemande) {
+                $demande->etatDemande->update(['compagnie_cree_demande' => false]);
+            }
+
             Activity::log('rejected', $demande->id);
             $recipientUser = $demande->user;
 

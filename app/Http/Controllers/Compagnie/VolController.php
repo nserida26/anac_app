@@ -349,6 +349,8 @@ public function update(Request $request, $id)
         'date_arrivee' => $validated['date_arrivee'],
         'nbr_passagers' => $validated['nbr_passagers'] ?? null,
         'demande_autorisation_id' => $validated['demande_autorisation_id'],
+        'valider' => 1,
+        'motif' => null,
     ]);
     
     // Update escales
