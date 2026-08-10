@@ -47,7 +47,28 @@
                 <input type="hidden" name="type_autorisation" value="{{ $demande->type->libelle }}">
                 <input type="hidden" name="type_autorisation_id" value="{{ $demande->type->id }}">
                 <input type="hidden" name="type_vol_id" value="{{ $demande->typeVol?->id }}">
-                
+
+                <button type="submit" class="btn btn-success btn-sm mb-1"
+                        onclick="return confirm('@lang("trans.confirm_validation")')">
+                    <i class="fas fa-check"></i> @lang('trans.validate')
+                </button>
+            </form>
+        @endif
+    @endif
+
+    {{-- Cas où le DG a envoyé directement à la SRTA (sans passer par la DTA) :
+         une fois la SRTA validée, la demande revient au DG pour validation finale,
+         sans intervention de la DTA. --}}
+    @if($etat->dg_annoter_admin && $etat->srta_valider && !$etat->dg_valider && !$etat->dta_dg_valider)
+        @if($demande->vols->isNotEmpty() && $demande->avions->isNotEmpty())
+            <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline">
+                @csrf
+                <input type="hidden" name="action" value="dg_valider">
+                <input type="hidden" name="is_approved" value="1">
+                <input type="hidden" name="type_autorisation" value="{{ $demande->type->libelle }}">
+                <input type="hidden" name="type_autorisation_id" value="{{ $demande->type->id }}">
+                <input type="hidden" name="type_vol_id" value="{{ $demande->typeVol?->id }}">
+
                 <button type="submit" class="btn btn-success btn-sm mb-1"
                         onclick="return confirm('@lang("trans.confirm_validation")')">
                     <i class="fas fa-check"></i> @lang('trans.validate')
@@ -59,7 +80,7 @@
 
 @elseif($role == 'dta')
     {{-- Actions pour DTA --}}
-    @if($etat->compagnie_cree_demande && !$etat->dg_annoter && !$etat->dta_dg_annoter && !$etat->dg_annoter_admin && !$etat->dg_rejeter)
+    @if($etat->compagnie_cree_demande && !$etat->dg_annoter && !$etat->dta_dg_annoter && !$etat->dg_annoter_admin && !$etat->dg_rejeter && !$etat->dg_valider && !$etat->dta_dg_valider)
         <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline">
             @csrf
             <input type="hidden" name="action" value="dta_dg_annoter">
