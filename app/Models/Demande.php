@@ -28,13 +28,13 @@ class Demande extends Model
         'motif_dsv',
         'mise_a_jour'
     ];
- protected $appends = ['etat_workflow'];
+    protected $appends = ['etat_workflow'];
     // Relationships
     public function demandeur()
     {
         return $this->belongsTo(Demandeur::class, 'demandeur_id');
     }
-    
+
     public function evaluateur()
     {
         return $this->belongsTo(Evaluateur::class, 'evaluateur_id');
@@ -58,10 +58,10 @@ class Demande extends Model
     {
         return $this->hasOne(ValidationLicence::class, 'demande_id');
     }
-public function pieces()
-{
-    return $this->hasMany(DemandePiece::class);
-}
+    public function pieces()
+    {
+        return $this->hasMany(DemandePiece::class);
+    }
     public function paiement()
     {
         return $this->hasOne(Paiement::class, 'demande_id');
@@ -409,13 +409,13 @@ public function pieces()
     {
         $this->update(['status' => 'pending']);
 
-        $this->licences()->update(['valider' => true, 'motif' => null]);
-        $this->documents()->update(['valider' => true, 'motif' => null]);
-        $this->medicalExaminations()->update(['valider' => true, 'motif' => null]);
-        $this->qualifications()->update(['valider' => true, 'motif' => null]);
-        $this->trainings()->update(['valider' => true, 'motif' => null]);
-        $this->experiences()->update(['valider' => true, 'motif' => null]);
-        $this->competences()->update(['valider' => true, 'motif' => null]);
+        $this->licences()->update(['valider' => null, 'motif' => null]);
+        $this->documents()->update(['valider' => null, 'motif' => null]);
+        $this->medicalExaminations()->update(['valider' => null, 'motif' => null]);
+        $this->qualifications()->update(['valider' => null, 'motif' => null]);
+        $this->trainings()->update(['valider' => null, 'motif' => null]);
+        $this->experiences()->update(['valider' => null, 'motif' => null]);
+        $this->competences()->update(['valider' => null, 'motif' => null]);
 
         // Reset state if exists
         if ($this->etatDemande) {
@@ -429,49 +429,48 @@ public function pieces()
             ]);
         }
     }
-    
-public function checklistReponses(): HasMany
+
+    public function checklistReponses(): HasMany
     {
         return $this->hasMany(ChecklistDemande::class);
     }
-public function getEtatWorkflowAttribute()
-{
-    $state = $this->etatDemande;
+    public function getEtatWorkflowAttribute()
+    {
+        $state = $this->etatDemande;
 
-    if (!$state) {
+        if (!$state) {
+            return 'draft';
+        }
+
+        // ordre du plus avanc� au moins avanc�
+        if ($state->pel_licence_valider) {
+            return 'printed';
+        }
+
+        if ($state->pel_valider) {
+            return 'service_approved';
+        }
+
+        if ($state->daf_confirme_pay) {
+            return 'payment_confirmed';
+        }
+
+        if ($state->demandeur_payer) {
+            return 'paid';
+        }
+
+        if ($state->dg_rejeter || $state->dsv_rejeter) {
+            return 'rejected';
+        }
+
+        if ($state->dg_annoter) {
+            return 'under_review';
+        }
+
+        if ($state->demandeur_cree_demande) {
+            return 'submitted';
+        }
+
         return 'draft';
     }
-
-    // ordre du plus avanc� au moins avanc�
-    if ($state->pel_licence_valider) {
-        return 'printed';
-    }
-
-    if ($state->pel_valider) {
-        return 'service_approved';
-    }
-
-    if ($state->daf_confirme_pay) {
-        return 'payment_confirmed';
-    }
-
-    if ($state->demandeur_payer) {
-        return 'paid';
-    }
-
-    if ($state->dg_rejeter || $state->dsv_rejeter) {
-        return 'rejected';
-    }
-
-    if ($state->dg_annoter) {
-        return 'under_review';
-    }
-
-    if ($state->demandeur_cree_demande) {
-        return 'submitted';
-    }
-
-    return 'draft';
-}
-
 }

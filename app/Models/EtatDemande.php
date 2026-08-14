@@ -188,11 +188,11 @@ class EtatDemande extends Model
     {
         $this->update([
             'demandeur_cree_demande' => true,
-            'dg_annoter' => true,
+            'dg_annoter' => false,
             'dsv_dg_annoter' => false,
             'dg_rejeter' => false,
             'dsv_dg_rejeter' => false,
-            'dsv_annoter' => true,
+            'dsv_annoter' => false,
             'dsv_rejeter' => false,
             'pel_annoter' => false,
             'evaluateur_annoter' => false,

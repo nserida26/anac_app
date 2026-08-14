@@ -62,23 +62,23 @@ class DemandeController extends Controller
         $demandeAutorisations =  $user->demandeAutorisations->sortByDesc('created_at');
         $type_vols  = TypeVol::all();
 
-$demandeAutorisations->map(function ($demande) {
-    $demande->created_at_formatted = $demande->created_at 
-        ? date('d-m-Y', strtotime($demande->created_at))
-        : 'N/A';
-    $demande->created_at_sort = $demande->created_at 
-        ? date('Y-m-d', strtotime($demande->created_at))
-        : '';
-        
-    $demande->date_soumission_formatted = $demande->date_soumission 
-        ? date('d-m-Y', strtotime($demande->date_soumission))
-        : 'N/A';
-    $demande->date_soumission_sort = $demande->date_soumission 
-        ? date('Y-m-d', strtotime($demande->date_soumission))
-        : '';
-    
-    return $demande;
-});
+        $demandeAutorisations->map(function ($demande) {
+            $demande->created_at_formatted = $demande->created_at
+                ? date('d-m-Y', strtotime($demande->created_at))
+                : 'N/A';
+            $demande->created_at_sort = $demande->created_at
+                ? date('Y-m-d', strtotime($demande->created_at))
+                : '';
+
+            $demande->date_soumission_formatted = $demande->date_soumission
+                ? date('d-m-Y', strtotime($demande->date_soumission))
+                : 'N/A';
+            $demande->date_soumission_sort = $demande->date_soumission
+                ? date('Y-m-d', strtotime($demande->date_soumission))
+                : '';
+
+            return $demande;
+        });
 
 
 
@@ -86,7 +86,7 @@ $demandeAutorisations->map(function ($demande) {
         $paiementAutorisations = $user->paiements;
 
 
-        return view('user.index', compact('type_vols','demandes', 'demandeAutorisations', 'type_demande_autorisations', 'paiementAutorisations'));
+        return view('user.index', compact('type_vols', 'demandes', 'demandeAutorisations', 'type_demande_autorisations', 'paiementAutorisations'));
     }
     public function create()
     {
@@ -106,14 +106,14 @@ $demandeAutorisations->map(function ($demande) {
         do {
             $code = rand(1000, 9999);
         } while (Demande::where('code', $code)->exists());
-        
+
 
         $demandeur = Demandeur::where('user_id', auth()->id())->first();
         $request->validate([
             'type_demande_id' => 'required|integer|exists:type_demandes,id',
             'type_licence_id' => 'required|integer|exists:type_licences,id',
         ]);
-        
+
 
         // Créer l demande
         $demande = Demande::create(array_merge($request->all(), ['status' => 'En attente'], ['date' => date('Y-m-d')], ['code' => $code], ['demandeur_id' => $demandeur->id]));
@@ -230,7 +230,7 @@ $demandeAutorisations->map(function ($demande) {
                 'demandeur_payer' => true
             ]
         );
-        $activity = Activity::log('demandeur_payer',$demande->id);
+        $activity = Activity::log('demandeur_payer', $demande->id);
         $daf = User::role('daf')
             ->latest()->first();
         if (!empty($daf->whatsapp)) {
@@ -255,7 +255,7 @@ $demandeAutorisations->map(function ($demande) {
                 'demandeur_cree_demande' => true
             ]
         );
-        $activity = Activity::log('demandeur_cree_demande',$demande->id);
+        $activity = Activity::log('demandeur_cree_demande', $demande->id);
         $demande->resetAllMotifs();
         $demande->resetAllValidations();
         $demande->etatDemande->resetAllApprovalStates();
@@ -281,9 +281,6 @@ $demandeAutorisations->map(function ($demande) {
                 );
             }
         }
-
-
-
         return back()->with('success', 'Demande validée avec succès.');
     }
 
@@ -1062,7 +1059,7 @@ $demandeAutorisations->map(function ($demande) {
                 ->where('demandes.id', $id)
                 ->orderByDesc('competence_demandeurs.id')
                 ->first();
-            
+
 
 
 
@@ -1071,13 +1068,13 @@ $demandeAutorisations->map(function ($demande) {
             return redirect()->back()->with('error', 'Licence n\' est pas encore valide.');
         }
     }
-    
-        /**
+
+    /**
      * Unified function to update demande state
      */
     public function updateDemandeState(Request $request, $demandeId)
     {
-        
+
         try {
             DB::beginTransaction();
 
@@ -1096,7 +1093,7 @@ $demandeAutorisations->map(function ($demande) {
                 'evaluateur_id' => 'required_if:action,evaluateur_annoter|nullable|exists:users,id',
                 'medical_evaluator_id' => 'required_if:action,evaluateur_valider_medical|nullable|exists:users,id',
             ]);
-            
+
 
             // Récupération des données
             $demande = Demande::with(['demandeur.user', 'typeDemande', 'etatDemande'])->findOrFail($demandeId);
@@ -1106,16 +1103,16 @@ $demandeAutorisations->map(function ($demande) {
             $dg = User::role('dg')
                 ->whereHas('signature', fn($q) => $q->whereNotNull('signature'))
                 ->latest()->first();
-            
+
             $dsv = User::role('dsv')
                 ->whereHas('signature', fn($q) => $q->whereNotNull('signature'))
                 ->latest()->first();
-            
+
             $pel = User::role('admin')
                 ->whereHas('permissions', fn($q) => $q->where('name', 'menage-dsv'))
                 ->whereHas('signature', fn($q) => $q->whereNotNull('signature'))
                 ->latest()->first();
-            
+
             $daf = User::role('daf')->latest()->first();
             $sma = User::role('sma')->latest()->first();
             $sla = User::role('sla')->latest()->first();
@@ -1287,7 +1284,7 @@ $demandeAutorisations->map(function ($demande) {
                     if ($demande->etatDemande) {
                         $demande->etatDemande->update(['pel_annoter' => true]);
                     }
-                    
+
                     if ($sma && !empty($sma->whatsapp)) {
                         $this->dsvNotificationService->sendApplicationActionRequired(
                             demandeNumber: $demande->code,
@@ -1371,10 +1368,10 @@ $demandeAutorisations->map(function ($demande) {
                 case 'daf_confirme_pay':
                     $paiement = $demande->paiement;
                     $p = $paiement->update(
-                            [
-                                'statut' => 'Payé'
-                            ]
-                        );
+                        [
+                            'statut' => 'Payé'
+                        ]
+                    );
                     if ($demande->etatDemande) {
                         $demande->etatDemande->update(['daf_confirme_pay' => true]);
                     }
@@ -1474,7 +1471,7 @@ $demandeAutorisations->map(function ($demande) {
                 default:
                     throw new \Exception("Action non reconnue: {$action}");
             }
-            
+
             // Mise à jour de l'état via EtatDemande
             /*if ($demande->etatDemande) {
                 
@@ -1488,13 +1485,12 @@ $demandeAutorisations->map(function ($demande) {
             }
 */
             // Log activity
-            
-            Activity::log($action,$demande->id);
+
+            Activity::log($action, $demande->id);
 
             DB::commit();
 
             return redirect()->back()->with('success', 'État mis à jour avec succès');
-
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Erreur updateDemandeState: ' . $e->getMessage(), [
