@@ -1133,7 +1133,7 @@ class DemandeController extends Controller
                     ]);
 
                     $demande->etatDemande->update(['demandeur_cree_demande' => true]);
-                    dd($dg);
+
                     if ($dg && !empty($dg->whatsapp)) {
                         $this->notificationService->sendApplicationActionRequired(
                             demandeNumber: $demande->code,
