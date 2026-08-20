@@ -246,6 +246,7 @@ return [
     'start_aeroport' => 'Departure Airport',
     'end_aeroport' => 'Arrival Airport',
     'name' => 'Name',
+    'name_operator' => 'Corporate name',
     'delete' => 'Delete',
     'cancel' => 'Cancel',
     'freight' => 'Freight',
@@ -1148,10 +1149,10 @@ return [
     'created_by' => 'Created By',
     'trainee_information' => 'Trainee Information',
     'delete' => 'Delete',
-'confirm_delete' => 'Confirm Delete',
-'delete_confirmation_message' => 'Are you sure you want to delete this item?',
-'delete_warning' => 'This action cannot be undone!',
-'cancel' => 'Cancel',
+    'confirm_delete' => 'Confirm Delete',
+    'delete_confirmation_message' => 'Are you sure you want to delete this item?',
+    'delete_warning' => 'This action cannot be undone!',
+    'cancel' => 'Cancel',
 
     // Missing translations (previously untranslated, English fallback added)
     'add_first_licence_message' => 'Start by adding your first license',

@@ -1815,7 +1815,7 @@
                     <form id="companyForm">
                         @csrf
                         <div class="mb-3">
-                            <label for="nom" class="form-label">@lang('trans.name') <span class="text-danger">*</span></label>
+                            <label for="nom" class="form-label">@lang('trans.name_operator') <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="nom_entreprise" name="nom_entreprise"
                                 required>
                         </div>
