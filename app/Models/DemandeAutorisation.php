@@ -12,13 +12,17 @@ class DemandeAutorisation extends Model
 
     protected $fillable = [
         'code','mise_a_jour', 'date_debut', 'type_demande_autorisation_id', 'type_vol_id',
-        'objet', 'date_fin', 'statut', 'date_soumission', 'date_validation',
+        'objet', 'date_fin', 'statut', 'date_soumission', 'last_relance_at', 'date_validation',
         'sous_validite', 'user_id', 'dsv_motif', 'dsna_motif', 'dsad_motif',
         'dg_motif', 'dta_motif', 'directions_annotees', 'points','type_vol_ids',
         'autorisation_annulee'
     ];
 
     protected $appends = ['has_issues', 'invalid_reasons', 'rejection_reasons_list', 'rejected_by', 'etat_workflow'];
+
+    protected $casts = [
+        'last_relance_at' => 'datetime',
+    ];
 
     // --- Relations ---
  public function typeVols()

@@ -666,7 +666,7 @@ class DemandeAutorisationController extends Controller
 
             // Validation de base
             $validated = $request->validate([
-                'action' => 'required|string|in:compagnie_cree_demande,compagnie_rectifie_demande,dg_annoter,dg_annoter_admin,dg_rejeter,dta_dg_annoter,dta_annoter,dta_annoter_admin,dta_rejeter,dta_notifier,service_annoter,service_raturer,dsv_valider,dsna_valider,dsad_valider,dsf_valider,service_valider,srta_valider,service_tout_valider,dta_valider,dg_valider,dta_dg_valider,compagnie_payer,daf_confirme_pay,dg_signer,service_envoyer,reset_to_dta_stage,reset_to_admin_stage',
+                'action' => 'required|string|in:compagnie_cree_demande,compagnie_rectifie_demande,dg_annoter,dg_annoter_admin,dg_rejeter,dta_dg_annoter,dta_annoter,dta_annoter_admin,dta_rejeter,dta_notifier,service_annoter,service_raturer,dsv_valider,dsna_valider,dsad_valider,dsf_valider,service_valider,srta_valider,service_tout_valider,dta_valider,dg_valider,dta_dg_valider,compagnie_payer,daf_confirme_pay,service_envoyer,reset_to_dta_stage,reset_to_admin_stage',
                 'is_approved' => 'sometimes|boolean',
                 'is_rejected' => 'sometimes|boolean',
                 'motif' => 'required_if:action,dg_rejeter,dta_rejeter|nullable|string',
@@ -695,6 +695,8 @@ class DemandeAutorisationController extends Controller
             $dsf = User::role('dsf')->latest()->first();
 
             $action = $request->input('action');
+
+            $this->authorizeWorkflowAction($action, $demande);
 
             // Traitement des actions
             switch ($action) {
@@ -968,16 +970,14 @@ class DemandeAutorisationController extends Controller
                     break;
 
                 case 'service_tout_valider':
-                    if (auth()->user()?->hasRole('dta')) {
-                        $demande->update([
-                            'dsv_motif' => null,
-                            'dsna_motif' => null,
-                            'dsad_motif' => null,
-                            'dg_motif' => null,
-                            'dta_motif' => null
-                        ]);
-                        EtatDemandeAutorisation::updateState($demandeId, 'dta_valider', auth()->id(), true);
-                    }
+                    $demande->update([
+                        'dsv_motif' => null,
+                        'dsna_motif' => null,
+                        'dsad_motif' => null,
+                        'dg_motif' => null,
+                        'dta_motif' => null
+                    ]);
+                    EtatDemandeAutorisation::updateState($demandeId, 'dta_valider', auth()->id(), true);
                     break;
 
                 case 'compagnie_payer':
@@ -1279,13 +1279,6 @@ class DemandeAutorisationController extends Controller
 
                     DB::commit();
                     return redirect()->back()->with('success', 'Demande remise au stade Admin.');
-
-                    /*case 'dg_signer':
-                // DG signe l'autorisation
-                if ($dta && !empty($dta->whatsapp) && $demande->user && !empty($demande->user->whatsapp)) {
-                    $notificationService->sendDGSignatureNotification($demande, $dta, $demande->user);
-                }
-                break;*/
             }
 
             // Mise à jour de l'état
@@ -1308,6 +1301,65 @@ class DemandeAutorisationController extends Controller
         }
     }
 
+    /**
+     * Vérifie que l'utilisateur connecté a le droit de déclencher cette action
+     * de workflow sur cette demande. Auparavant, seule l'UI (visibilité des
+     * boutons) empêchait un rôle non concerné d'appeler /update-state avec
+     * n'importe quelle action de la liste blanche.
+     */
+    private function authorizeWorkflowAction(string $action, DemandeAutorisation $demande): void
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            throw new \Exception('Action non autorisée.');
+        }
+
+        // Actions réservées à la compagnie propriétaire du dossier (un admin peut agir en support)
+        if (in_array($action, ['compagnie_cree_demande', 'compagnie_rectifie_demande', 'compagnie_payer'])) {
+            if ((int) $demande->user_id !== (int) $user->id && !$user->hasRole('admin')) {
+                throw new \Exception('Action non autorisée.');
+            }
+            return;
+        }
+
+        $rolesByAction = [
+            'dg_annoter'            => ['dg'],
+            'dg_annoter_admin'      => ['dg'],
+            'dg_rejeter'            => ['dg'],
+            'dg_valider'            => ['dg'],
+
+            'dta_dg_annoter'        => ['dta'],
+            'dta_annoter'           => ['dta'],
+            'dta_annoter_admin'     => ['dta'],
+            'dta_rejeter'           => ['dta'],
+            'dta_notifier'          => ['dta'],
+            'dta_valider'           => ['dta'],
+            'dta_dg_valider'        => ['dta'],
+            'service_tout_valider'  => ['dta'],
+            'reset_to_dta_stage'    => ['dta'],
+
+            'service_annoter'       => ['dta', 'admin'],
+            'service_raturer'       => ['dta', 'admin'],
+            'service_valider'       => ['dta', 'admin'],
+            'srta_valider'          => ['admin'],
+            'service_envoyer'       => ['dta', 'admin'],
+            'reset_to_admin_stage'  => ['admin'],
+
+            'dsv_valider'           => ['dsv'],
+            'dsna_valider'          => ['dsna'],
+            'dsad_valider'          => ['dsad'],
+            'dsf_valider'           => ['dsf'],
+
+            'daf_confirme_pay'      => ['daf'],
+        ];
+
+        $allowedRoles = $rolesByAction[$action] ?? null;
+
+        if ($allowedRoles === null || !$user->hasAnyRole($allowedRoles)) {
+            throw new \Exception('Action non autorisée pour votre rôle.');
+        }
+    }
 
     /**
      * Store a newly created deceased person.
@@ -1775,7 +1827,11 @@ class DemandeAutorisationController extends Controller
     }
     public function destroy($id)
     {
-        $demandeAutorisation = DemandeAutorisation::findOrFail($id);
+        $demandeAutorisation = DemandeAutorisation::with('etatDemande')->findOrFail($id);
+
+        if ($demandeAutorisation->etatDemande && $demandeAutorisation->etatDemande->compagnie_cree_demande) {
+            return redirect()->back()->with('error', 'Cette demande a déjà été déposée et ne peut plus être supprimée.');
+        }
 
         $demandeAutorisation->delete();
         return redirect()->back()->with('success', 'Demande supprimée avec succès.');

@@ -565,6 +565,11 @@ public function sendDTARemoveFromDirectionsNotification(
                 'instruction' => 'Monsieur le Directeur, Je vous informe que la demande sous état de paiement.',
                 'has_attachment' => true
             ],
+            'reminder' => [
+                'icon' => '⏰',
+                'action' => 'RELANCE - DOSSIER EN ATTENTE',
+                'instruction' => 'Ce dossier attend votre action depuis plusieurs jours. Merci de le traiter dès que possible.'
+            ],
             default => ['icon' => '📄', 'action' => 'ACTION REQUISE', 'instruction' => 'Veuillez traiter cette demande']
         };
     }

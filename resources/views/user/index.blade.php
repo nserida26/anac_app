@@ -19,14 +19,65 @@
     <link rel="stylesheet" href="{{ asset('assets/admin/plugins/select2/css/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/admin/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
     <style>
+        .badge-draft { background-color: #6c757d; color: white; }
         .badge-submitted { background-color: #17a2b8; color: white; }
         .badge-under_review { background-color: #ffc107; color: black; }
         .badge-service_approved { background-color: #28a745; color: white; }
         .badge-paid { background-color: #007bff; color: white; }
         .badge-payment_confirmed { background-color: #20c997; color: white; }
+        .badge-issued { background-color: #6f42c1; color: white; }
         .badge-printed{background-color: navy; color: white;}
         .badge-rejected { background-color: #dc3545; color: white; }
-        
+
+        .autorisation-stepper {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0;
+        }
+        .autorisation-stepper li {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            padding-top: 2.25rem;
+            font-size: 0.8rem;
+            color: #adb5bd;
+        }
+        .autorisation-stepper li::before {
+            content: '';
+            position: absolute;
+            top: 1rem;
+            left: -50%;
+            width: 100%;
+            height: 3px;
+            background-color: #e9ecef;
+            z-index: 0;
+        }
+        .autorisation-stepper li:first-child::before { display: none; }
+        .autorisation-stepper li::after {
+            content: '\2713';
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            color: #fff;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+            font-size: 0.9rem;
+        }
+        .autorisation-stepper li.completed { color: #28a745; }
+        .autorisation-stepper li.completed::before { background-color: #28a745; }
+        .autorisation-stepper li.completed::after { background-color: #28a745; }
+        .autorisation-stepper li.current { color: #007bff; font-weight: bold; }
+        .autorisation-stepper li.current::after { background-color: #007bff; content: attr(data-step); }
+        .autorisation-stepper li.pending::after { content: attr(data-step); }
+
         .table-danger {
             background-color: rgba(220, 53, 69, 0.1) !important;
         }
@@ -267,6 +318,7 @@
                                             <th>@lang('trans.type_flight')</th>
                                             <th>@lang('trans.start_date')</th>
                                             <th>@lang('trans.end_date')</th>
+                                            <th>@lang('trans.status')</th>
                                             <th>@lang('trans.actions')</th>
                                         </tr>
                                     </thead>
@@ -285,6 +337,30 @@
                                                     $dateFin = $demande->date_fin ?? null;
                                                     $sousValidite = $demande->sous_validite ?? null;
                                                     $objet = $demande->objet ?? null;
+                                                    $isIssued = (bool) $demande->autorisation($demande->id);
+                                                    $workflowState = $isIssued ? 'issued' : ($demande->etat_workflow ?? 'draft');
+                                                    $statusBadgeClass = match ($workflowState) {
+                                                        'draft' => 'badge-draft',
+                                                        'submitted' => 'badge-submitted',
+                                                        'under_review' => 'badge-under_review',
+                                                        'service_approved' => 'badge-service_approved',
+                                                        'paid' => 'badge-paid',
+                                                        'payment_confirmed' => 'badge-payment_confirmed',
+                                                        'issued' => 'badge-issued',
+                                                        'rejected' => 'badge-rejected',
+                                                        default => 'badge-secondary',
+                                                    };
+                                                    $statusLabel = match ($workflowState) {
+                                                        'draft' => 'Brouillon',
+                                                        'submitted' => 'Déposé',
+                                                        'under_review' => "À l'étude",
+                                                        'service_approved' => 'Validé par les services',
+                                                        'paid' => 'Payé',
+                                                        'payment_confirmed' => 'Paiement confirmé',
+                                                        'issued' => 'Autorisation délivrée',
+                                                        'rejected' => 'Refusé',
+                                                        default => $workflowState,
+                                                    };
                                                 @endphp
                                                 <tr>
                                                     <td>{{ $demande->created_at->format('d/m/Y') ?? 'N/A' }}</td>
@@ -294,6 +370,13 @@
                                                     <td>{{ $demande->typeVol->nom ?? 'N/A' }}</td>
                                                     <td>{{ $dateDebut ?? 'N/A' }}</td>
                                                     <td>{{ $dateFin ?? 'N/A' }}</td>
+                                                    <td>
+                                                        <button type="button" class="badge {{ $statusBadgeClass }}"
+                                                                style="border: none; cursor: pointer;"
+                                                                data-toggle="modal" data-target="#statusModal-{{ $demande->id }}">
+                                                            {{ $statusLabel }}
+                                                        </button>
+                                                    </td>
                                                     <td>
                                                         <div class="btn-group">
                                                             @if ($canEdit)
@@ -372,10 +455,13 @@
                                                 @if ($hasIssues)
                                                     @include('dir.demandeAutorisations.modals.issues', ['demande' => $demande])
                                                 @endif
+
+                                                {{-- Modal du parcours de la demande --}}
+                                                @include('user.partials.autorisation-status-timeline', ['demande' => $demande])
                                             @endforeach
                                         @else
                                             <tr>
-                                                <td colspan="8" class="text-center">@lang('trans.no_data')</td>
+                                                <td colspan="9" class="text-center">@lang('trans.no_data')</td>
                                             </tr>
                                         @endif
                                     </tbody>
@@ -615,7 +701,7 @@ $(document).ready(function() {
                 "orderDataType": "dom-data-order"
             },
             {
-                "targets": 7, // Colonne actions
+                "targets": 8, // Colonne actions
                 "orderable": false,
                 "searchable": false
             }
