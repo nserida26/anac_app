@@ -441,28 +441,28 @@ $typeString = implode('; ', $resultStrings);
                                     $instructeurStartDate = Carbon::parse($qualification_inst->date_examen);
                                     $instExpiryDate = $instructeurStartDate->copy()->addMonths(24)->endOfMonth();
 
-                                    if ($currentDate->lte($instExpiryDate)) {
-                                        // Créer une clé unique basée sur le type, machine et code
-                                        $key =
-                                            $qualification_inst->type_privilege .
-                                            '|' .
-                                            ($qualification_inst->machine ?? '') .
-                                            '|' .
-                                            ($qualification_inst->code ?? '');
+                                    // SUPPRIM�: if ($currentDate->lte($instExpiryDate)) {
+                                    // Créer une clé unique basée sur le type, machine et code
+                                    $key =
+                                        $qualification_inst->type_privilege .
+                                        '|' .
+                                        ($qualification_inst->machine ?? '') .
+                                        '|' .
+                                        ($qualification_inst->code ?? '');
 
-                                        if (
-                                            !isset($groupedInstructeur[$key]) ||
-                                            $instExpiryDate->gt($groupedInstructeur[$key]['expiry_date'])
-                                        ) {
-                                            $groupedInstructeur[$key] = [
-                                                'expiry_date' => $instExpiryDate,
-                                                'formatted_date' => $instExpiryDate->format('d-m-Y'),
-                                                'type' => $qualification_inst->type_privilege,
-                                                'machine' => $qualification_inst->machine,
-                                                'code' => $qualification_inst->code,
-                                            ];
-                                        }
+                                    if (
+                                        !isset($groupedInstructeur[$key]) ||
+                                        $instExpiryDate->gt($groupedInstructeur[$key]['expiry_date'])
+                                    ) {
+                                        $groupedInstructeur[$key] = [
+                                            'expiry_date' => $instExpiryDate,
+                                            'formatted_date' => $instExpiryDate->format('d-m-Y'),
+                                            'type' => $qualification_inst->type_privilege,
+                                            'machine' => $qualification_inst->machine,
+                                            'code' => $qualification_inst->code,
+                                        ];
                                     }
+                                    // SUPPRIM�: }
                                 }
 
                                 // Regrouper par date d'expiration pour l'affichage
@@ -538,28 +538,28 @@ $typeString = implode('; ', $resultStrings);
                                         $examExpiryDate = $examinateurStartDate->copy()->addMonths(12)->endOfMonth();
                                     }
 
-                                    if ($currentDate->lte($examExpiryDate)) {
-                                        // Créer une clé unique basée sur le type, machine et code
-                                        $key =
-                                            $qualification_exam->type_privilege .
-                                            '|' .
-                                            ($qualification_exam->machine ?? '') .
-                                            '|' .
-                                            ($qualification_exam->code ?? '');
+                                    // SUPPRIM�: if ($currentDate->lte($examExpiryDate)) {
+                                    // Créer une clé unique basée sur le type, machine et code
+                                    $key =
+                                        $qualification_exam->type_privilege .
+                                        '|' .
+                                        ($qualification_exam->machine ?? '') .
+                                        '|' .
+                                        ($qualification_exam->code ?? '');
 
-                                        if (
-                                            !isset($groupedExaminateur[$key]) ||
-                                            $examExpiryDate->gt($groupedExaminateur[$key]['expiry_date'])
-                                        ) {
-                                            $groupedExaminateur[$key] = [
-                                                'expiry_date' => $examExpiryDate,
-                                                'formatted_date' => $examExpiryDate->format('d-m-Y'),
-                                                'type' => $qualification_exam->type_privilege,
-                                                'machine' => $qualification_exam->machine,
-                                                'code' => $qualification_exam->code,
-                                            ];
-                                        }
+                                    if (
+                                        !isset($groupedExaminateur[$key]) ||
+                                        $examExpiryDate->gt($groupedExaminateur[$key]['expiry_date'])
+                                    ) {
+                                        $groupedExaminateur[$key] = [
+                                            'expiry_date' => $examExpiryDate,
+                                            'formatted_date' => $examExpiryDate->format('d-m-Y'),
+                                            'type' => $qualification_exam->type_privilege,
+                                            'machine' => $qualification_exam->machine,
+                                            'code' => $qualification_exam->code,
+                                        ];
                                     }
+                                    // SUPPRIM�: }
                                 }
 
                                 $examinateurDetails = [];
