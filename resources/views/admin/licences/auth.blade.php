@@ -436,88 +436,89 @@ $typeString = implode('; ', $resultStrings);
 
                         @if (!empty($qualification_instructeur))
                             @php
-                                $instructeurDetails = [];
-                                $groupedByExpiry = [];
-                            @endphp
-
-                            @foreach ($qualification_instructeur as $qualification_instructeur)
-                                @php
-                                    $instructeurStartDate = $qualification_instructeur->date_examen;
-                                    $instructeurStartDate = Carbon::parse($instructeurStartDate);
+                                $groupedInstructeur = [];
+                                foreach ($qualification_instructeur as $qualification_inst) {
+                                    $instructeurStartDate = Carbon::parse($qualification_inst->date_examen);
                                     $instExpiryDate = $instructeurStartDate->copy()->addMonths(24)->endOfMonth();
 
-                                    // SUPPRIM�: if ($currentDate->lte($instExpiryDate)) {
-                                    $instExpiryDateFormatted = $instExpiryDate->format('d-m-Y');
+                                    if ($currentDate->lte($instExpiryDate)) {
+                                        // Créer une clé unique basée sur le type, machine et code
+                                        $key =
+                                            $qualification_inst->type_privilege .
+                                            '|' .
+                                            ($qualification_inst->machine ?? '') .
+                                            '|' .
+                                            ($qualification_inst->code ?? '');
 
-                                    // Cr�er une cl� unique pour cette date d'expiration
-if (!isset($groupedByExpiry[$instExpiryDateFormatted])) {
-    $groupedByExpiry[$instExpiryDateFormatted] = [
-        'types' => [],
-        'machines' => [],
-        'codes' => [],
-    ];
-}
+                                        if (
+                                            !isset($groupedInstructeur[$key]) ||
+                                            $instExpiryDate->gt($groupedInstructeur[$key]['expiry_date'])
+                                        ) {
+                                            $groupedInstructeur[$key] = [
+                                                'expiry_date' => $instExpiryDate,
+                                                'formatted_date' => $instExpiryDate->format('d-m-Y'),
+                                                'type' => $qualification_inst->type_privilege,
+                                                'machine' => $qualification_inst->machine,
+                                                'code' => $qualification_inst->code,
+                                            ];
+                                        }
+                                    }
+                                }
 
-// Ajouter les d�tails uniquement s'ils existent et ne sont pas d�j� pr�sents
-                                    if (
-                                        !empty($qualification_instructeur->type_privilege) &&
-                                        !in_array(
-                                            $qualification_instructeur->type_privilege,
-                                            $groupedByExpiry[$instExpiryDateFormatted]['types'],
-                                        )
-                                    ) {
-                                        $groupedByExpiry[$instExpiryDateFormatted]['types'][] =
-                                            $qualification_instructeur->type_privilege;
+                                // Regrouper par date d'expiration pour l'affichage
+                                $groupedByExpiry = [];
+                                foreach ($groupedInstructeur as $data) {
+                                    $expiryDate = $data['formatted_date'];
+                                    if (!isset($groupedByExpiry[$expiryDate])) {
+                                        $groupedByExpiry[$expiryDate] = [
+                                            'types' => [],
+                                            'machines' => [],
+                                            'codes' => [],
+                                        ];
                                     }
 
                                     if (
-                                        !empty($qualification_instructeur->machine) &&
-                                        !in_array(
-                                            $qualification_instructeur->machine,
-                                            $groupedByExpiry[$instExpiryDateFormatted]['machines'],
-                                        )
+                                        !empty($data['type']) &&
+                                        !in_array($data['type'], $groupedByExpiry[$expiryDate]['types'])
                                     ) {
-                                        $groupedByExpiry[$instExpiryDateFormatted]['machines'][] =
-                                            $qualification_instructeur->machine;
+                                        $groupedByExpiry[$expiryDate]['types'][] = $data['type'];
                                     }
-
                                     if (
-                                        !empty($qualification_instructeur->code) &&
-                                        !in_array(
-                                            $qualification_instructeur->code,
-                                            $groupedByExpiry[$instExpiryDateFormatted]['codes'],
-                                        )
+                                        !empty($data['machine']) &&
+                                        !in_array($data['machine'], $groupedByExpiry[$expiryDate]['machines'])
                                     ) {
-                                        $groupedByExpiry[$instExpiryDateFormatted]['codes'][] =
-                                            $qualification_instructeur->code;
+                                        $groupedByExpiry[$expiryDate]['machines'][] = $data['machine'];
                                     }
-                                    // SUPPRIM�: }
-                                @endphp
-                            @endforeach
+                                    if (
+                                        !empty($data['code']) &&
+                                        !in_array($data['code'], $groupedByExpiry[$expiryDate]['codes'])
+                                    ) {
+                                        $groupedByExpiry[$expiryDate]['codes'][] = $data['code'];
+                                    }
+                                }
 
-                            @php
-                                // Construire la cha�ne finale group�e par date d'expiration
-foreach ($groupedByExpiry as $expiryDate => $details) {
-    $parts = [];
+                                $instructeurDetails = [];
+                                foreach ($groupedByExpiry as $expiryDate => $details) {
+                                    $parts = [];
 
-    if (!empty($details['types'])) {
-        $parts[] = implode('/', $details['types']);
-    }
+                                    if (!empty($details['types'])) {
+                                        $parts[] = implode('/', $details['types']);
+                                    }
 
-    if (!empty($details['codes'])) {
-        $parts[] = '(' . implode('/', $details['codes']) . ')';
-    }
+                                    if (!empty($details['codes'])) {
+                                        $parts[] = '(' . implode('/', $details['codes']) . ')';
+                                    }
 
-    if (!empty($details['machines'])) {
-        $parts[] = '(' . implode('/', $details['machines']) . ')';
-    }
+                                    if (!empty($details['machines'])) {
+                                        $parts[] = '(' . implode('/', $details['machines']) . ')';
+                                    }
 
-    if (!empty($parts)) {
-        $instructeurDetails[] = implode(' ', $parts) . " [{$expiryDate}]";
-    }
-}
+                                    if (!empty($parts)) {
+                                        $instructeurDetails[] = implode(' ', $parts) . " [{$expiryDate}]";
+                                    }
+                                }
 
-$instructeurString = implode('; ', $instructeurDetails);
+                                $instructeurString = implode('; ', $instructeurDetails);
                             @endphp
 
                             @if (!empty($instructeurString))
@@ -527,39 +528,52 @@ $instructeurString = implode('; ', $instructeurDetails);
 
                         @if (!empty($qualification_examinateur))
                             @php
-                                $examinateurDetails = [];
-                            @endphp
-                            @foreach ($qualification_examinateur as $qualification_examinateur)
-                                @php
-                                    $examinateurStartDate = $qualification_examinateur->date_examen;
-                                    $examinateurStartDate = Carbon::parse($examinateurStartDate);
+                                $groupedExaminateur = [];
+                                foreach ($qualification_examinateur as $qualification_exam) {
+                                    $examinateurStartDate = Carbon::parse($qualification_exam->date_examen);
 
                                     if (in_array($demande->typeLicence->id, [31, 35])) {
                                         $examExpiryDate = $examinateurStartDate->copy()->addMonths(24)->endOfMonth();
                                     } else {
                                         $examExpiryDate = $examinateurStartDate->copy()->addMonths(12)->endOfMonth();
                                     }
-                                    // SUPPRIM�: if ($currentDate->lte($examExpiryDate)) {
-                                    $examExpiryDateFormatted = $examExpiryDate->format('d-m-Y');
-                                    if (
-                                        !empty($qualification_examinateur->machine) &&
-                                        !empty($qualification_examinateur->code)
-                                    ) {
-                                        $examinateurDetails[] =
-                                            "{$qualification_examinateur->type_privilege} " .
-                                            "({$qualification_examinateur->machine}) " .
-                                            "({$qualification_examinateur->code}) [{$examExpiryDateFormatted}]";
-                                    } else {
-                                        $examinateurDetails[] =
-                                            "{$qualification_examinateur->type_privilege} " .
-                                            "[{$examExpiryDateFormatted}]";
+
+                                    if ($currentDate->lte($examExpiryDate)) {
+                                        // Créer une clé unique basée sur le type, machine et code
+                                        $key =
+                                            $qualification_exam->type_privilege .
+                                            '|' .
+                                            ($qualification_exam->machine ?? '') .
+                                            '|' .
+                                            ($qualification_exam->code ?? '');
+
+                                        if (
+                                            !isset($groupedExaminateur[$key]) ||
+                                            $examExpiryDate->gt($groupedExaminateur[$key]['expiry_date'])
+                                        ) {
+                                            $groupedExaminateur[$key] = [
+                                                'expiry_date' => $examExpiryDate,
+                                                'formatted_date' => $examExpiryDate->format('d-m-Y'),
+                                                'type' => $qualification_exam->type_privilege,
+                                                'machine' => $qualification_exam->machine,
+                                                'code' => $qualification_exam->code,
+                                            ];
+                                        }
                                     }
-                                    // SUPPRIM�: }
-                                @endphp
-                            @endforeach
-                            @php
+                                }
+
+                                $examinateurDetails = [];
+                                foreach ($groupedExaminateur as $data) {
+                                    if (!empty($data['machine']) && !empty($data['code'])) {
+                                        $examinateurDetails[] = "{$data['type']} ({$data['machine']}) ({$data['code']}) [{$data['formatted_date']}]";
+                                    } else {
+                                        $examinateurDetails[] = "{$data['type']} [{$data['formatted_date']}]";
+                                    }
+                                }
+
                                 $examinateurString = implode('; ', $examinateurDetails);
                             @endphp
+
                             @if (!empty($examinateurString))
                                 <p>{{ $examinateurString }}</p>
                             @endif
