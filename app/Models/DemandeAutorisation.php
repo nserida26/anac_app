@@ -315,7 +315,7 @@ public function isValidatedByAll(): bool
     {
         $this->update(['statut' => 'pending']);
 
-        $relations = ['avions', 'vols', 'equipe', 'fret','personnes', 'receivingParties', 'documents'];
+        $relations = ['avions', 'vols', 'equipe', 'fret','personnes', 'mdns', 'receivingParties', 'documents'];
         foreach ($relations as $rel) {
             $this->$rel()->update(['valider' => null, 'motif' => null]);
         }

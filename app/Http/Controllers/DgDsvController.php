@@ -1289,8 +1289,9 @@ $demandeAutorisations = DemandeAutorisation::with(['type', 'user', 'etatDemande'
                 break;
             case 'demande_autorisations': {
                     $demande = DemandeAutorisation::find($id);
+
                     if (Auth::user()->hasRole('dta')) {
-                        # code...
+                        $rejectedFlag = 'dta_rejeter';
                         $demande->update(
                             [
                                 'dta_motif' => $motif,
@@ -1298,14 +1299,9 @@ $demandeAutorisations = DemandeAutorisation::with(['type', 'user', 'etatDemande'
                                 'directions_annotees' => null
                             ]
                         );
-                        $etat_demande = $demande->etatDemande->update(
-                            [
-                                'dta_rejeter' => true
-                            ]
-                        );
                         $activity = Activity::log('dta_rejeter',$demande->id);
                     } else if (Auth::user()->hasRole('dg')) {
-
+                        $rejectedFlag = 'dg_rejeter';
                         $demande->update(
                             [
                                 'dg_motif' => $motif,
@@ -1313,13 +1309,16 @@ $demandeAutorisations = DemandeAutorisation::with(['type', 'user', 'etatDemande'
                                 'directions_annotees' => null
                             ]
                         );
-                        $etat_demande =  $demande->etatDemande->update(
-                            [
-                                'dg_rejeter' => true
-                            ]
-                        );
                         $activity = Activity::log('dg_rejeter',$demande->id);
+                    } else {
+                        // Le rejet complet du dossier n'est ouvert qu'au DG et à la DTA (voir le
+                        // parcours idéal). La SRTA (admin) rejette pièce par pièce depuis son propre
+                        // écran ; sans ce garde-fou, un appel par un autre rôle repartait en silence
+                        // (notification envoyée, état remis à zéro) sans qu'aucun rejet ne soit
+                        // réellement enregistré.
+                        return back()->with('error', 'Seuls le DG et la DTA peuvent rejeter le dossier complet.');
                     }
+
                     $recipientUser = $demande->user;
 
                     $this->dtaAutorisationNotificationService->sendRejectionNotification(
@@ -1331,10 +1330,24 @@ $demandeAutorisations = DemandeAutorisation::with(['type', 'user', 'etatDemande'
                     $state = $demande->etatDemande;
                     $demande->update(['mise_a_jour' => true]);
                     if ($state) {
+                        // On conserve les jalons d'annotation déjà atteints (dg_annoter,
+                        // dg_annoter_admin, dta_dg_annoter, dta_annoter) : après correction par le
+                        // demandeur, le dossier doit reprendre exactement où il s'était arrêté au
+                        // lieu que la DTA revoie réapparaître un bouton "Annoter DG" déjà utilisé.
+                        // resetAllApprovalStates() remet aussi le flag de rejet à false : on le
+                        // restaure explicitement juste après, sinon la demande n'est jamais
+                        // réellement marquée comme rejetée dans le workflow.
+                        $milestones = [
+                            'dg_annoter'       => (bool) $state->dg_annoter,
+                            'dg_annoter_admin' => (bool) $state->dg_annoter_admin,
+                            'dta_dg_annoter'   => (bool) $state->dta_dg_annoter,
+                            'dta_annoter'      => (bool) $state->dta_annoter,
+                        ];
                         $state->resetAllApprovalStates();
-                        $state->update([
-                            'compagnie_cree_demande' => false
-                        ]);
+                        $state->update(array_merge($milestones, [
+                            'compagnie_cree_demande' => false,
+                            $rejectedFlag => true,
+                        ]));
                     }
                     return back()->with('success', 'Demande rejetée avec succès.');
                 }

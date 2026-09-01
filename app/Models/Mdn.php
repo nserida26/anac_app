@@ -22,7 +22,10 @@ class Mdn extends Model
         'date_autorisation',
         'numero_mdn',
         'pays_id',
-        'demande_autorisation_id'
+        'demande_autorisation_id',
+        'valider',
+        'motif',
+        'valide_par_role',
     ];
 
     /**

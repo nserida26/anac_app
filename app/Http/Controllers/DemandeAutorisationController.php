@@ -380,7 +380,7 @@ class DemandeAutorisationController extends Controller
         }
 
         try {
-            $mdn->update($request->all());
+            $mdn->update(array_merge($request->all(), ['valider' => 1, 'motif' => null]));
 
             return response()->json([
                 'success' => true,
@@ -795,9 +795,17 @@ class DemandeAutorisationController extends Controller
                         );
                     }
                     $state = $demande->etatDemande()->firstOrCreate([]);
+                    // Conserver les jalons d'annotation déjà atteints (voir case
+                    // 'compagnie_cree_demande' pour le même principe côté redépôt).
+                    $milestones = [
+                        'dg_annoter'       => (bool) $state->dg_annoter,
+                        'dg_annoter_admin' => (bool) $state->dg_annoter_admin,
+                        'dta_dg_annoter'   => (bool) $state->dta_dg_annoter,
+                        'dta_annoter'      => (bool) $state->dta_annoter,
+                    ];
                     $state->resetAllApprovalStates();
-                    $state->update(['compagnie_cree_demande' => false, 'dg_rejeter' => true]);
-                    $demande->update(['dg_motif' => $request->motif]);
+                    $state->update(array_merge($milestones, ['compagnie_cree_demande' => false, 'dg_rejeter' => true]));
+                    $demande->update(['dg_motif' => $request->motif, 'mise_a_jour' => true]);
                     break;
 
                 case 'dta_dg_annoter':
@@ -818,9 +826,17 @@ class DemandeAutorisationController extends Controller
                         );
                     }
                     $state = $demande->etatDemande()->firstOrCreate([]);
+                    // Conserver les jalons d'annotation déjà atteints (voir case
+                    // 'compagnie_cree_demande' pour le même principe côté redépôt).
+                    $milestones = [
+                        'dg_annoter'       => (bool) $state->dg_annoter,
+                        'dg_annoter_admin' => (bool) $state->dg_annoter_admin,
+                        'dta_dg_annoter'   => (bool) $state->dta_dg_annoter,
+                        'dta_annoter'      => (bool) $state->dta_annoter,
+                    ];
                     $state->resetAllApprovalStates();
-                    $state->update(['compagnie_cree_demande' => false, 'dta_rejeter' => true]);
-                    $demande->update(['dta_motif' => $request->motif]);
+                    $state->update(array_merge($milestones, ['compagnie_cree_demande' => false, 'dta_rejeter' => true]));
+                    $demande->update(['dta_motif' => $request->motif, 'mise_a_jour' => true]);
 
                     break;
 
@@ -947,8 +963,17 @@ class DemandeAutorisationController extends Controller
                         $demande->rejection_reasons_list
                     );
                     $state = $demande->etatDemande()->firstOrCreate([]);
+                    // Conserver les jalons d'annotation déjà atteints (voir case
+                    // 'compagnie_cree_demande' pour le même principe côté redépôt).
+                    $milestones = [
+                        'dg_annoter'       => (bool) $state->dg_annoter,
+                        'dg_annoter_admin' => (bool) $state->dg_annoter_admin,
+                        'dta_dg_annoter'   => (bool) $state->dta_dg_annoter,
+                        'dta_annoter'      => (bool) $state->dta_annoter,
+                    ];
                     $state->resetAllApprovalStates();
-                    $state->update(['compagnie_cree_demande' => false, 'dta_rejeter' => true]);
+                    $state->update(array_merge($milestones, ['compagnie_cree_demande' => false, 'dta_rejeter' => true]));
+                    $demande->update(['mise_a_jour' => true]);
                     break;
 
                 case 'dsv_valider':
@@ -1446,6 +1471,9 @@ class DemandeAutorisationController extends Controller
             $data['justificatif'] = $filename;
         }
 
+        $data['valider'] = 1;
+        $data['motif'] = null;
+
         $personne->update($data);
 
         return response()->json(['success' => true, 'data' => $personne]);
@@ -1840,6 +1868,8 @@ class DemandeAutorisationController extends Controller
         $path = $request->file('piece')->store('documents');
         $document->update([
             'url' => basename($path),
+            'valider' => 1,
+            'motif' => null,
             'updated_at' => now()
         ]);
 
