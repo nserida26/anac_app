@@ -1064,8 +1064,18 @@ class AdminController extends Controller
         $demande = Demande::findOrFail($id);
         $demandeur = $demande->demandeur;
         $dateExpiration = null;
-        if (in_array($demande->typeDemande->id, array(2, 4, 5, 6, 8)) && !empty($demandeur->licence)) {
-            $oldDemande = $demandeur->licence->demande;
+
+        // Un demandeur peut détenir plusieurs licences (une par type). La licence
+        // concernée par CETTE demande est celle dont le type correspond à
+        // $demande->typeLicence, pas « la » licence du demandeur au sens large
+        // (qui, avec plusieurs licences, serait ambiguë).
+        $licenceConcernee = $demandeur->licences()
+            ->where('type_licence', $demande->typeLicence->nom)
+            ->latest('date_expiration')
+            ->first();
+
+        if (in_array($demande->typeDemande->id, array(2, 4, 5, 6, 8)) && !empty($licenceConcernee)) {
+            $oldDemande = $licenceConcernee->demande;
             if ($oldDemande->qualifications->isNotEmpty()) {
                 foreach ($oldDemande->qualifications as $qualification) {
                     $newQualification = $qualification->replicate();
@@ -1162,6 +1172,14 @@ class AdminController extends Controller
             })
             ->latest()->first();
         if (in_array($demande->typeDemande->id, array(1, 3, 10))) {
+            // Règle d'unicité : un demandeur ne peut détenir qu'une seule licence
+            // par type. Le garde-fou ne s'applique qu'à la délivrance initiale (1) :
+            // la conversion (3) et la transformation au nouveau format (10) portent
+            // par nature sur une licence déjà détenue par ce demandeur.
+            if ($demande->typeDemande->id === 1 && !empty($licenceConcernee)) {
+                return back()->with('error', "Ce demandeur détient déjà une licence de type {$demande->typeLicence->nom} (n° {$licenceConcernee->numero_licence}).");
+            }
+
             //D + C + V
             $licence = Licence::create(
                 [
@@ -1209,13 +1227,13 @@ class AdminController extends Controller
                 'signature_path' => $dsv->signature->signature,
                 'cachet_path' => $dsv->cachet->cachet,
             ]);
-        } else if ($demande->typeDemande->id === 9 && !empty($demandeur->licence)) {
+        } else if ($demande->typeDemande->id === 9 && !empty($licenceConcernee)) {
             // reemission
-        } else if (in_array($demande->typeDemande->id, array(2, 4, 5, 6)) && !empty($demandeur->licence)) {
+        } else if (in_array($demande->typeDemande->id, array(2, 4, 5, 6)) && !empty($licenceConcernee)) {
 
-            $licenceMiseAjour = $demandeur->licence;
+            $licenceMiseAjour = $licenceConcernee;
             $licenceMiseAjour->date_mise_a_jour = date('Y-m-d');
-            $oldDemande = $demandeur->licence->demande;
+            $oldDemande = $licenceConcernee->demande;
             $licenceMiseAjour->demande_id = $demande->id;
             $licenceMiseAjour->date_expiration = $dateExpiration;
             $licenceMiseAjour->licence_valide = 0;

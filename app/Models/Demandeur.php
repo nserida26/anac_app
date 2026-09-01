@@ -55,8 +55,24 @@ class Demandeur extends Model
     {
         return $this->hasMany(Formation::class, 'demandeur_id');
     }
+    /**
+     * Un demandeur peut détenir plusieurs licences (une par type, voir la règle
+     * d'unicité dans licences()). Cette relation hasOne reste utilisée par de
+     * nombreux écrans qui n'affichent qu'« une » licence : ofMany() choisit de
+     * façon déterministe celle dont la date d'expiration est la plus tardive
+     * (typiquement la licence la plus récente/la plus élevée dans la carrière),
+     * plutôt qu'une ligne arbitraire comme le faisait le hasOne simple.
+     */
     public function licence()
     {
-        return $this->hasOne(Licence::class, 'demandeur_id');
+        return $this->hasOne(Licence::class, 'demandeur_id')->ofMany('date_expiration', 'max');
+    }
+
+    /**
+     * Toutes les licences détenues par le demandeur (une par type de licence).
+     */
+    public function licences()
+    {
+        return $this->hasMany(Licence::class, 'demandeur_id');
     }
 }

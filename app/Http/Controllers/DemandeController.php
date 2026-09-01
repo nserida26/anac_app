@@ -114,6 +114,18 @@ class DemandeController extends Controller
             'type_licence_id' => 'required|integer|exists:type_licences,id',
         ]);
 
+        // Règle d'unicité : un demandeur peut détenir plusieurs licences, mais une
+        // seule par type. On bloque dès la soumission une « délivrance initiale »
+        // (type_demande_id = 1) si le demandeur possède déjà une licence de ce
+        // type, plutôt que de laisser tout le circuit d'instruction se dérouler
+        // pour rien.
+        if ((int) $request->type_demande_id === 1) {
+            $typeLicence = TypeLicence::find($request->type_licence_id);
+            $dejaDetenue = $typeLicence && $demandeur->licences()->where('type_licence', $typeLicence->nom)->exists();
+            if ($dejaDetenue) {
+                return back()->withInput()->with('error', "Vous détenez déjà une licence de type {$typeLicence->nom}.");
+            }
+        }
 
         // Créer l demande
         $demande = Demande::create(array_merge($request->all(), ['status' => 'En attente'], ['date' => date('Y-m-d')], ['code' => $code], ['demandeur_id' => $demandeur->id]));
