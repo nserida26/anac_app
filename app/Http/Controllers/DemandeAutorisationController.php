@@ -701,12 +701,44 @@ class DemandeAutorisationController extends Controller
             // Traitement des actions
             switch ($action) {
                 case 'compagnie_cree_demande':
+                    $state = $demande->etatDemande;
+                    $wasRectification = (bool) $demande->mise_a_jour;
+                    $previousWorkflow = $state ? [
+                        'dg_annoter'       => (bool) $state->dg_annoter,
+                        'dg_annoter_admin' => (bool) $state->dg_annoter_admin,
+                        'dta_dg_annoter'   => (bool) $state->dta_dg_annoter,
+                        'dta_annoter'      => (bool) $state->dta_annoter,
+                    ] : [];
+
+                    if ($wasRectification && !in_array(true, $previousWorkflow, true)) {
+                        $previousWorkflow = [
+                            'dg_annoter'       => Activity::where('demande_id', $demande->id)->where('action', 'dg_annoter')->exists(),
+                            'dg_annoter_admin' => Activity::where('demande_id', $demande->id)->where('action', 'dg_annoter_admin')->exists(),
+                            'dta_dg_annoter'   => Activity::where('demande_id', $demande->id)->where('action', 'dta_dg_annoter')->exists(),
+                            'dta_annoter'      => Activity::where('demande_id', $demande->id)->where('action', 'dta_annoter')->exists(),
+                        ];
+                    }
+
                     // Si la demande était rejetée, on réinitialise les validations/motifs
-                    // des lignes et de l'état de workflow pour repartir sur "submitted".
+                    // des lignes. En rectification, on conserve l'étape déjà atteinte :
+                    // l'annotation DG ne doit pas être refaite, et la SRTA doit retrouver
+                    // son dossier si elle l'avait déjà reçu avant rejet.
                     $demande->resetAllValidations();
                     $demande->resetAllMotifs();
-                    if ($demande->etatDemande) {
-                        $demande->etatDemande->resetAllApprovalStates();
+                    if ($state) {
+                        $state->resetAllApprovalStates();
+
+                        if ($wasRectification) {
+                            $state->update([
+                                'compagnie_rectifie_demande' => true,
+                                'dg_annoter'                 => $previousWorkflow['dg_annoter'] ?? false,
+                                'dg_annoter_admin'           => $previousWorkflow['dg_annoter_admin'] ?? false,
+                                'dta_dg_annoter'             => $previousWorkflow['dta_dg_annoter'] ?? false,
+                                'dta_annoter'                => $previousWorkflow['dta_annoter'] ?? false,
+                                'dg_rejeter'                 => false,
+                                'dta_rejeter'                => false,
+                            ]);
+                        }
                     }
 
                     $demande->update([
