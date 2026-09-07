@@ -666,10 +666,10 @@ class DemandeAutorisationController extends Controller
 
             // Validation de base
             $validated = $request->validate([
-                'action' => 'required|string|in:compagnie_cree_demande,compagnie_rectifie_demande,dg_annoter,dg_annoter_admin,dg_rejeter,dta_dg_annoter,dta_annoter,dta_annoter_admin,dta_rejeter,dta_notifier,service_annoter,service_raturer,dsv_valider,dsna_valider,dsad_valider,dsf_valider,service_valider,srta_valider,service_tout_valider,dta_valider,dg_valider,dta_dg_valider,compagnie_payer,daf_confirme_pay,service_envoyer,reset_to_dta_stage,reset_to_admin_stage',
+                'action' => 'required|string|in:compagnie_cree_demande,compagnie_rectifie_demande,dg_annoter,dg_annoter_admin,dg_rejeter,dta_dg_annoter,dta_annoter,dta_annoter_admin,dta_rejeter,dta_notifier,service_annoter,service_raturer,dsv_valider,dsna_valider,dsad_valider,dsf_valider,service_valider,srta_valider,dta_demande_reverif,service_tout_valider,dta_valider,dg_valider,dta_dg_valider,compagnie_payer,daf_confirme_pay,service_envoyer,reset_to_dta_stage,reset_to_admin_stage',
                 'is_approved' => 'sometimes|boolean',
                 'is_rejected' => 'sometimes|boolean',
-                'motif' => 'required_if:action,dg_rejeter,dta_rejeter|nullable|string',
+                'motif' => 'required_if:action,dg_rejeter,dta_rejeter,dta_demande_reverif|nullable|string',
                 'directions' => 'required_if:action,service_annoter|nullable|array',
                 'directions.*' => 'in:dsv,dsad,dsna,dsf',
                 'points' => 'nullable|string',
@@ -999,8 +999,10 @@ class DemandeAutorisationController extends Controller
                         'dsna_motif' => null,
                         'dsad_motif' => null,
                         'dg_motif' => null,
-                        'dta_motif' => null
+                        'dta_motif' => null,
+                        'reverif_motif' => null,
                     ]);
+                    $demande->etatDemande()->update(['dta_demande_reverif' => false]);
                     break;
 
                 case 'srta_valider':
@@ -1023,7 +1025,9 @@ class DemandeAutorisationController extends Controller
                         $updateFields['autorisation_annulee'] = $request->input('autorisation_annulee');
                     }
 
+                    $updateFields['reverif_motif'] = null;
                     $demande->update($updateFields);
+                    $demande->etatDemande()->update(['dta_demande_reverif' => false]);
                     break;
 
                 case 'service_tout_valider':
@@ -1245,6 +1249,50 @@ class DemandeAutorisationController extends Controller
                     }
                     break;
 
+                case 'dta_demande_reverif':
+                    // La DTA renvoie le dossier à la SRTA pour une revérification :
+                    // on défait la validation SRTA/service et les validations de lignes,
+                    // en conservant les annotations (DG/DTA) et les validations des directions.
+                    if (!auth()->user()?->hasRole('dta')) {
+                        throw new \Exception('Action non autorisée.');
+                    }
+
+                    $motifReverif = trim((string) $request->input('motif'));
+                    if ($motifReverif === '') {
+                        throw new \Exception("Le motif de la revérification est obligatoire.");
+                    }
+
+                    $state = $demande->etatDemande()->firstOrCreate([]);
+                    $state->update([
+                        'srta_valider'         => false,
+                        'service_valider'      => false,
+                        'service_tout_valider' => false,
+                        'dta_valider'          => false,
+                        'dta_demande_reverif'  => true,
+                    ]);
+
+                    // Réinitialise la validation ligne par ligne pour que la SRTA reprenne le dossier
+                    foreach (['avions', 'vols', 'equipe', 'fret', 'personnes', 'mdns', 'receivingParties', 'documents'] as $rel) {
+                        $demande->$rel()->update(['valider' => null, 'motif' => null]);
+                    }
+
+                    $demande->update([
+                        'statut'        => 'in_progress',
+                        'reverif_motif' => $motifReverif,
+                    ]);
+
+                    EtatDemandeAutorisation::updateGlobalStatus($demande->id);
+
+                    // Notification à la SRTA (admin)
+                    if ($srta && !empty($srta->whatsapp)) {
+                        $notificationService->sendDTAReverificationRequestNotification($demande, $srta, $motifReverif);
+                    }
+
+                    Activity::log("dta_demande_reverif: {$motifReverif}", $demande->id);
+
+                    DB::commit();
+                    return redirect()->back()->with('success', 'Dossier renvoyé à la SRTA pour revérification.');
+
                 case 'reset_to_dta_stage':
                     // Le DTA peut remettre la demande au point où il doit l'annoter,
                     // comme si le DG venait de l'annoter (défait toute annotation/validation ultérieure).
@@ -1401,6 +1449,7 @@ class DemandeAutorisationController extends Controller
             'dta_dg_valider'        => ['dta'],
             'service_tout_valider'  => ['dta'],
             'reset_to_dta_stage'    => ['dta'],
+            'dta_demande_reverif'   => ['dta'],
 
             'service_annoter'       => ['dta', 'admin'],
             'service_raturer'       => ['dta', 'admin'],
@@ -1650,7 +1699,7 @@ class DemandeAutorisationController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'demande_autorisation_id' => 'required|exists:demande_autorisations,id',
-            'nature' => 'required|in:normal,dangerous,perishable,living',
+            'nature' => 'required|in:normal,dangerous,perishable,living,depouille_mortelle',
             'poids' => 'nullable|numeric|min:0',
             'numero_waybill' => 'nullable|string',
             'expediteur' => 'nullable|string',
@@ -1675,7 +1724,7 @@ class DemandeAutorisationController extends Controller
         $fret = FretVol::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
-            'nature' => 'required|in:normal,dangerous,perishable,living',
+            'nature' => 'required|in:normal,dangerous,perishable,living,depouille_mortelle',
             'poids' => 'nullable|numeric|min:0',
             'numero_waybill' => 'nullable|string',
             'expediteur' => 'nullable|string',

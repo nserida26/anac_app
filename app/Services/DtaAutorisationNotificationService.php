@@ -256,6 +256,30 @@ class DtaAutorisationNotificationService
     }
 
     /**
+     * Notification quand la DTA renvoie le dossier à la SRTA pour revérification
+     */
+    public function sendDTAReverificationRequestNotification(
+        DemandeAutorisation $demande,
+        User $srta,
+        string $motif
+    ): array {
+        $message = <<<MSG
+        🔄 *DEMANDE DE REVÉRIFICATION* 🔄
+        _Type:_ *{$demande->type->libelle}*
+        _Numéro:_ {$demande->code}
+        _Demandeur:_ {$demande->user->demandeur->np }
+
+        📌 *Message:* La DTA vous demande de revérifier ce dossier.
+        _Motif:_ {$motif}
+
+        🔗 *Accès direct:*
+        {$this->getApplicationLink($demande->code)}
+        MSG;
+
+        return $this->whatsApp->sendRichMessage($srta->whatsapp, $message);
+    }
+
+    /**
      * Notification quand le DTA transmet la demande aux directions
      */
     public function sendDTATransmitToDirectionsNotification(

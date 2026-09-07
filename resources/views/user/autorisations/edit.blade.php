@@ -105,6 +105,10 @@
                     @endif
                 </h4>
 
+                {{-- Transport de dépouille mortelle (type 4) : ni avion/immatriculation, ni équipage --}}
+                @php $isDepouilleMortelle = $demandeAutorisation->type_demande_autorisation_id == 4; @endphp
+
+                @unless ($isDepouilleMortelle)
                 <div class="card card-primary">
                     <div class="card-header bg-primary text-white">
                         <h3 class="card-title">@lang('trans.plane_info')</h3>
@@ -282,6 +286,7 @@
                         @endif
                     </div>
                 </div>
+                @endunless
 
                 <!-- Information sur le vol -->
                 <div class="card card-primary">
@@ -567,7 +572,7 @@
                     </div>
                 </div>
                 <!-- Flight Crew Section -->
-                @if (!in_array($demandeAutorisation->first_type_vol_id, [12, 13]))
+                @if (!$isDepouilleMortelle && !in_array($demandeAutorisation->first_type_vol_id, [12, 13]))
                     <div class="card card-primary">
                         <div class="card-header bg-primary text-white">
                             <h3 class="card-title">@lang('trans.flight_crew')</h3>
@@ -980,6 +985,10 @@
                                                 <option value="dangerous">@lang('trans.dangerous')</option>
                                                 <option value="perishable">@lang('trans.perishable')</option>
                                                 <option value="living">@lang('trans.living')</option>
+                                                @if ($demandeAutorisation->type_demande_autorisation_id == 4)
+                                                    <option value="depouille_mortelle" selected>
+                                                        @lang('trans.depouille_mortelle')</option>
+                                                @endif
                                             </select>
                                         </div>
                                     </div>
@@ -1062,6 +1071,11 @@
                                                                                     <option value="living"
                                                                                         {{ $fret->nature == 'living' ? 'selected' : '' }}>
                                                                                         @lang('trans.living')</option>
+                                                                                    @if ($demandeAutorisation->type_demande_autorisation_id == 4 || $fret->nature == 'depouille_mortelle')
+                                                                                        <option value="depouille_mortelle"
+                                                                                            {{ $fret->nature == 'depouille_mortelle' ? 'selected' : '' }}>
+                                                                                            @lang('trans.depouille_mortelle')</option>
+                                                                                    @endif
                                                                                 </select>
                                                                             </div>
                                                                         </div>

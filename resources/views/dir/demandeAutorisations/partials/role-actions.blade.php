@@ -3,6 +3,8 @@
     $etat = optional($demande->etatDemande);
     $user = auth()->user();
     $role = $user->getRoleNames()->first();
+    // Transport de dépouille mortelle (type 4) : pas d'avion attendu dans le dossier
+    $avionOk = $demande->avions->isNotEmpty() || (int) optional($demande->type)->id === 4;
 @endphp
 
 @if($role == 'dg')
@@ -16,7 +18,7 @@
             <i class="fas fa-user-tie"></i> @lang('trans.dg_annotate')
         </button>
 
-        @if($demande->vols->isNotEmpty() && $demande->avions->isNotEmpty())
+        @if($demande->vols->isNotEmpty() && $avionOk)
             <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline">
                 @csrf
                 <input type="hidden" name="action" value="dg_valider">
@@ -39,7 +41,7 @@
     @endif
 
     @if($etat->dta_valider && !$etat->dg_valider && !$etat->dta_dg_valider)
-        @if($demande->vols->isNotEmpty() && $demande->avions->isNotEmpty())
+        @if($demande->vols->isNotEmpty() && $avionOk)
             <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline">
                 @csrf
                 <input type="hidden" name="action" value="dg_valider">
@@ -60,7 +62,7 @@
          une fois la SRTA validée, la demande revient au DG pour validation finale,
          sans intervention de la DTA. --}}
     @if($etat->dg_annoter_admin && $etat->srta_valider && !$etat->dg_valider && !$etat->dta_dg_valider)
-        @if($demande->vols->isNotEmpty() && $demande->avions->isNotEmpty())
+        @if($demande->vols->isNotEmpty() && $avionOk)
             <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline">
                 @csrf
                 <input type="hidden" name="action" value="dg_valider">
@@ -154,10 +156,31 @@
                 <i class="fas fa-check"></i> @lang('trans.validate')
             </button>
         </form>
+
+        {{-- La DTA peut renvoyer le dossier à la SRTA pour une revérification --}}
+        <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline" id="reverifForm-{{ $demande->id }}">
+            @csrf
+            <input type="hidden" name="action" value="dta_demande_reverif">
+            <input type="hidden" name="motif" id="reverifMotif-{{ $demande->id }}">
+            <button type="button" class="btn btn-warning btn-sm mb-1"
+                    onclick="promptResetStage('reverifForm-{{ $demande->id }}', 'reverifMotif-{{ $demande->id }}', '@lang('trans.confirm_dta_reverif')')">
+                <i class="fas fa-undo"></i> @lang('trans.dta_request_reverif')
+            </button>
+        </form>
+    @endif
+
+    {{-- Rappel visuel : une revérification est en cours côté SRTA --}}
+    @if($etat->dta_demande_reverif && !$etat->dta_valider)
+        <div class="alert alert-warning py-1 px-2 mb-1 small d-inline-block">
+            <i class="fas fa-hourglass-half"></i> @lang('trans.reverif_pending_srta')
+            @if(!empty($demande->reverif_motif))
+                <br><em>{{ $demande->reverif_motif }}</em>
+            @endif
+        </div>
     @endif
 
     @if(!$etat->dg_valider && !$etat->dta_dg_valider && $etat->dta_valider)
-        @if($demande->vols->isNotEmpty() && $demande->avions->isNotEmpty())
+        @if($demande->vols->isNotEmpty() && $avionOk)
             <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline">
                 @csrf
                 <input type="hidden" name="action" value="dta_dg_valider">

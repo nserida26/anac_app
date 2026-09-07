@@ -255,6 +255,7 @@ return [
     'dangerous' => 'Dangerous',
     'perishable' => 'Perishable',
     'living' => 'Living',
+    'depouille_mortelle' => 'MORTAL REMAINS',
     'weight_kg' => 'Weight (kg)',
     'special_instructions' => 'Special Instructions',
     'itinerary' => 'Itinerary',
@@ -1288,4 +1289,9 @@ return [
     'autorisation_numero' => 'Authorization number',
     'edit_autorisation_numero_hint' => 'The number must stay unique. It appears on the printed authorization and in notifications.',
     'edit_autorisation_numero_confirm' => 'Confirm the change of the authorization number?',
+    'motif' => 'Reason',
+    'dta_request_reverif' => 'Request re-verification',
+    'confirm_dta_reverif' => 'Send the file back to the SRTA for re-verification?',
+    'reverif_pending_srta' => 'Re-verification requested from the SRTA',
+    'dta_reverif_requested' => 'The DTA requests a re-verification of this file.',
 ];

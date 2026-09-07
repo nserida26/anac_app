@@ -194,6 +194,17 @@
         <!-- Workflow Timeline -->
         @include('admin.partials.workflow-timeline', ['demande' => $demandeAutorisation])
 
+        {{-- La DTA a renvoyé le dossier pour une revérification SRTA --}}
+        @if(optional($demandeAutorisation->etatDemande)->dta_demande_reverif && !optional($demandeAutorisation->etatDemande)->dta_valider)
+            <div class="alert alert-warning">
+                <i class="fas fa-undo"></i>
+                <strong>@lang('trans.dta_reverif_requested')</strong>
+                @if(!empty($demandeAutorisation->reverif_motif))
+                    <br><span class="text-muted">@lang('trans.motif') :</span> {{ $demandeAutorisation->reverif_motif }}
+                @endif
+            </div>
+        @endif
+
         @php
             $hasInvalidItems = $demandeAutorisation->hasInvalidComponents();
             $autorisation = $demandeAutorisation->autorisation($demandeAutorisation->id);
