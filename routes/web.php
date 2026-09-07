@@ -518,6 +518,8 @@ Route::get('/rapports/compagnie/{id}', [App\Http\Controllers\DgDsvController::cl
                 Route::post('/validate/document', [AdminController::class, 'validateDocumentVi'])->name('validate.documentvi');
                 Route::post('/validate/demande', [AdminController::class, 'validateDemandeVi'])->name('validate.demandevi');
                 Route::get('/autorisations/print/{autorisation}', [App\Http\Controllers\AdminController::class, 'print'])->name('autorisations.print');
+                // Modification du numéro d'autorisation (DTA / SRTA)
+                Route::post('/autorisations/{autorisation}/numero', [App\Http\Controllers\DemandeAutorisationController::class, 'updateAutorisationNumero'])->name('autorisations.update-numero');
             });
         Route::middleware(['auth:web', 'verified', 'role:admin|dsv|dg'])
             ->prefix('admin')

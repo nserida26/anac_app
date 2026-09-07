@@ -225,6 +225,9 @@
                     <div class="alert alert-info d-inline-block">
                         <i class="fas fa-lock"></i> @lang('trans.autorisation_already_issued')
                     </div>
+                    <div class="mt-2">
+                        @include('admin.autorisations.partials.edit-numero', ['autorisation' => $autorisation])
+                    </div>
                 </div>
             </div>
         @elseif($hasInvalidItems)

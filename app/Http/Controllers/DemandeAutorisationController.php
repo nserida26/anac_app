@@ -1063,6 +1063,9 @@ class DemandeAutorisationController extends Controller
                 case 'daf_confirme_pay':
                     PaiementAutorisation::where('id', $request->paiement_id)->update(['statut' => 'confirmed']);
 
+                    // Vérifie qu'aucune autorisation n'a déjà été délivrée pour cette demande
+                    $this->assertNoExistingAutorisation($demandeId);
+
                     // Génération du code autorisation
                     $prefix = strtoupper($request->type_autorisation) === 'SURVOL' ? 'SUR' : 'SAT';
                     $currentYear = now()->format('y');
@@ -1112,6 +1115,9 @@ class DemandeAutorisationController extends Controller
                 case 'dg_valider':
                 case 'dta_dg_valider':
                     $typeVolId = intval($request->input('type_vol_id'));
+
+                    // Vérifie qu'aucune autorisation n'a déjà été délivrée pour cette demande
+                    $this->assertNoExistingAutorisation($demandeId);
 
                     // Cas avec paiement
                     if ($demande->type->id === 2 && in_array($typeVolId, [1, 2, 5, 8, 14])) {
@@ -1416,6 +1422,63 @@ class DemandeAutorisationController extends Controller
         if ($allowedRoles === null || !$user->hasAnyRole($allowedRoles)) {
             throw new \Exception('Action non autorisée pour votre rôle.');
         }
+    }
+
+    /**
+     * Empêche la génération d'une nouvelle autorisation lorsqu'une autorisation
+     * a déjà été délivrée pour cette demande (numéro déjà attribué).
+     */
+    private function assertNoExistingAutorisation($demandeId): void
+    {
+        $existante = Autorisation::where('demande_id', $demandeId)->first();
+
+        if ($existante) {
+            throw new \Exception(
+                "Une autorisation (n° {$existante->code_autorisation}) existe déjà pour cette demande. "
+                . "Impossible d'en générer une nouvelle."
+            );
+        }
+    }
+
+    /**
+     * Modifier le numéro d'une autorisation déjà délivrée.
+     * Réservé à la DTA et à l'Administrateur (SRTA). Le numéro doit rester unique.
+     */
+    public function updateAutorisationNumero(Request $request, Autorisation $autorisation)
+    {
+        if (!auth()->user()?->hasAnyRole(['dta', 'admin'])) {
+            abort(403, 'Action non autorisée pour votre rôle.');
+        }
+
+        $request->merge([
+            'code_autorisation' => trim((string) $request->input('code_autorisation')),
+        ]);
+
+        $validated = $request->validate([
+            'code_autorisation' => [
+                'required', 'string', 'max:50',
+                Rule::unique('autorisations', 'code_autorisation')->ignore($autorisation->id),
+            ],
+        ], [
+            'code_autorisation.required' => "Le numéro d'autorisation est obligatoire.",
+            'code_autorisation.unique'   => "Ce numéro d'autorisation est déjà utilisé par une autre autorisation.",
+        ]);
+
+        $ancienNumero = $autorisation->code_autorisation;
+        $nouveauNumero = $validated['code_autorisation'];
+
+        if ($nouveauNumero === $ancienNumero) {
+            return redirect()->back()->with('warning', "Le numéro d'autorisation est inchangé.");
+        }
+
+        $autorisation->update(['code_autorisation' => $nouveauNumero]);
+
+        Activity::log(
+            "autorisation_numero_modifie: {$ancienNumero} -> {$nouveauNumero}",
+            $autorisation->demande_id
+        );
+
+        return redirect()->back()->with('success', "Numéro d'autorisation modifié avec succès ({$ancienNumero} → {$nouveauNumero}).");
     }
 
     /**

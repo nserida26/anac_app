@@ -85,12 +85,14 @@
                                                         data-demande-date-fin="{{ $autorisation->demande->date_fin ?? '' }}">
                                                     <i class="fas fa-bell"></i> @lang('trans.send_notifications')
                                                 </button>
+                                                @include('admin.autorisations.partials.edit-numero', ['autorisation' => $autorisation, 'part' => 'button'])
                                             </td>
                                         </tr>
                                         
                                         <!-- Modal pour chaque autorisation -->
                                         
                                         @include('admin.autorisations.notification-modal', ['autorisation' => $autorisation])
+                                        @include('admin.autorisations.partials.edit-numero', ['autorisation' => $autorisation, 'part' => 'modal'])
                                     @endforeach
                                 </tbody>
                             </table>

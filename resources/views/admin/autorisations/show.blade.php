@@ -112,6 +112,7 @@
                                         @endif
                                     </table>
                                 </div>
+                                @include('admin.autorisations.partials.edit-numero', ['autorisation' => $autorisation])
                             </div>
 
                             <!-- Section 2: Informations de la Demande -->

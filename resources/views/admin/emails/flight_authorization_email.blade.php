@@ -132,19 +132,10 @@
             border-radius: 50px;
             font-weight: 600;
             font-size: 16px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
             border: none;
             cursor: pointer;
         }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
-            background: linear-gradient(135deg, #ffb300 0%, #ffa000 100%);
-            color: #1e3c72;
-        }
-        
+
         /* Pied de page */
         .email-footer {
             background: #f8f9fa;
@@ -164,11 +155,6 @@
             text-decoration: none;
             margin: 0 10px;
             font-size: 12px;
-        }
-        
-        .footer-links a:hover {
-            text-decoration: underline;
-            color: #ffc107;
         }
         
         .signature {
@@ -245,59 +231,17 @@
             }
         }
         
-        /* Impression */
-        @media print {
-            body {
-                background: white;
-                padding: 0;
-                margin: 0;
-            }
-            
-            .email-container {
-                box-shadow: none;
-                margin: 0;
-                border: none;
-            }
-            
-            .btn-primary {
-                display: none;
-            }
-            
-            .email-footer {
-                page-break-inside: avoid;
-            }
-        }
-        
-        /* Animation */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .email-container {
-            animation: fadeIn 0.5s ease-out;
-        }
     </style>
 </head>
 <body>
+    <span style="display:none!important;visibility:hidden;opacity:0;color:transparent;height:0;width:0;overflow:hidden;mso-hide:all;">Autorisation de vol {{ $autorisation->code_autorisation }} approuvée par l'ANAC - Direction du Transport Aérien.</span>
     <div class="email-container">
         <!-- En-tête -->
         <div class="email-header">
             <div class="logo">
-                <!-- Remplacez par votre logo réel -->
-                <svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="50" cy="50" r="45" stroke="white" stroke-width="2" fill="none"/>
-                    <path d="M50 20 L70 40 L50 60 L30 40 L50 20 Z" fill="white" opacity="0.9"/>
-                    <rect x="45" y="55" width="10" height="25" fill="white" opacity="0.9"/>
-                </svg>
+                <img src="{{ asset('assets/admin/imgs/anac.png') }}" alt="ANAC" width="120" style="max-width:120px;height:auto;">
             </div>
-            <h1>Autorisation</h1>
+            <h1>Autorisation de vol</h1>
             <p>Document officiel d'autorisation délivré par l'ANAC</p>
         </div>
         
@@ -381,11 +325,11 @@
             
             <div class="signature">
                 <div class="organization-name">AGENCE NATIONALE DE L'AVIATION CIVILE (ANAC)</div>
-                <div>Direction de Transport Aérienne</div>
+                <div>Direction du Transport Aérien</div>
                 <div class="contact-info">
-                    <div>📍 Adresse : 01 BP 1234 Nouakchott 01, Mauritanie</div>
-                    <div>📞 Tél : +225 27 20 30 40 50 | 📧 Email : autorisations@anac.mr</div>
-                    <div>🌐 Web : www.anac.mr</div>
+                    <div>Adresse : Nouakchott, Mauritanie</div>
+                    <div>Tél : 00 222 45 24 40 05 | Email : survol.dta@anac.mr</div>
+                    <div>Web : www.anac.mr</div>
                 </div>
                 <div style="margin-top: 15px; font-size: 11px;">
                     Ce message est généré automatiquement, merci de ne pas y répondre directement.

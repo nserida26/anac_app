@@ -1284,4 +1284,8 @@ return [
     'operator_added_success' => 'Operator added successfully',
     'select_placeholder' => 'Select...',
     'runway_name' => 'Runway Name',
+    'edit_autorisation_numero' => 'Edit number',
+    'autorisation_numero' => 'Authorization number',
+    'edit_autorisation_numero_hint' => 'The number must stay unique. It appears on the printed authorization and in notifications.',
+    'edit_autorisation_numero_confirm' => 'Confirm the change of the authorization number?',
 ];
