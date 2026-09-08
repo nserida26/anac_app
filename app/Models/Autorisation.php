@@ -22,6 +22,22 @@ class Autorisation extends Model
         'nom_signataire'
     ];
 
+    protected static function booted()
+    {
+        // À la délivrance, on fige les informations du demandeur et de l'opérateur.
+        // Un échec de snapshot ne doit jamais empêcher la délivrance : on journalise
+        // et le snapshot pourra être reconstruit (AutorisationSnapshot::buildFor).
+        static::created(function (Autorisation $autorisation) {
+            try {
+                AutorisationSnapshot::buildFor($autorisation);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error(
+                    'Échec de création du snapshot pour autorisation ' . $autorisation->id . ' : ' . $e->getMessage()
+                );
+            }
+        });
+    }
+
     public function demande()
     {
         return $this->belongsTo(DemandeAutorisation::class, 'demande_id');
@@ -30,5 +46,36 @@ class Autorisation extends Model
     public function vol()
     {
         return $this->belongsTo(Vol::class);
+    }
+
+    public function snapshot()
+    {
+        return $this->hasOne(AutorisationSnapshot::class, 'autorisation_id');
+    }
+
+    // --- Accesseurs : privilégient le snapshot figé, repli sur les données en direct ---
+
+    public function getDemandeurNpAttribute(): ?string
+    {
+        return optional($this->snapshot)->demandeur_np
+            ?: optional(optional(optional($this->demande)->user)->demandeur)->np;
+    }
+
+    public function getDemandeurEmailAttribute(): ?string
+    {
+        return optional($this->snapshot)->demandeur_email
+            ?: optional(optional($this->demande)->user)->email;
+    }
+
+    public function getDemandeurTelephoneAttribute(): ?string
+    {
+        return optional($this->snapshot)->demandeur_telephone
+            ?: optional(optional($this->demande)->user)->whatsapp;
+    }
+
+    public function getOperateurNomAttribute(): ?string
+    {
+        return optional($this->snapshot)->operateur_nom
+            ?: optional(optional(optional($this->demande)->avions->first())->compagnie)->nom_entreprise;
     }
 }

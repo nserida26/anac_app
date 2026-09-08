@@ -297,13 +297,13 @@
                 <td style="width: 50%;">
                     <div style="margin: 10px 0;">
                         <div style="margin-bottom: 10px; font-size: 13px; font-weight: bold;">
-                            À/To {{ strtoupper($autorisation->demande->user->demandeur->np) }}
+                            À/To {{ strtoupper($autorisation->demandeur_np ?? '') }}
                         </div>
                         <div style="margin-bottom: 8px; font-size: 13px; font-weight: bold;">
-                            Tél/Tel: {{ $autorisation->demande->user->whatsapp }}
+                            Tél/Tel: {{ $autorisation->demandeur_telephone }}
                         </div>
                         <div style="margin-bottom: 10px; font-size: 13px; font-weight: bold;">
-                            Email/Email: {{ $autorisation->demande->user->email }}
+                            Email/Email: {{ $autorisation->demandeur_email }}
                         </div>
                         <div style="margin-bottom: 10px; font-size: 13px; font-weight: bold;">
                             Date de réception de la demande / Date of receipt of request:
@@ -526,11 +526,11 @@
                         @endif
 
                         <!-- Opérateur -->
-                        @if (!empty($autorisation->demande->avions))
+                        @if (!empty($autorisation->operateur_nom))
                             <div style="display: flex;">
                                 <span style="font-weight: bold; min-width: 200px;">Opérateur/Operator:</span>
                                 <span style="font-weight: bold;">
-                                    {{ $autorisation->demande->avions->first()->compagnie->nom_entreprise ?? '' }}
+                                    {{ $autorisation->operateur_nom }}
                                 </span>
                             </div>
                         @endif

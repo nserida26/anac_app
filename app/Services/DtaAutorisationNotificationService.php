@@ -200,7 +200,7 @@ class DtaAutorisationNotificationService
         
         _Type:_ *{$autorisation->demande->type->libelle}*
         _Numéro:_ {$autorisation->code_autorisation}
-        _Demandeur:_ {$autorisation->demande->user->demandeur->np }
+        _Demandeur:_ {$autorisation->demandeur_np}
         📌 *Message:*ANAC vous a notifié cette autorisation.
 
         🔗 *Accès direct:*
