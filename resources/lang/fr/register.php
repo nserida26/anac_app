@@ -7,6 +7,7 @@ return [
     'password' => 'Mot de passe',
     'enter' => 'Entrer',
     'confirm_password' => 'Confirmer le mot de passe',
+    'whatsapp_digits' => 'Le numéro WhatsApp doit contenir exactement 8 chiffres (numéro mauritanien, sans l\'indicatif).',
     'activation_notice' => "Après votre inscription, un lien d'activation de votre compte vous sera envoyé par e-mail ainsi que par WhatsApp au numéro indiqué. Cliquez sur ce lien pour activer votre compte.",
     'activation_whatsapp_message' => "Bienvenue sur la plateforme de l'ANAC.\n\nPour activer votre compte, veuillez cliquer sur le lien ci-dessous :\n:url\n\nCe lien est valable :minutes minutes.",
 ];

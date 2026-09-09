@@ -289,16 +289,19 @@
                     @error('country_code')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
-                    <div class="input-group mb-3">
+                    <div class="input-group mb-1">
 
-                        <input type="text" name="whatsapp" class="form-control"
-                            placeholder="{{ __('register.whatsapp') }}" value="{{ old('whatsapp') }}" required>
+                        <input type="text" name="whatsapp" class="form-control" id="whatsapp"
+                            placeholder="{{ __('register.whatsapp') }}" value="{{ old('whatsapp') }}"
+                            required inputmode="numeric" maxlength="8" pattern="[0-9]{8}"
+                            title="{{ __('register.whatsapp_digits') }}">
                         <div class="input-group-append">
                             <div class="input-group-text">
                                 <span class="fas fa-phone"></span>
                             </div>
                         </div>
                     </div>
+                    <small class="form-text text-muted mb-3 d-block">{{ __('register.whatsapp_digits') }}</small>
                     @error('whatsapp')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
@@ -374,6 +377,11 @@
     $(document).ready(function() {
         // Initialize Select2 for country code
         $('.select2').select2();
+
+        // WhatsApp : n'accepter que des chiffres, 8 au maximum (numéro mauritanien)
+        $('#whatsapp').on('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 8);
+        });
     });
 </script>
 

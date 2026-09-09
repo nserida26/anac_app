@@ -64,15 +64,18 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
+            // Numéro mauritanien : exactement 8 chiffres (sans l'indicatif).
             'whatsapp' =>  [
                 'required',
                 'string',
-                'regex:/^[0-9]{7,14}$/',
+                'regex:/^[0-9]{8}$/',
             ],
             'country_code' => ['required', 'string', 'max:5'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'user_type' => ['required', 'in:autorisation,licence'],
+        ], [
+            'whatsapp.regex' => __('register.whatsapp_digits'),
         ]);
     }
 
