@@ -5,11 +5,16 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use App\Models\User;
+use App\Services\WhatsAppService;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Auth;
 
 class RegisterController extends Controller
 {
@@ -90,5 +95,48 @@ class RegisterController extends Controller
 
         $user->assignRole('user');
         return $user;
+    }
+
+    /**
+     * Après l'inscription : l'e-mail de vérification est déjà envoyé par
+     * l'événement Registered ; on envoie en plus le lien d'activation par WhatsApp.
+     */
+    protected function registered(Request $request, $user)
+    {
+        $this->sendWhatsappVerificationLink($user);
+    }
+
+    /**
+     * Envoie le lien signé de vérification d'e-mail (le même que celui du mail)
+     * au numéro WhatsApp fourni à l'inscription. Un échec n'interrompt pas
+     * l'inscription : il est seulement journalisé.
+     */
+    protected function sendWhatsappVerificationLink(User $user): void
+    {
+        if (empty($user->whatsapp)) {
+            return;
+        }
+
+        try {
+            $expireMinutes = (int) config('auth.verification.expire', 60);
+
+            $verifyUrl = URL::temporarySignedRoute(
+                'verification.verify',
+                Carbon::now()->addMinutes($expireMinutes),
+                [
+                    'id'   => $user->getKey(),
+                    'hash' => sha1($user->getEmailForVerification()),
+                ]
+            );
+
+            $message = __('register.activation_whatsapp_message', [
+                'url'     => $verifyUrl,
+                'minutes' => $expireMinutes,
+            ]);
+
+            app(WhatsAppService::class)->sendMessage($user->whatsapp, $message);
+        } catch (\Throwable $e) {
+            Log::error("Lien d'activation WhatsApp non envoyé (user {$user->id}) : " . $e->getMessage());
+        }
     }
 }

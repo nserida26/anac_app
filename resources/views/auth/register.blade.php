@@ -49,6 +49,9 @@
                     </div>
                 @endif
                 <p class="register-box-msg">@lang('register.register')</p>
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle"></i> @lang('register.activation_notice')
+                </div>
                 <form action="{{ route('register') }}" method="post">
                     @csrf
                     <div class="input-group mb-3">

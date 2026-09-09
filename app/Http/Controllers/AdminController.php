@@ -130,7 +130,7 @@ class AdminController extends Controller
     {
         //
         $demandeAutorisations = DemandeAutorisation::with('type')->with('user')
-            ->where('statut', '<>', 'on_hold')
+            ->soumises() // les brouillons (non soumis par la compagnie) ne sont pas visibles côté ANAC
             ->orderBy('date_soumission', 'desc')
             ->get();
 
@@ -209,7 +209,13 @@ class AdminController extends Controller
     public function show_vi($id)
     {
         //
-        $demandeAutorisation = DemandeAutorisation::find($id);
+        $demandeAutorisation = DemandeAutorisation::findOrFail($id);
+
+        // Un brouillon non soumis par la compagnie n'est pas consultable côté ANAC.
+        if ($demandeAutorisation->estBrouillon()) {
+            return redirect()->route('demandeAutorisations')
+                ->with('error', "Cette demande n'a pas encore été soumise par la compagnie.");
+        }
 
         $etatDemande = $demandeAutorisation->etatDemande;
         if (!optional($etatDemande)->dta_annoter && !optional($etatDemande)->dg_annoter_admin && !optional($etatDemande)->dta_rejeter) {

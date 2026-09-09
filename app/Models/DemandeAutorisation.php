@@ -70,6 +70,27 @@ class DemandeAutorisation extends Model
         $autorisation = Autorisation::where('demande_id', $demandeId)->first();
         return $autorisation;
     }
+
+    // --- Scopes ---
+
+    /**
+     * Une demande est un brouillon (draft) tant que la compagnie ne l'a pas
+     * soumise : `statut` vaut alors 'on_hold'. Ce scope ne renvoie que les
+     * demandes réellement soumises, celles que l'ANAC (DG/DTA/SRTA) doit voir.
+     */
+    public function scopeSoumises($query)
+    {
+        return $query->where('statut', '<>', 'on_hold');
+    }
+
+    /**
+     * Vrai tant que la demande n'a pas été soumise par la compagnie.
+     */
+    public function estBrouillon(): bool
+    {
+        return $this->statut === 'on_hold';
+    }
+
     // --- Accessors (Attributes) ---
 
     public function getHasIssuesAttribute(): bool

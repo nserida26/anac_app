@@ -75,7 +75,15 @@ class Autorisation extends Model
 
     public function getOperateurNomAttribute(): ?string
     {
-        return optional($this->snapshot)->operateur_nom
-            ?: optional(optional(optional($this->demande)->avions->first())->compagnie)->nom_entreprise;
+        if ($nom = optional($this->snapshot)->operateur_nom) {
+            return $nom;
+        }
+
+        $demande = $this->demande;
+
+        // Opérateur = exploitant du 1ᵉʳ aéronef ; à défaut (ex. dépouille mortelle,
+        // sans aéronef) la compagnie du compte demandeur.
+        return optional(optional(optional($demande)->avions->first())->compagnie)->nom_entreprise
+            ?: optional(optional(optional($demande)->user)->compagnie)->nom_entreprise;
     }
 }

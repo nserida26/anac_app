@@ -422,26 +422,29 @@
                         $tropAvions = (bool) $documentAvions;
                     @endphp
 
-                    <div class="dual-column">
-                        <div class="column">
-                            <h4>Aéronef type / Aircraft type:</h4>
-                            <label>
-                                {{ $typeString1 }}
-                                @if ($tropAvions)
-                                    <span> OR SUB VOIR PIECE JOINTE </span>
-                                @endif
-                            </label>
+                    {{-- Transport de dépouille mortelle (type 4) : ni type d'aéronef ni immatriculation --}}
+                    @unless (in_array($autorisation->demande->type->id, [4]))
+                        <div class="dual-column">
+                            <div class="column">
+                                <h4>Aéronef type / Aircraft type:</h4>
+                                <label>
+                                    {{ $typeString1 }}
+                                    @if ($tropAvions)
+                                        <span> OR SUB VOIR PIECE JOINTE </span>
+                                    @endif
+                                </label>
+                            </div>
+                            <div class="column">
+                                <h4>Immatriculation / Registration:</h4>
+                                <label>
+                                    {{ $typeString2 }}
+                                    @if ($tropAvions)
+                                        <span> OR SUB VOIR PIECE JOINTE </span>
+                                    @endif
+                                </label>
+                            </div>
                         </div>
-                        <div class="column">
-                            <h4>Immatriculation / Registration:</h4>
-                            <label>
-                                {{ $typeString2 }}
-                                @if ($tropAvions)
-                                    <span> OR SUB VOIR PIECE JOINTE </span>
-                                @endif
-                            </label>
-                        </div>
-                    </div>
+                    @endunless
                 </td>
             </tr>
         </table>

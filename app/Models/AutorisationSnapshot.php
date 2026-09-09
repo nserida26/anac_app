@@ -38,14 +38,16 @@ class AutorisationSnapshot extends Model
     {
         $demande   = $autorisation->demande()->with([
             'user.demandeur',
+            'user.compagnie',
             'avions.compagnie',
         ])->first();
 
         $user      = $demande?->user;
         $demandeur = $user?->demandeur;
 
-        // Opérateur = exploitant du premier aéronef du dossier (distinct du demandeur)
-        $operateur = optional($demande?->avions->first())->compagnie;
+        // Opérateur = exploitant du premier aéronef du dossier (distinct du demandeur).
+        // À défaut d'aéronef (ex. transport de dépouille mortelle) : la compagnie du compte.
+        $operateur = optional($demande?->avions->first())->compagnie ?: $user?->compagnie;
 
         return static::updateOrCreate(
             ['autorisation_id' => $autorisation->id],

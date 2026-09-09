@@ -711,6 +711,7 @@ class DgDsvController extends Controller
     public function indexAutorisation()
     {
 $demandeAutorisations = DemandeAutorisation::with(['type', 'user', 'etatDemande'])
+    ->soumises() // les brouillons (non soumis par la compagnie) ne sont pas visibles côté ANAC
     ->orderBy('created_at', 'desc')
     ->get();
         $demandeAutorisations->map(function ($demande) {
@@ -825,7 +826,14 @@ $demandeAutorisations = DemandeAutorisation::with(['type', 'user', 'etatDemande'
     }
     public function showDemandeAutorisation($id)
     {
-        $demandeAutorisation = DemandeAutorisation::find($id);
+        $demandeAutorisation = DemandeAutorisation::findOrFail($id);
+
+        // Un brouillon non soumis par la compagnie n'est pas consultable côté ANAC.
+        if ($demandeAutorisation->estBrouillon()) {
+            return redirect()->route('dir.demandeAutorisations')
+                ->with('error', "Cette demande n'a pas encore été soumise par la compagnie.");
+        }
+
         $vols = !empty($demandeAutorisation->vols) ? $demandeAutorisation->vols : [];
         $mdns = $demandeAutorisation->mdns;
         $itineraires = $demandeAutorisation->itineraires;
