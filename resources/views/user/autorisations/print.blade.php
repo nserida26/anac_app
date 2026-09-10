@@ -444,7 +444,7 @@
                             <div style="display: flex;">
                                 <span style="font-weight: bold; min-width: 200px;">Opérateur/Operator:</span>
                                 <span style="font-weight: bold;">
-                                    {{ $autorisation->demande->avions->first()->compagnie->nom_entreprise ?? '' }}
+                                    {{ $autorisation->operateur_nom }}
                                 </span>
                             </div>
                         @endif

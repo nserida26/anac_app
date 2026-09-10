@@ -47,7 +47,12 @@ class AutorisationSnapshot extends Model
 
         // Opérateur = exploitant du premier aéronef du dossier (distinct du demandeur).
         // À défaut d'aéronef (ex. transport de dépouille mortelle) : la compagnie du compte.
-        $operateur = optional($demande?->avions->first())->compagnie ?: $user?->compagnie;
+        $premierAvion    = $demande?->avions->first();
+        $operateurEntite = optional($premierAvion)->compagnie ?: $user?->compagnie;
+
+        // Le nom est celui figé sur l'aéronef au moment de sa saisie (Avion::booted) :
+        // un renommage ultérieur de la compagnie ne doit pas modifier l'historique.
+        $operateurNom = optional($premierAvion)->operateur_nom ?: optional($operateurEntite)->nom_entreprise;
 
         return static::updateOrCreate(
             ['autorisation_id' => $autorisation->id],
@@ -58,10 +63,10 @@ class AutorisationSnapshot extends Model
                 'demandeur_adresse'     => $demandeur?->adresse,
                 'demandeur_nationalite' => $demandeur?->nationalite,
 
-                'operateur_nom'         => $operateur?->nom_entreprise,
-                'operateur_email'       => $operateur?->email,
-                'operateur_telephone'   => $operateur?->telephone,
-                'operateur_code'        => $operateur?->code,
+                'operateur_nom'         => $operateurNom,
+                'operateur_email'       => optional($operateurEntite)->email,
+                'operateur_telephone'   => optional($operateurEntite)->telephone,
+                'operateur_code'        => optional($operateurEntite)->code,
             ]
         );
     }

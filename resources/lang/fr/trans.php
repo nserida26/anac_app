@@ -1611,6 +1611,8 @@ return [
     'operator_added_success' => 'Opérateur ajouté avec succès',
     'select_placeholder' => 'Sélectionnez...',
     'runway_name' => 'Nom de la piste',
+    'demande_readonly_notice' => 'Cette demande a déjà été soumise : elle est affichée en lecture seule et ne peut plus être modifiée.',
+    'passport_number_optional_hint' => 'Facultatif : certains défunts ne disposent pas de passeport.',
     'edit_autorisation_numero' => "Modifier le numéro",
     'autorisation_numero' => "Numéro d'autorisation",
     'edit_autorisation_numero_hint' => "Le numéro doit rester unique. Il apparaîtra sur l'autorisation imprimée et dans les notifications.",

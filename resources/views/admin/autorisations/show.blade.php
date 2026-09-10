@@ -277,7 +277,7 @@
                                             </tr>
                                             <tr>
                                                 <th>@lang('trans.company')</th>
-                                                <td>{{ $avion->compagnie ? $avion->compagnie->nom_entreprise : '-' }}</td>
+                                                <td>{{ $avion->operateur_nom ?? '-' }}</td>
                                             </tr>
                                             @if($avion->motif)
                                             <tr>

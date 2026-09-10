@@ -303,7 +303,7 @@
                                                 @endif
                                                 <td>{{ $avionItem->immatriculation }}</td>
                                                 <td>{{ $avionItem->type->code ?? 'N/A' }}</td>
-                                                <td>{{ $avionItem->compagnie->nom_entreprise ?? 'N/A' }}</td>
+                                                <td>{{ $avionItem->operateur_nom ?? 'N/A' }}</td>
                                                 @if (auth()->user()->hasRole(['dta', 'dg']))
                                                 <td>
                                                     @if ($avionItem->valider)

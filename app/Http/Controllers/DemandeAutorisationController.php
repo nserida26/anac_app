@@ -168,6 +168,19 @@ class DemandeAutorisationController extends Controller
                 // ========== MISE À JOUR ==========
                 $demande = DemandeAutorisation::findOrFail($request->demande_id);
 
+                // Une demande déjà soumise n'est plus modifiable par le demandeur
+                // (protection serveur, en plus du mode lecture seule côté UI).
+                if ((int) $demande->user_id !== (int) auth()->id() && !auth()->user()?->hasRole('admin')) {
+                    return response()->json([
+                        'message' => 'Action non autorisée.',
+                    ], 403);
+                }
+                if (optional($demande->etatDemande)->compagnie_cree_demande) {
+                    return response()->json([
+                        'message' => "Cette demande a déjà été soumise et ne peut plus être modifiée.",
+                    ], 422);
+                }
+
                 $updateData = [
                     'date_debut' => $request->date_debut,
                     'date_fin' => $request->date_fin,

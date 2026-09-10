@@ -82,8 +82,9 @@ class Autorisation extends Model
         $demande = $this->demande;
 
         // Opérateur = exploitant du 1ᵉʳ aéronef ; à défaut (ex. dépouille mortelle,
-        // sans aéronef) la compagnie du compte demandeur.
-        return optional(optional(optional($demande)->avions->first())->compagnie)->nom_entreprise
+        // sans aéronef) la compagnie du compte demandeur. Le nom de l'aéronef est
+        // celui figé à sa création (Avion::booted), pas la raison sociale actuelle.
+        return optional(optional($demande)->avions->first())->operateur_nom
             ?: optional(optional(optional($demande)->user)->compagnie)->nom_entreprise;
     }
 }

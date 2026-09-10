@@ -395,11 +395,17 @@
                                                                 </button>
                                                                 <form action="{{ route('user.autorisations.destroy', $demande->id) }}" method="POST" class="d-inline">
                                                                     @csrf @method('DELETE')
-                                                                    <button type="submit" class="btn btn-danger btn-sm" 
+                                                                    <button type="submit" class="btn btn-danger btn-sm"
                                                                             onclick="return confirm('@lang('trans.confirm_delete')')">
                                                                         <i class="fas fa-trash"></i>
                                                                     </button>
                                                                 </form>
+                                                            @else
+                                                                {{-- Demande déjà soumise : consultation en lecture seule uniquement --}}
+                                                                <a href="{{ route('user.autorisations.edit', $demande->id) }}"
+                                                                   class="btn btn-secondary btn-sm">
+                                                                    <i class="fas fa-eye"></i> @lang('trans.view')
+                                                                </a>
                                                             @endif
 
                                                             @if ($canSubmit)

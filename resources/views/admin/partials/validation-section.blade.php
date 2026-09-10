@@ -55,7 +55,7 @@
                                                 @break
                                                 
                                             @case('operateur')
-                                                {{ $item->compagnie->nom_entreprise ?? 'N/A' }}
+                                                {{ $item->operateur_nom ?? 'N/A' }}
                                                 @break
                                                 
                                             @case('depart')

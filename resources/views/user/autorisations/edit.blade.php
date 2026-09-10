@@ -106,7 +106,36 @@
                 </h4>
 
                 {{-- Transport de dépouille mortelle (type 4) : ni avion/immatriculation, ni équipage --}}
-                @php $isDepouilleMortelle = $demandeAutorisation->type_demande_autorisation_id == 4; @endphp
+                @php
+                    $isDepouilleMortelle = $demandeAutorisation->type_demande_autorisation_id == 4;
+                    // Une fois la demande soumise (compagnie_cree_demande), elle n'est plus modifiable
+                    // par le demandeur : la page reste accessible mais en lecture seule ("Voir").
+                    $readonly = (bool) optional($demandeAutorisation->etatDemande)->compagnie_cree_demande;
+                @endphp
+
+                @if ($readonly)
+                    <div class="alert alert-info">
+                        <i class="fas fa-lock"></i>
+                        @lang('trans.demande_readonly_notice')
+                    </div>
+                    <style>
+                        /* Lecture seule : masquer tous les contrôles de création/modification/suppression */
+                        #showAvionFormBtn, #showVolFormBtn,
+                        #avionForm, #volForm, #crewForm, #mdnForm, #fretForm,
+                        #receivingPartyForm, #deceasedPersonForm, #documentForm,
+                        #addAeroportBtn, #addEscaleBtn, #addTypeAvionBtn, #addCompanyBtn,
+                        .edit-avion, .delete-avion,
+                        .edit-vol, .delete-vol,
+                        .edit-membre, .delete-membre,
+                        .edit-mdn, .delete-mdn, .cancel-edit-mdn,
+                        .edit-fret, .delete-fret,
+                        .edit-party, .delete-party,
+                        .edit-personne, .delete-personne,
+                        .replace-document, .delete-document {
+                            display: none !important;
+                        }
+                    </style>
+                @endif
 
                 @unless ($isDepouilleMortelle)
                 <div class="card card-primary">
@@ -255,7 +284,7 @@
                                                         <tr id="avion-{{ $avionItem->id }}">
                                                             <td>{{ $avionItem->immatriculation }}</td>
                                                             <td>{{ $avionItem->type->code ?? 'N/A' }}</td>
-                                                            <td>{{ $avionItem->compagnie->nom_entreprise ?? 'N/A' }}</td>
+                                                            <td>{{ $avionItem->operateur_nom ?? 'N/A' }}</td>
                                                             <td>
                                                                 <div class="btn-group" role="group">
                                                                     <button class="btn btn-warning btn-sm edit-avion"
@@ -1335,7 +1364,7 @@
                                     id="demande_autorisation_id" name="demande_autorisation_id">
 
                                 <div class="row">
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="nom_prenom"><span
                                                     class="text-danger">*</span>@lang('trans.full_name')</label>
@@ -1343,21 +1372,16 @@
                                                 required>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="numero_passport">@lang('trans.passport_number')</label>
                                             <input type="text" class="form-control" id="numero_passport"
                                                 name="numero_passport">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label for="justificatif">@lang('trans.proof')</label>
-                                            <input type="file" class="form-control" id="justificatif"
-                                                name="justificatif">
+                                            <small class="form-text text-muted">@lang('trans.passport_number_optional_hint')</small>
                                         </div>
                                     </div>
                                 </div>
+                                {{-- Le justificatif n'est plus saisi ici : il est déjà déposé dans la section Documents. --}}
 
                                 <div class="row">
                                     <div class="col-lg-12">
@@ -1378,7 +1402,6 @@
                                                     <tr>
                                                         <th>@lang('trans.full_name')</th>
                                                         <th>@lang('trans.passport_number')</th>
-                                                        <th>@lang('trans.proof')</th>
                                                         <th>@lang('trans.actions')</th>
                                                     </tr>
                                                 </thead>
@@ -1388,16 +1411,6 @@
                                                             <td>{{ $personne->nom_prenom }}</td>
                                                             <td>{{ $personne->numero_passport ?? 'N/A' }}</td>
                                                             <td>
-                                                                @if ($personne->justificatif)
-                                                                    <a href="{{ asset('/uploads/' . $personne->justificatif) }}"
-                                                                        target="_blank" class="btn btn-sm btn-primary">
-                                                                        <i class="fas fa-eye"></i>
-                                                                    </a>
-                                                                @else
-                                                                    N/A
-                                                                @endif
-                                                            </td>
-                                                            <td>
                                                                 <button class="btn btn-warning btn-sm edit-personne"
                                                                     data-id="{{ $personne->id }}">@lang('trans.update')</button>
                                                                 <button class="btn btn-danger btn-sm delete-personne"
@@ -1406,7 +1419,7 @@
                                                         </tr>
                                                         <tr id="edit-form-personne-{{ $personne->id }}"
                                                             style="display: none;">
-                                                            <td colspan="4">
+                                                            <td colspan="3">
                                                                 <form id="updateDeceasedPersonForm-{{ $personne->id }}"
                                                                     method="POST" enctype="multipart/form-data">
                                                                     @method('PUT')
@@ -1416,7 +1429,7 @@
                                                                         id="personne_id" value="{{ $personne->id }}">
 
                                                                     <div class="row">
-                                                                        <div class="col-md-4">
+                                                                        <div class="col-md-6">
                                                                             <div class="form-group">
                                                                                 <label>@lang('trans.full_name')</label>
                                                                                 <input type="text" class="form-control"
@@ -1425,26 +1438,12 @@
                                                                                     required>
                                                                             </div>
                                                                         </div>
-                                                                        <div class="col-md-4">
+                                                                        <div class="col-md-6">
                                                                             <div class="form-group">
                                                                                 <label>@lang('trans.passport_number')</label>
                                                                                 <input type="text" class="form-control"
                                                                                     name="numero_passport"
                                                                                     value="{{ $personne->numero_passport }}">
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="col-md-4">
-                                                                            <div class="form-group">
-                                                                                <label
-                                                                                    for="justificatif">@lang('trans.proof')</label>
-                                                                                <input type="file" class="form-control"
-                                                                                    id="justificatif" name="justificatif">
-                                                                                @if ($personne->justificatif)
-                                                                                    <small class="form-text text-muted">
-                                                                                        @lang('trans.current_file'):
-                                                                                        {{ $personne->justificatif }}
-                                                                                    </small>
-                                                                                @endif
                                                                             </div>
                                                                         </div>
                                                                     </div>

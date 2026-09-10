@@ -1285,6 +1285,8 @@ return [
     'operator_added_success' => 'Operator added successfully',
     'select_placeholder' => 'Select...',
     'runway_name' => 'Runway Name',
+    'demande_readonly_notice' => 'This application has already been submitted: it is shown read-only and can no longer be modified.',
+    'passport_number_optional_hint' => 'Optional: some deceased persons do not have a passport.',
     'edit_autorisation_numero' => 'Edit number',
     'autorisation_numero' => 'Authorization number',
     'edit_autorisation_numero_hint' => 'The number must stay unique. It appears on the printed authorization and in notifications.',
