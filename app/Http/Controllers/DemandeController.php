@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Activity;
 use App\Models\Autorite;
 use App\Models\CentreFormation;
+use App\Models\Compagnie;
 use App\Models\CentreMedical;
 use App\Models\CompetenceDemandeur;
 use App\Models\Demande;
@@ -84,9 +85,10 @@ class DemandeController extends Controller
 
         $type_demande_autorisations = TypeDemandeAutorisation::all();
         $paiementAutorisations = $user->paiements;
+        $compagnies = Compagnie::all();
 
 
-        return view('user.index', compact('type_vols', 'demandes', 'demandeAutorisations', 'type_demande_autorisations', 'paiementAutorisations'));
+        return view('user.index', compact('type_vols', 'demandes', 'demandeAutorisations', 'type_demande_autorisations', 'paiementAutorisations', 'compagnies'));
     }
     public function create()
     {

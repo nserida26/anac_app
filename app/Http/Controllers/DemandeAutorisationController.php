@@ -120,6 +120,9 @@ class DemandeAutorisationController extends Controller
                 ],
                 'sous_validite' => 'nullable|integer|min:12|max:72',
                 'objet' => 'nullable|string|max:500',
+                // Opérateur représenté par la demande : choisi explicitement par le demandeur
+                // (un même demandeur peut représenter plusieurs opérateurs, voir User::compagnies()).
+                'compagnie_id' => 'required|exists:compagnies,id',
             ];
 
             // Validation du type_vol selon le type de demande
@@ -156,6 +159,8 @@ class DemandeAutorisationController extends Controller
                 'sous_validite.max' => 'La sous-validité maximale est de 72 heures.',
                 'objet.string' => 'L\'objet doit être une chaîne de caractères.',
                 'objet.max' => 'L\'objet ne doit pas dépasser 500 caractères.',
+                'compagnie_id.required' => "Veuillez sélectionner l'opérateur représenté par cette demande.",
+                'compagnie_id.exists' => "L'opérateur sélectionné n'existe pas.",
             ];
 
             // Valider les données
@@ -187,6 +192,7 @@ class DemandeAutorisationController extends Controller
                     'type_demande_autorisation_id' => $typeId,
                     'objet' => $request->objet,
                     'sous_validite' => $request->sous_validite,
+                    'compagnie_id' => $request->compagnie_id,
                 ];
 
                 // Gérer type_vol selon le type
@@ -239,6 +245,7 @@ class DemandeAutorisationController extends Controller
                     'type_demande_autorisation_id' => $typeId,
                     'objet' => $request->objet,
                     'sous_validite' => $request->sous_validite,
+                    'compagnie_id' => $request->compagnie_id,
                     'statut' => 'on_hold',
                     'user_id' => auth()->id(),
                     'code' => $code,

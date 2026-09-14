@@ -390,6 +390,7 @@
                                                                     data-date-fin="{{ $dateFin }}"
                                                                     data-sous-validite="{{ $sousValidite }}"
                                                                     data-objet="{{ $objet }}"
+                                                                    data-compagnie-id="{{ $demande->compagnie_id }}"
                                                                     title="@lang('trans.modify')">
                                                                     <i class="fas fa-edit"></i>
                                                                 </button>
@@ -619,6 +620,36 @@
                         </div>
                     </div>
                     
+                    <!-- Opérateur représenté -->
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label for="compagnie_id" class="form-label">
+                                        @lang('trans.operator') <span class="text-danger">*</span>
+                                    </label>
+                                    <button type="button" class="btn btn-sm btn-success" id="addCompanyBtnApplication">
+                                        <i class="fas fa-plus"></i> @lang('trans.add_action')
+                                    </button>
+                                </div>
+                                <select class="form-control select2" id="compagnie_id" name="compagnie_id" required>
+                                    <option value="">@lang('trans.select_operator')</option>
+                                    @foreach ($compagnies as $compagnie)
+                                        <option value="{{ $compagnie->id }}">
+                                            @if (!empty($compagnie->code))
+                                                {{ $compagnie->code }} {{ $compagnie->nom_entreprise }}
+                                            @else
+                                                {{ $compagnie->nom_entreprise }}
+                                            @endif
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <small class="form-text text-muted">@lang('trans.operator_represented_hint')</small>
+                                <div class="invalid-feedback" id="compagnie_id_error"></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Objet du vol -->
                     <div class="row">
                         <div class="col-md-12 mb-3">
@@ -642,6 +673,47 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour ajouter un opérateur (utilisé par le sélecteur "Opérateur" ci-dessus) -->
+<div class="modal fade" id="companyModalApplication" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@lang('trans.new_operator')</h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="companyFormApplication">
+                    @csrf
+                    <div class="mb-3">
+                        <label class="form-label">@lang('trans.name_operator') <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="nom_entreprise" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">@lang('trans.code') <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="code" required>
+                    </div>
+                    <div class="form-group">
+                        <label>@lang('trans.email')</label>
+                        <input type="email" class="form-control" name="email">
+                    </div>
+                    <div class="form-group">
+                        <label>@lang('trans.phone')</label>
+                        <input type="text" class="form-control" name="telephone">
+                    </div>
+                    <div class="form-group">
+                        <label>@lang('trans.address')</label>
+                        <input type="text" class="form-control" name="adresse">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('trans.close')</button>
+                <button type="button" class="btn btn-primary" id="saveCompanyBtnApplication">@lang('trans.save')</button>
+            </div>
         </div>
     </div>
 </div>
@@ -785,6 +857,14 @@ $(document).ready(function() {
     $('#type_demande_autorisation_id').select2({
         dropdownParent: $('#applicationModal'),
         placeholder: "@lang('trans.select_option')",
+        allowClear: false,
+        width: '100%'
+    });
+
+    // Initialisation du select2 pour l'opérateur représenté
+    $('#compagnie_id').select2({
+        dropdownParent: $('#applicationModal'),
+        placeholder: "@lang('trans.select_operator')",
         allowClear: false,
         width: '100%'
     });
@@ -1015,7 +1095,8 @@ function loadDemandeForEdit(button) {
         dateDebut: button.data('date-debut'),
         dateFin: button.data('date-fin'),
         sousValidite: button.data('sous-validite'),
-        objet: button.data('objet')
+        objet: button.data('objet'),
+        compagnieId: button.data('compagnie-id')
     };
     
     console.log('Chargement demande pour modification:', demandeId, demandeData);
@@ -1030,6 +1111,7 @@ function loadDemandeForEdit(button) {
     $('#date_fin').val(demandeData.dateFin);
     $('#sous_validite').val(demandeData.sousValidite);
     $('#objet').val(demandeData.objet);
+    $('#compagnie_id').val(demandeData.compagnieId || '').trigger('change');
 
     // Déclencher le changement de type (important pour configurer le select type_vol)
     $('#type_demande_autorisation_id').val(demandeData.type).trigger('change');
@@ -1086,7 +1168,10 @@ function resetModalForNew() {
     
     // Réinitialiser le type de demande
     $('#type_demande_autorisation_id').val('').trigger('change');
-    
+
+    // Réinitialiser l'opérateur représenté
+    $('#compagnie_id').val('').trigger('change');
+
     // Réinitialiser type_vol
     const typeVolSelect = $('#type_vol_id');
     typeVolSelect.find('option').prop('disabled', false).show();
@@ -1283,14 +1368,60 @@ $('#objet').on('input', function() {
     const maxLength = 500;
     const currentLength = $(this).val().length;
     const errorDiv = $('#objet_error');
-    
+
     $(this).removeClass('is-invalid');
     errorDiv.text('');
-    
+
     if (currentLength > maxLength) {
         $(this).addClass('is-invalid');
         errorDiv.text('L\'objet ne doit pas dépasser ' + maxLength + ' caractères.');
     }
+});
+
+// ============================================
+// OPÉRATEUR REPRÉSENTÉ (ajout à la volée d'une nouvelle compagnie)
+// ============================================
+$('#addCompanyBtnApplication').on('click', function() {
+    $('#companyModalApplication').modal('show');
+});
+
+$('#saveCompanyBtnApplication').on('click', function() {
+    const $btn = $(this);
+    $btn.prop('disabled', true);
+
+    $.ajax({
+        url: "{{ route('user.store_compagnies') }}",
+        type: 'POST',
+        data: $('#companyFormApplication').serialize(),
+        success: function(response) {
+            const nouvelleCompagnie = response.data;
+            const texteOption = nouvelleCompagnie.code ?
+                nouvelleCompagnie.code + ' ' + nouvelleCompagnie.nom_entreprise :
+                nouvelleCompagnie.nom_entreprise;
+
+            $('#compagnie_id').append($('<option>', {
+                value: nouvelleCompagnie.id,
+                text: texteOption,
+                selected: true
+            })).trigger('change');
+
+            $('#companyModalApplication').modal('hide');
+            $('#companyFormApplication')[0].reset();
+
+            toastr.success("@lang('trans.info_saved_success')");
+        },
+        error: function(xhr) {
+            const errors = xhr.responseJSON?.errors;
+            let errorMsg = xhr.responseJSON?.message || "@lang('trans.error_occurred')";
+            if (errors) {
+                errorMsg = Object.values(errors).map(v => v.join(' ')).join('<br>');
+            }
+            toastr.error(errorMsg);
+        },
+        complete: function() {
+            $btn.prop('disabled', false);
+        }
+    });
 });
 </script>
 @endpush
