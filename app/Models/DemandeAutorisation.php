@@ -15,7 +15,7 @@ class DemandeAutorisation extends Model
         'objet', 'date_fin', 'statut', 'date_soumission', 'last_relance_at', 'date_validation',
         'sous_validite', 'user_id', 'dsv_motif', 'dsna_motif', 'dsad_motif',
         'dg_motif', 'dta_motif', 'directions_annotees', 'points','type_vol_ids',
-        'autorisation_annulee', 'reverif_motif'
+        'autorisation_annulee', 'reverif_motif', 'compagnie_id'
     ];
 
     protected $appends = ['has_issues', 'invalid_reasons', 'rejection_reasons_list', 'rejected_by', 'etat_workflow'];
@@ -34,6 +34,13 @@ class DemandeAutorisation extends Model
     }
     public function typeVol() { return $this->belongsTo(TypeVol::class, 'type_vol_id'); }
     public function user() { return $this->belongsTo(User::class, 'user_id'); }
+    /**
+     * Opérateur explicitement représenté par cette demande (choisi par le
+     * demandeur), indépendant du compte qui la dépose : un même demandeur peut
+     * représenter plusieurs opérateurs. Sert notamment quand la demande n'a
+     * pas d'aéronef (type 4, dépouille mortelle) pour identifier l'opérateur.
+     */
+    public function compagnie() { return $this->belongsTo(Compagnie::class, 'compagnie_id'); }
     public function etatDemande() { return $this->hasOne(EtatDemandeAutorisation::class, 'demande_id'); }
     public function type() { return $this->belongsTo(TypeDemandeAutorisation::class, 'type_demande_autorisation_id'); }
     public function paiement() { return $this->hasOne(PaiementAutorisation::class, 'demande_autorisation_id'); }

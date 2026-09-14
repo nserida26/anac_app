@@ -79,6 +79,17 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasOne(Compagnie::class, 'user_id');
     }
+
+    /**
+     * Un demandeur peut représenter plusieurs opérateurs (compagnies.user_id
+     * n'est pas unique). compagnie() ne renvoie qu'un choix arbitraire dans ce
+     * cas — préférer cette relation dès qu'il faut énumérer/choisir parmi les
+     * opérateurs représentés par ce compte (ex. sélecteur d'opérateur).
+     */
+    public function compagnies()
+    {
+        return $this->hasMany(Compagnie::class, 'user_id');
+    }
     public function centreFormation()
     {
         return $this->hasOne(CentreFormation::class, 'user_id');

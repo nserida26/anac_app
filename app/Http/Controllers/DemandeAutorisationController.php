@@ -331,6 +331,42 @@ class DemandeAutorisationController extends Controller
     }
 
     /**
+     * Renseigne l'opérateur explicitement représenté par cette demande.
+     * Sert notamment quand la demande n'a pas d'aéronef (type 4, dépouille
+     * mortelle) : sans ce choix explicite, l'opérateur ne peut pas être déduit
+     * et le repli sur $user->compagnie est arbitraire dès qu'un même demandeur
+     * représente plusieurs opérateurs.
+     */
+    public function updateOperateur(Request $request, $id)
+    {
+        $demande = DemandeAutorisation::findOrFail($id);
+
+        if ((int) $demande->user_id !== (int) auth()->id() && !auth()->user()?->hasRole('admin')) {
+            return response()->json(['message' => 'Action non autorisée.'], 403);
+        }
+
+        if (optional($demande->etatDemande)->compagnie_cree_demande) {
+            return response()->json([
+                'message' => "Cette demande a déjà été soumise et ne peut plus être modifiée.",
+            ], 422);
+        }
+
+        $validated = $request->validate([
+            'compagnie_id' => 'required|exists:compagnies,id',
+        ], [
+            'compagnie_id.required' => "Veuillez sélectionner l'opérateur représenté par cette demande.",
+        ]);
+
+        $demande->update(['compagnie_id' => $validated['compagnie_id']]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Opérateur enregistré avec succès.',
+            'data' => $demande->compagnie,
+        ]);
+    }
+
+    /**
      * Store a newly created MDN.
      */
     public function storeMdn(Request $request)
@@ -714,6 +750,12 @@ class DemandeAutorisationController extends Controller
             // Traitement des actions
             switch ($action) {
                 case 'compagnie_cree_demande':
+                    // Sans aéronef (ex. dépouille mortelle), l'opérateur ne peut pas être déduit
+                    // de la liste des avions : il doit avoir été choisi explicitement au préalable.
+                    if ((int) $demande->type_demande_autorisation_id === 4 && empty($demande->compagnie_id)) {
+                        throw new \Exception("Veuillez indiquer l'opérateur représenté par cette demande avant de l'envoyer.");
+                    }
+
                     $state = $demande->etatDemande;
                     $wasRectification = (bool) $demande->mise_a_jour;
                     $previousWorkflow = $state ? [

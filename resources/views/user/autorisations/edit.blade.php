@@ -124,6 +124,7 @@
                         #avionForm, #volForm, #crewForm, #mdnForm, #fretForm,
                         #receivingPartyForm, #deceasedPersonForm, #documentForm,
                         #addAeroportBtn, #addEscaleBtn, #addTypeAvionBtn, #addCompanyBtn,
+                        #addCompanyBtnDemande, #saveOperateurBtn,
                         .edit-avion, .delete-avion,
                         .edit-vol, .delete-vol,
                         .edit-membre, .delete-membre,
@@ -135,6 +136,55 @@
                             display: none !important;
                         }
                     </style>
+                @endif
+
+                @if ($isDepouilleMortelle)
+                <div class="card card-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title">@lang('trans.operator_represented')</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small">@lang('trans.operator_represented_hint')</p>
+                        <div class="row align-items-end">
+                            <div class="col-md-8">
+                                <div class="form-group mb-0">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label for="demande_compagnie_id" class="form-label">
+                                            @lang('trans.operator') <span class="text-danger">*</span>
+                                        </label>
+                                        <button type="button" class="btn btn-sm btn-success" id="addCompanyBtnDemande">
+                                            <i class="fas fa-plus"></i> @lang('trans.add_action')
+                                        </button>
+                                    </div>
+                                    <select class="form-control select2-single" id="demande_compagnie_id" required
+                                        {{ $readonly ? 'disabled' : '' }}>
+                                        <option value="">@lang('trans.select_operator')</option>
+                                        @foreach ($compagnies as $compagnie)
+                                            <option value="{{ $compagnie->id }}"
+                                                {{ $demandeAutorisation->compagnie_id == $compagnie->id ? 'selected' : '' }}>
+                                                @if (!empty($compagnie->code))
+                                                    {{ $compagnie->code }} {{ $compagnie->nom_entreprise }}
+                                                @else
+                                                    {{ $compagnie->nom_entreprise }}
+                                                @endif
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" id="saveOperateurBtn" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> @lang('trans.save')
+                                </button>
+                                @if ($demandeAutorisation->compagnie_id)
+                                    <span class="badge badge-success ml-2" id="operateurSavedBadge">
+                                        <i class="fas fa-check"></i> @lang('trans.saved')
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 @endif
 
                 @unless ($isDepouilleMortelle)
@@ -2745,6 +2795,46 @@
                 $('#companyModal').modal('show');
             });
 
+            // Cas dépouille mortelle : ajouter un opérateur depuis la carte "Opérateur représenté"
+            $('#addCompanyBtnDemande').click(function() {
+                $('#companyModal').modal('show');
+            });
+
+            // Cas dépouille mortelle : enregistrer l'opérateur explicitement représenté par la demande
+            $('#saveOperateurBtn').click(function() {
+                const compagnieId = $('#demande_compagnie_id').val();
+                if (!compagnieId) {
+                    toastr.error("@lang('trans.select_operator')");
+                    return;
+                }
+
+                const $btn = $(this);
+                $btn.prop('disabled', true);
+
+                $.ajax({
+                    url: "{{ route('user.autorisations.update-operateur', $demandeAutorisation->id) }}",
+                    type: 'POST',
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        compagnie_id: compagnieId
+                    },
+                    success: function(response) {
+                        toastr.success(response.message);
+                        if ($('#operateurSavedBadge').length === 0) {
+                            $btn.after(
+                                '<span class="badge badge-success ml-2" id="operateurSavedBadge"><i class="fas fa-check"></i> @lang(\'trans.saved\')</span>'
+                            );
+                        }
+                    },
+                    error: function(xhr) {
+                        toastr.error(xhr.responseJSON?.message || "Une erreur s'est produite.");
+                    },
+                    complete: function() {
+                        $btn.prop('disabled', false);
+                    }
+                });
+            });
+
 
 
             $('#saveCompanyBtn').click(function() {
@@ -2758,16 +2848,16 @@
                             nouvelleCompagnie.code + ' ' + nouvelleCompagnie.nom_entreprise :
                             nouvelleCompagnie.nom_entreprise;
 
-                        // Ajouter la nouvelle option au select
-                        $('#compagnie_aerienne_id').append($('<option>', {
-                            value: nouvelleCompagnie.id,
-                            text: texteOption,
-                            selected: true,
-                            'data-code': nouvelleCompagnie.code
-                        }));
-
-                        // Réinitialiser Select2 pour afficher la nouvelle valeur
-                        $('#compagnie_aerienne_id').trigger('change');
+                        // Ajouter la nouvelle option au(x) select(s) présent(s) sur la page
+                        // (avion "compagnie_aerienne_id" ou demande "demande_compagnie_id" selon le type)
+                        $('#compagnie_aerienne_id, #demande_compagnie_id').each(function() {
+                            $(this).append($('<option>', {
+                                value: nouvelleCompagnie.id,
+                                text: texteOption,
+                                selected: true,
+                                'data-code': nouvelleCompagnie.code
+                            })).trigger('change');
+                        });
 
                         $('#companyModal').modal('hide');
                         $('#companyForm')[0].reset();

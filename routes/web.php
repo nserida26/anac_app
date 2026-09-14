@@ -346,7 +346,9 @@ Route::get('/rapports/compagnie/{id}', [App\Http\Controllers\DgDsvController::cl
                 Route::get('/autorisations/edit/{id}', [App\Http\Controllers\DemandeAutorisationController::class, 'edit'])->name('user.autorisations.edit');
                 Route::delete('/autorisations/destroy/{id}', [App\Http\Controllers\DemandeAutorisationController::class, 'destroy'])
                     ->name('user.autorisations.destroy');
-                
+                Route::post('/autorisations/{id}/operateur', [App\Http\Controllers\DemandeAutorisationController::class, 'updateOperateur'])
+                    ->name('user.autorisations.update-operateur');
+
                 Route::post('/personnes-deces', [App\Http\Controllers\DemandeAutorisationController::class, 'storeDeceasedPerson'])->name('personnes-deces.store');
                 Route::put('/personnes-deces/{id}', [App\Http\Controllers\DemandeAutorisationController::class, 'updateDeceasedPerson'])->name('personnes-deces.update');
                 Route::delete('/personnes-deces/{id}', [App\Http\Controllers\DemandeAutorisationController::class, 'destroyDeceasedPerson'])->name('personnes-deces.destroy');
