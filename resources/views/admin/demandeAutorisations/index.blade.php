@@ -110,6 +110,13 @@
                                                 $canView = (optional($demande->etatDemande)->compagnie_cree_demande ?? false)
                                                     && ((optional($demande->etatDemande)->dta_annoter ?? false)
                                                         || (optional($demande->etatDemande)->dg_annoter_admin ?? false));
+                                                // Même condition que le bouton "Tout Valider" de la fiche détail (show) :
+                                                // aucune ligne rejetée, aucune autorisation déjà délivrée, pas déjà tout validé.
+                                                $rowAutorisation = $demande->autorisation($demande->id);
+                                                $canValidateAll = $canView
+                                                    && empty($rowAutorisation)
+                                                    && !$demande->hasInvalidComponents()
+                                                    && !$demande->isFullyValidated();
                                             @endphp
                                             <tr data-etat="{{ $etat }}" data-type="{{ $demande->type->id }}">
                                                 <td data-order="{{ $demande->created_at ? strtotime($demande->created_at) : 0 }}">
@@ -172,7 +179,16 @@
                                                                 <i class="fas fa-exclamation-triangle"></i>
                                                             </button>
                                                         @endif
-                                                    
+
+                                                        @if($canValidateAll)
+                                                            <button type="button"
+                                                                    class="btn btn-success btn-sm validate-all-btn"
+                                                                    data-demande-id="{{ $demande->id }}"
+                                                                    title="@lang('trans.validate_all')">
+                                                                <i class="fas fa-check-double"></i>
+                                                            </button>
+                                                        @endif
+
                                                         @if(!empty($demande->autorisation($demande->id)))
                                                             <a target="_blank" 
                                                                href="{{ route('autorisations.print', $demande->autorisation($demande->id)) }}"
@@ -260,6 +276,33 @@
         document.getElementById(motifInputId).value = motif.trim();
         document.getElementById(formId).submit();
     }
+
+    // "Tout Valider" directement depuis la liste (même action que sur la fiche détail)
+    $(document).on('click', '.validate-all-btn', function() {
+        if (!confirm("@lang('trans.validate_all_confirmation')")) {
+            return;
+        }
+
+        const $btn = $(this);
+        $btn.prop('disabled', true);
+
+        $.ajax({
+            url: "{{ route('validate.all.items') }}",
+            method: 'POST',
+            data: {
+                demande_id: $btn.data('demande-id'),
+                _token: $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                toastr.success(response.message || "@lang('trans.success')");
+                setTimeout(() => window.location.reload(), 1200);
+            },
+            error: function(xhr) {
+                toastr.error(xhr.responseJSON?.message || "@lang('trans.error_occurred')");
+                $btn.prop('disabled', false);
+            }
+        });
+    });
 
     $(document).ready(function() {
         // Initialisation des Select2
