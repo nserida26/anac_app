@@ -120,153 +120,68 @@
                     </div>
                     <style>
                         /* Lecture seule : masquer tous les contrôles de création/modification/suppression */
-                        #showAvionFormBtn, #showVolFormBtn,
-                        #avionForm, #volForm, #crewForm, #mdnForm, #fretForm,
-                        #receivingPartyForm, #deceasedPersonForm, #documentForm,
-                        #addAeroportBtn, #addEscaleBtn, #addTypeAvionBtn, #addCompanyBtn,
-                        #addCompanyBtnDemande, #saveOperateurBtn,
-                        .edit-avion, .delete-avion,
-                        .edit-vol, .delete-vol,
-                        .edit-membre, .delete-membre,
-                        .edit-mdn, .delete-mdn, .cancel-edit-mdn,
-                        .edit-fret, .delete-fret,
-                        .edit-party, .delete-party,
-                        .edit-personne, .delete-personne,
-                        .replace-document, .delete-document {
+                        #showAvionFormBtn,
+                        #showVolFormBtn,
+                        #avionForm,
+                        #volForm,
+                        #crewForm,
+                        #mdnForm,
+                        #fretForm,
+                        #receivingPartyForm,
+                        #deceasedPersonForm,
+                        #documentForm,
+                        #addAeroportBtn,
+                        #addEscaleBtn,
+                        #addTypeAvionBtn,
+                        #addCompanyBtn,
+                        #addCompanyBtnDemande,
+                        #saveOperateurBtn,
+                        .edit-avion,
+                        .delete-avion,
+                        .edit-vol,
+                        .delete-vol,
+                        .edit-membre,
+                        .delete-membre,
+                        .edit-mdn,
+                        .delete-mdn,
+                        .cancel-edit-mdn,
+                        .edit-fret,
+                        .delete-fret,
+                        .edit-party,
+                        .delete-party,
+                        .edit-personne,
+                        .delete-personne,
+                        .replace-document,
+                        .delete-document {
                             display: none !important;
                         }
                     </style>
                 @endif
 
                 @if ($isDepouilleMortelle)
-                <div class="card card-primary">
-                    <div class="card-header bg-primary text-white">
-                        <h3 class="card-title">@lang('trans.operator_represented')</h3>
-                    </div>
-                    <div class="card-body">
-                        <p class="text-muted small">@lang('trans.operator_represented_hint')</p>
-                        <div class="row align-items-end">
-                            <div class="col-md-8">
-                                <div class="form-group mb-0">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <label for="demande_compagnie_id" class="form-label">
-                                            @lang('trans.operator') <span class="text-danger">*</span>
-                                        </label>
-                                        <button type="button" class="btn btn-sm btn-success" id="addCompanyBtnDemande">
-                                            <i class="fas fa-plus"></i> @lang('trans.add_action')
-                                        </button>
-                                    </div>
-                                    <select class="form-control select2-single" id="demande_compagnie_id" required
-                                        {{ $readonly ? 'disabled' : '' }}>
-                                        <option value="">@lang('trans.select_operator')</option>
-                                        @foreach ($compagnies as $compagnie)
-                                            <option value="{{ $compagnie->id }}"
-                                                {{ $demandeAutorisation->compagnie_id == $compagnie->id ? 'selected' : '' }}>
-                                                @if (!empty($compagnie->code))
-                                                    {{ $compagnie->code }} {{ $compagnie->nom_entreprise }}
-                                                @else
-                                                    {{ $compagnie->nom_entreprise }}
-                                                @endif
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <button type="button" id="saveOperateurBtn" class="btn btn-primary">
-                                    <i class="fas fa-save"></i> @lang('trans.save')
-                                </button>
-                                @if ($demandeAutorisation->compagnie_id)
-                                    <span class="badge badge-success ml-2" id="operateurSavedBadge">
-                                        <i class="fas fa-check"></i> @lang('trans.saved')
-                                    </span>
-                                @endif
-                            </div>
+                    <div class="card card-primary">
+                        <div class="card-header bg-primary text-white">
+                            <h3 class="card-title">@lang('trans.operator_represented')</h3>
                         </div>
-                    </div>
-                </div>
-                @endif
-
-                @unless ($isDepouilleMortelle)
-                <div class="card card-primary">
-                    <div class="card-header bg-primary text-white">
-                        <h3 class="card-title">@lang('trans.plane_info')</h3>
-                        <button type="button" class="btn btn-sm btn-light float-right" id="showAvionFormBtn">
-                            <i class="fas fa-plus"></i> @lang('trans.add_planes')
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <!-- Formulaire avec Select2 Tags -->
-                        <form method="POST" id="avionForm" style="display: none;">
-                            @csrf
-                            <input type="hidden" name="avion_id" id="avion_id" value="">
-                            <input type="hidden" name="demande_autorisation_id" id="demande_autorisation_id"
-                                value="{{ $demandeAutorisation->id }}">
-
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle"></i>
-                                @lang('trans.registrations_help')
-                            </div>
-
-                            <div class="row">
-                                <!-- Immatriculations multiples avec Select2 Tags -->
-                                <div class="col-md-12 mb-3">
-                                    <div class="form-group">
-                                        <label for="immatriculations" class="form-label">
-                                            @lang('trans.registrations') <span class="text-danger">*</span>
-                                        </label>
-                                        <!-- Champs caché pour Select2 -->
-                                        <select class="form-control" id="immatriculations_select" name="immatriculations[]"
-                                            multiple="multiple" style="width: 100%; height: 100px;">
-                                            <!-- Les options seront ajoutées dynamiquement -->
-                                        </select>
-                                        <div class="invalid-feedback" id="immatriculations_error"></div>
-                                        <small class="text-muted">@lang('trans.registration_input_help')</small>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <!-- Type d'avion -->
-                                <div class="col-md-6 mb-3">
-                                    <div class="form-group">
+                        <div class="card-body">
+                            <p class="text-muted small">@lang('trans.operator_represented_hint')</p>
+                            <div class="row align-items-end">
+                                <div class="col-md-8">
+                                    <div class="form-group mb-0">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <label for="type_avion_id" class="form-label">@lang('trans.plane_type') <span
-                                                    class="text-danger">*</span></label>
-                                            <button type="button" class="btn btn-sm btn-success" id="addTypeAvionBtn">
+                                            <label for="demande_compagnie_id" class="form-label">
+                                                @lang('trans.operator') <span class="text-danger">*</span>
+                                            </label>
+                                            <button type="button" class="btn btn-sm btn-success" id="addCompanyBtnDemande">
                                                 <i class="fas fa-plus"></i> @lang('trans.add_action')
                                             </button>
                                         </div>
-                                        <select class="form-control select2-single" id="type_avion_id" name="type_avion_id"
-                                            required>
-                                            <option value="">@lang('trans.select_type')</option>
-                                            @foreach ($type_avions as $type)
-                                                <option value="{{ $type->id }}" data-code="{{ $type->code }}"
-                                                    data-capacite="{{ $type->capacite }}">
-                                                    {{ $type->code }} ({{ $type->capacite }} places)
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        <div class="invalid-feedback" id="type_avion_id_error"></div>
-                                    </div>
-                                </div>
-
-                                <!-- Opérateur -->
-                                <div class="col-md-6 mb-3">
-                                    <div class="form-group">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <label for="compagnie_aerienne_id" class="form-label">@lang('trans.operator') <span
-                                                    class="text-danger">*</span></label>
-                                            <button type="button" class="btn btn-sm btn-success" id="addCompanyBtn">
-                                                <i class="fas fa-plus"></i> @lang('trans.add_action')
-                                            </button>
-                                        </div>
-
-                                        <select class="form-control select2-single" id="compagnie_aerienne_id"
-                                            name="compagnie_aerienne_id" required>
+                                        <select class="form-control select2-single" id="demande_compagnie_id" required
+                                            {{ $readonly ? 'disabled' : '' }}>
                                             <option value="">@lang('trans.select_operator')</option>
                                             @foreach ($compagnies as $compagnie)
-                                                <option value="{{ $compagnie->id }}" data-code="{{ $compagnie->code }}">
+                                                <option value="{{ $compagnie->id }}"
+                                                    {{ $demandeAutorisation->compagnie_id == $compagnie->id ? 'selected' : '' }}>
                                                     @if (!empty($compagnie->code))
                                                         {{ $compagnie->code }} {{ $compagnie->nom_entreprise }}
                                                     @else
@@ -275,96 +190,204 @@
                                                 </option>
                                             @endforeach
                                         </select>
-                                        <div class="invalid-feedback" id="compagnie_aerienne_id_error"></div>
                                     </div>
                                 </div>
-                            </div>
-
-                            <!-- Prévisualisation -->
-                            <div class="row" id="previewSection" style="display: none;">
-                                <div class="col-md-12">
-                                    <div class="alert alert-success">
-                                        <h6><i class="fas fa-plane"></i> @lang('trans.preview_planes_title')</h6>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <p><strong>@lang('trans.type'):</strong> <span id="selectedTypeDisplay">-</span></p>
-                                                <p><strong>@lang('trans.operator'):</strong> <span id="selectedOperatorDisplay">-</span>
-                                                </p>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div id="immatriculationsPreview" class="mt-2"></div>
-                                                <p class="mb-0"><strong>@lang('trans.total'):</strong> <span id="totalCount">0</span>
-                                                    @lang('trans.plane_unit')</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <button type="submit" class="btn btn-success float-right" id="submitAvionBtn">
-                                        <i class="fas fa-save"></i> <span id="formActionText">@lang('trans.send')</span>
+                                <div class="col-md-4">
+                                    <button type="button" id="saveOperateurBtn" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> @lang('trans.save')
                                     </button>
-                                    <button type="button" class="btn btn-secondary float-right mr-2"
-                                        id="cancelAvionFormBtn">
-                                        <i class="fas fa-times"></i> @lang('trans.cancel')
-                                    </button>
+                                    @if ($demandeAutorisation->compagnie_id)
+                                        <span class="badge badge-success ml-2" id="operateurSavedBadge">
+                                            <i class="fas fa-check"></i> @lang('trans.saved')
+                                        </span>
+                                    @endif
                                 </div>
                             </div>
-                        </form>
-
-                        <!-- Tableau des avions existants -->
-                        @if (isset($avions) && $avions->isNotEmpty())
-                            <div class="table-responsive">
-                                <div class="row mt-4" id="avionsTableContainer">
-                                    <div class="col-lg-12">
-                                        <div class="table-responsive">
-                                            <table class="table table-striped table-bordered" id="avionsTable">
-                                                <thead>
-                                                    <tr>
-                                                        <th>@lang('trans.registration')</th>
-                                                        <th>@lang('trans.type')</th>
-                                                        <th>@lang('trans.operator')</th>
-                                                        <th>@lang('trans.actions')</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach ($avions as $avionItem)
-                                                        <tr id="avion-{{ $avionItem->id }}">
-                                                            <td>{{ $avionItem->immatriculation }}</td>
-                                                            <td>{{ $avionItem->type->code ?? 'N/A' }}</td>
-                                                            <td>{{ $avionItem->operateur_nom ?? 'N/A' }}</td>
-                                                            <td>
-                                                                <div class="btn-group" role="group">
-                                                                    <button class="btn btn-warning btn-sm edit-avion"
-                                                                        data-id="{{ $avionItem->id }}"
-                                                                        data-immatriculation="{{ $avionItem->immatriculation }}"
-                                                                        data-type_avion_id="{{ $avionItem->type_avion_id }}"
-                                                                        data-compagnie_aerienne_id="{{ $avionItem->compagnie_aerienne_id }}">
-                                                                        <i class="fas fa-edit"></i> @lang('trans.edit')
-                                                                    </button>
-                                                                    <button class="btn btn-danger btn-sm delete-avion"
-                                                                        data-id="{{ $avionItem->id }}">
-                                                                        <i class="fas fa-trash"></i> @lang('trans.delete')
-                                                                    </button>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    @endforeach
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @else
-                            <div class="alert alert-info" id="noAvionsAlert">
-                                @lang('trans.no_planes_registered')
-                            </div>
-                        @endif
+                        </div>
                     </div>
-                </div>
+                @endif
+
+                @unless ($isDepouilleMortelle)
+                    <div class="card card-primary">
+                        <div class="card-header bg-primary text-white">
+                            <h3 class="card-title">@lang('trans.plane_info')</h3>
+                            <button type="button" class="btn btn-sm btn-light float-right" id="showAvionFormBtn">
+                                <i class="fas fa-plus"></i> @lang('trans.add_planes')
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <!-- Formulaire avec Select2 Tags -->
+                            <form method="POST" id="avionForm" style="display: none;">
+                                @csrf
+                                <input type="hidden" name="avion_id" id="avion_id" value="">
+                                <input type="hidden" name="demande_autorisation_id" id="demande_autorisation_id"
+                                    value="{{ $demandeAutorisation->id }}">
+
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    @lang('trans.registrations_help')
+                                </div>
+
+                                <div class="row">
+                                    <!-- Immatriculations multiples avec Select2 Tags -->
+                                    <div class="col-md-12 mb-3">
+                                        <div class="form-group">
+                                            <label for="immatriculations" class="form-label">
+                                                @lang('trans.registrations') <span class="text-danger">*</span>
+                                            </label>
+                                            <!-- Champs caché pour Select2 -->
+                                            <select class="form-control" id="immatriculations_select" name="immatriculations[]"
+                                                multiple="multiple" style="width: 100%; height: 100px;">
+                                                <!-- Les options seront ajoutées dynamiquement -->
+                                            </select>
+                                            <div class="invalid-feedback" id="immatriculations_error"></div>
+                                            <small class="text-muted">@lang('trans.registration_input_help')</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <!-- Type d'avion -->
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-group">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <label for="type_avion_id" class="form-label">@lang('trans.plane_type') <span
+                                                        class="text-danger">*</span></label>
+                                                <button type="button" class="btn btn-sm btn-success" id="addTypeAvionBtn">
+                                                    <i class="fas fa-plus"></i> @lang('trans.add_action')
+                                                </button>
+                                            </div>
+                                            <select class="form-control select2-single" id="type_avion_id" name="type_avion_id"
+                                                required>
+                                                <option value="">@lang('trans.select_type')</option>
+                                                @foreach ($type_avions as $type)
+                                                    <option value="{{ $type->id }}" data-code="{{ $type->code }}"
+                                                        data-capacite="{{ $type->capacite }}">
+                                                        {{ $type->code }} ({{ $type->capacite }} places)
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <div class="invalid-feedback" id="type_avion_id_error"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Opérateur -->
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-group">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <label for="compagnie_aerienne_id" class="form-label">@lang('trans.operator') <span
+                                                        class="text-danger">*</span></label>
+                                                <button type="button" class="btn btn-sm btn-success" id="addCompanyBtn">
+                                                    <i class="fas fa-plus"></i> @lang('trans.add_action')
+                                                </button>
+                                            </div>
+
+                                            <select class="form-control select2-single" id="compagnie_aerienne_id"
+                                                name="compagnie_aerienne_id" required>
+                                                <option value="">@lang('trans.select_operator')</option>
+                                                @foreach ($compagnies as $compagnie)
+                                                    <option value="{{ $compagnie->id }}" data-code="{{ $compagnie->code }}">
+                                                        @if (!empty($compagnie->code))
+                                                            {{ $compagnie->code }} {{ $compagnie->nom_entreprise }}
+                                                        @else
+                                                            {{ $compagnie->nom_entreprise }}
+                                                        @endif
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <div class="invalid-feedback" id="compagnie_aerienne_id_error"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Prévisualisation -->
+                                <div class="row" id="previewSection" style="display: none;">
+                                    <div class="col-md-12">
+                                        <div class="alert alert-success">
+                                            <h6><i class="fas fa-plane"></i> @lang('trans.preview_planes_title')</h6>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><strong>@lang('trans.type'):</strong> <span
+                                                            id="selectedTypeDisplay">-</span></p>
+                                                    <p><strong>@lang('trans.operator'):</strong> <span
+                                                            id="selectedOperatorDisplay">-</span>
+                                                    </p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div id="immatriculationsPreview" class="mt-2"></div>
+                                                    <p class="mb-0"><strong>@lang('trans.total'):</strong> <span
+                                                            id="totalCount">0</span>
+                                                        @lang('trans.plane_unit')</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <button type="submit" class="btn btn-success float-right" id="submitAvionBtn">
+                                            <i class="fas fa-save"></i> <span id="formActionText">@lang('trans.send')</span>
+                                        </button>
+                                        <button type="button" class="btn btn-secondary float-right mr-2"
+                                            id="cancelAvionFormBtn">
+                                            <i class="fas fa-times"></i> @lang('trans.cancel')
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <!-- Tableau des avions existants -->
+                            @if (isset($avions) && $avions->isNotEmpty())
+                                <div class="table-responsive">
+                                    <div class="row mt-4" id="avionsTableContainer">
+                                        <div class="col-lg-12">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped table-bordered" id="avionsTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>@lang('trans.registration')</th>
+                                                            <th>@lang('trans.type')</th>
+                                                            <th>@lang('trans.operator')</th>
+                                                            <th>@lang('trans.actions')</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($avions as $avionItem)
+                                                            <tr id="avion-{{ $avionItem->id }}">
+                                                                <td>{{ $avionItem->immatriculation }}</td>
+                                                                <td>{{ $avionItem->type->code ?? 'N/A' }}</td>
+                                                                <td>{{ $avionItem->operateur_nom ?? 'N/A' }}</td>
+                                                                <td>
+                                                                    <div class="btn-group" role="group">
+                                                                        <button class="btn btn-warning btn-sm edit-avion"
+                                                                            data-id="{{ $avionItem->id }}"
+                                                                            data-immatriculation="{{ $avionItem->immatriculation }}"
+                                                                            data-type_avion_id="{{ $avionItem->type_avion_id }}"
+                                                                            data-compagnie_aerienne_id="{{ $avionItem->compagnie_aerienne_id }}">
+                                                                            <i class="fas fa-edit"></i> @lang('trans.edit')
+                                                                        </button>
+                                                                        <button class="btn btn-danger btn-sm delete-avion"
+                                                                            data-id="{{ $avionItem->id }}">
+                                                                            <i class="fas fa-trash"></i> @lang('trans.delete')
+                                                                        </button>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @else
+                                <div class="alert alert-info" id="noAvionsAlert">
+                                    @lang('trans.no_planes_registered')
+                                </div>
+                            @endif
+                        </div>
+                    </div>
                 @endunless
 
                 <!-- Information sur le vol -->
@@ -428,13 +451,15 @@
                                                     <input class="form-check-input lieu-type-radio" type="radio"
                                                         name="type_lieu_depart" id="type_lieu_depart_aeroport"
                                                         value="aeroport" data-field="depart" checked>
-                                                    <label class="form-check-label" for="type_lieu_depart_aeroport">@lang('trans.airport')</label>
+                                                    <label class="form-check-label"
+                                                        for="type_lieu_depart_aeroport">@lang('trans.airport')</label>
                                                 </div>
                                                 <div class="form-check form-check-inline">
                                                     <input class="form-check-input lieu-type-radio" type="radio"
                                                         name="type_lieu_depart" id="type_lieu_depart_piste"
                                                         value="piste" data-field="depart">
-                                                    <label class="form-check-label" for="type_lieu_depart_piste">@lang('trans.runway')</label>
+                                                    <label class="form-check-label"
+                                                        for="type_lieu_depart_piste">@lang('trans.runway')</label>
                                                 </div>
                                             </div>
                                         </div>
@@ -481,13 +506,15 @@
                                                     <input class="form-check-input lieu-type-radio" type="radio"
                                                         name="type_lieu_arrivee" id="type_lieu_arrivee_aeroport"
                                                         value="aeroport" data-field="arrivee" checked>
-                                                    <label class="form-check-label" for="type_lieu_arrivee_aeroport">@lang('trans.airport')</label>
+                                                    <label class="form-check-label"
+                                                        for="type_lieu_arrivee_aeroport">@lang('trans.airport')</label>
                                                 </div>
                                                 <div class="form-check form-check-inline">
                                                     <input class="form-check-input lieu-type-radio" type="radio"
                                                         name="type_lieu_arrivee" id="type_lieu_arrivee_piste"
                                                         value="piste" data-field="arrivee">
-                                                    <label class="form-check-label" for="type_lieu_arrivee_piste">@lang('trans.runway')</label>
+                                                    <label class="form-check-label"
+                                                        for="type_lieu_arrivee_piste">@lang('trans.runway')</label>
                                                 </div>
                                             </div>
                                         </div>
@@ -582,20 +609,26 @@
                                                     @php
                                                         // Récupérer les escales pour ce vol
                                                         $escales = $volItem->escales()->orderBy('ordre')->get();
-                                                        $routeString = optional($volItem->aeroportDepart)->codeICAO ?? $volItem->nom_piste_depart ?? 'N/A';
+                                                        $routeString =
+                                                            optional($volItem->aeroportDepart)->codeICAO ??
+                                                            ($volItem->nom_piste_depart ?? 'N/A');
                                                         if ($escales->isNotEmpty()) {
                                                             foreach ($escales as $escale) {
                                                                 $routeString .= ' → ' . $escale->aeroport->codeICAO;
                                                             }
                                                         }
                                                         $routeString .=
-                                                            ' → ' . (optional($volItem->aeroportArrivee)->codeICAO ?? $volItem->nom_piste_arrivee ?? 'N/A');
+                                                            ' → ' .
+                                                            (optional($volItem->aeroportArrivee)->codeICAO ??
+                                                                ($volItem->nom_piste_arrivee ?? 'N/A'));
                                                     @endphp
                                                     <tr id="vol-{{ $volItem->id }}">
                                                         <td>{{ $volItem->numero_vol }}</td>
 
-                                                        <td>{{ optional($volItem->aeroportDepart)->codeICAO ?? $volItem->nom_piste_depart ?? 'N/A' }}</td>
-                                                        <td>{{ optional($volItem->aeroportArrivee)->codeICAO ?? $volItem->nom_piste_arrivee ?? 'N/A' }}</td>
+                                                        <td>{{ optional($volItem->aeroportDepart)->codeICAO ?? ($volItem->nom_piste_depart ?? 'N/A') }}
+                                                        </td>
+                                                        <td>{{ optional($volItem->aeroportArrivee)->codeICAO ?? ($volItem->nom_piste_arrivee ?? 'N/A') }}
+                                                        </td>
                                                         <td>{{ date('H:i', strtotime($volItem->date_depart)) }}</td>
                                                         <td>{{ date('H:i', strtotime($volItem->date_arrivee)) }}</td>
                                                         <td>{{ $volItem->nbr_passagers }}</td>
@@ -1213,7 +1246,8 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="nomcontact"><i class="fa fa-user mr-2"></i>@lang('trans.full_name')*</label>
+                                            <label for="nomcontact"><i
+                                                    class="fa fa-user mr-2"></i>@lang('trans.full_name')*</label>
                                             <input id="nomcontact" name="nom_contact" class="form-control" required>
                                         </div>
                                     </div>
@@ -1230,7 +1264,8 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="emailcontact"><i class="fa fa-envelope mr-2"></i>@lang('trans.email')</label>
+                                            <label for="emailcontact"><i
+                                                    class="fa fa-envelope mr-2"></i>@lang('trans.email')</label>
                                             <input id="emailcontact" name="email_contact" type="email"
                                                 class="form-control">
                                         </div>
@@ -1256,7 +1291,8 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <label for="pieceidentite"><i class="fa fa-credit-card mr-2"></i>@lang('trans.identity_document')</label>
+                                            <label for="pieceidentite"><i
+                                                    class="fa fa-credit-card mr-2"></i>@lang('trans.identity_document')</label>
                                             <input id="pieceidentite" name="piece_identite" type="file"
                                                 class="form-control-file">
                                         </div>
@@ -1677,8 +1713,8 @@
                                                             {{ LaravelLocalization::getCurrentLocale() == 'fr' ? optional($document->typeDocument)->nom_fr : optional($document->typeDocument)->nom_en }}
                                                         </td>
                                                         <td>
-                                                            <a href="{{ $document->file_url }}"
-                                                                target="_blank" class="btn btn-sm btn-primary">
+                                                            <a href="{{ $document->file_url }}" target="_blank"
+                                                                class="btn btn-sm btn-primary">
                                                                 <i class="fas fa-eye"></i> @lang('trans.view')
                                                             </a>
                                                         </td>
@@ -1739,7 +1775,8 @@
                                 </form>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('trans.cancel')</button>
+                                <button type="button" class="btn btn-secondary"
+                                    data-dismiss="modal">@lang('trans.cancel')</button>
                                 <button type="button" class="btn btn-primary" id="confirmReplace">
                                     <i class="fas fa-sync"></i> @lang('trans.replace')
                                 </button>
@@ -1758,12 +1795,13 @@
                     <div class="card card-success">
                         <div class="card-body text-center">
                             @if ($canSubmit)
-                                <form action="{{ route('update-state', $demandeAutorisation->id) }}" method="POST" class="d-inline">
+                                <form action="{{ route('update-state', $demandeAutorisation->id) }}" method="POST"
+                                    class="d-inline">
                                     @csrf
                                     <input type="hidden" name="action" value="compagnie_cree_demande">
                                     <input type="hidden" name="is_approved" value="1">
                                     <button type="submit" class="btn btn-success btn-lg"
-                                            onclick="return confirm('@lang('trans.confirm_submission')')">
+                                        onclick="return confirm('@lang('trans.confirm_submission')')">
                                         <i class="fas fa-paper-plane"></i> @lang('trans.send')
                                         <span class="badge badge-light">{{ $documentCount }}</span>
                                     </button>
@@ -1799,7 +1837,8 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="nom">@lang('trans.airport_name')</label>
-                                    <input type="text" class="form-control" id="nom" name="nom" required>
+                                    <input type="text" class="form-control" id="nom" name="nom"
+                                        required>
                                 </div>
                             </div>
                             <div class="col-md-3">
@@ -1858,7 +1897,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('trans.cancel')</button>
+                        <button type="button" class="btn btn-secondary"
+                            data-dismiss="modal">@lang('trans.cancel')</button>
                         <button type="submit" class="btn btn-primary">@lang('trans.save_airport')</button>
                     </div>
                 </form>
@@ -1878,12 +1918,14 @@
                     <form id="companyForm">
                         @csrf
                         <div class="mb-3">
-                            <label for="nom" class="form-label">@lang('trans.name_operator') <span class="text-danger">*</span></label>
+                            <label for="nom" class="form-label">@lang('trans.name_operator') <span
+                                    class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="nom_entreprise" name="nom_entreprise"
                                 required>
                         </div>
                         <div class="mb-3">
-                            <label for="code" class="form-label">@lang('trans.code') <span class="text-danger">*</span></label>
+                            <label for="code" class="form-label">@lang('trans.code') <span
+                                    class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="code" name="code" required>
                         </div>
                         <div class="form-group">
@@ -1919,7 +1961,8 @@
                     <form id="typeAvionForm">
                         @csrf
                         <div class="mb-3">
-                            <label for="code" class="form-label">@lang('trans.code') <span class="text-danger">*</span></label>
+                            <label for="code" class="form-label">@lang('trans.code') <span
+                                    class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="code_type" name="code" required>
                         </div>
                         <div class="mb-3">
@@ -2014,7 +2057,8 @@
                     },
                     error: function(xhr) {
                         // Show error message
-                        var errorMessage = xhr.responseJSON.message || @json(__('trans.error_occurred'));
+                        var errorMessage = xhr.responseJSON.message ||
+                            @json(__('trans.error_occurred'));
                         toastr.error(errorMessage);
 
                         // Highlight error fields
@@ -2753,7 +2797,8 @@
                         // Ajouter la nouvelle option au select
                         $('#type_avion_id').append($('<option>', {
                             value: response.id,
-                            text: response.code + ' (' + (response.data.capacite || 0) + ' places)',
+                            text: response.code + ' (' + (response.data.capacite ||
+                                0) + ' places)',
                             selected: true,
                             'data-code': response.code,
                             'data-capacite': response.data.capacite || 0
@@ -2822,7 +2867,9 @@
                         toastr.success(response.message);
                         if ($('#operateurSavedBadge').length === 0) {
                             $btn.after(
-                                '<span class="badge badge-success ml-2" id="operateurSavedBadge"><i class="fas fa-check"></i> @lang(\'trans.saved\')</span>'
+                                '<span class="badge badge-success ml-2" id="operateurSavedBadge">' +
+                                '<i class="fas fa-check"></i> @lang('trans.saved')' +
+                                '</span>'
                             );
                         }
                     },
