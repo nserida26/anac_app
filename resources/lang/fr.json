@@ -10,7 +10,6 @@
     "Log In": "Connexion",
     "Don't have an account?": "Vous n'avez pas de compte ?",
     "Sign Up": "S'inscrire",
-
     "Inscription": "Inscription",
     "Create an account": "Créer un compte",
     "Fill out the form below to create your accounte": "Remplissez le formulaire ci-dessous pour créer votre compte",
@@ -25,9 +24,7 @@
     "Enter your password (min 8 characters)": "Entrez votre mot de passe (min 8 caractères)",
     "Password confirmation *": "Confirmation du mot de passe *",
     "Password confirmation": "Confirmation du mot de passe",
-    
     "Already have an account?": "Vous avez déjà un compte ?",
-    
     "Select a country": "Sélectionnez un pays",
     "Reset your password": "Réinitialiser votre mot de passe",
     "Enter your new password below to recover access to your account.": "Saisissez votre nouveau mot de passe pour récupérer l'accès à votre compte.",
@@ -38,11 +35,35 @@
     "Reset password": "Réinitialiser le mot de passe",
     "New Password": "Nouveau mot de passe",
     "Reset Password": "Réinitialisation du mot de passe",
-   
     "Enter your email address and we will send you a reset link.": "Entrez votre adresse e-mail et nous vous enverrons un lien de réinitialisation.",
     "Send Password Reset Link": "Envoyer le lien de réinitialisation",
     "Confirm Password": "Confirmer le mot de passe",
     "Please confirm your password before continuing.": "Veuillez confirmer votre mot de passe avant de continuer.",
     "Please wait...": "Veuillez patienter...",
-    "We have emailed your password reset link!": "Nous avons envoyé le lien de réinitialisation à votre adresse e-mail !"
+    "We have emailed your password reset link!": "Nous avons envoyé le lien de réinitialisation à votre adresse e-mail !",
+
+    "Welcome title": "Gestion Aéronautique Simplifiée",
+    "Welcome description": "L'ANAC Mauritanie modernise la gestion des autorisations de survol, des licences et des paiements via une plateforme en ligne sécurisée.",
+    "Services": "Nos Services",
+    "Management": "Services",
+    "Authorizations": "Autorisations",
+    "Authorizations desc": "Demandes de survol et d'atterrissage en ligne. Gestion efficace et sécurisée de vos autorisations d'aviation civile.",
+    "Licenses": "Licences",
+    "Licenses desc": "Gestion du personnel aéronautique et délivrance des licences. Traçabilité complète des compétences et autorisations.",
+    "Online Payment": "Paiement en ligne",
+    "Online Payment desc": "Paiement sécurisé de vos demandes avant traitement. Suivi de vos factures et reçus en temps réel.",
+    "About": "À propos",
+    "About ANAC": "L'ANAC Mauritanie",
+    "About description": "L'Agence Nationale de l'Aviation Civile de Mauritanie assure la réglementation et la supervision de l'aviation civile nationale, en conformité avec les normes internationales de l'OACI.",
+    "Secure request management": "Gestion sécurisée des demandes d'autorisation",
+    "License issuance and tracking": "Délivrance et suivi des licences aéronautiques",
+    "Secure online payment": "Paiement en ligne sécurisé",
+    "ICAO international standards compliance": "Conformité aux normes internationales OACI",
+    "Get Started": "Commencer",
+    "Ready to start?": "Prêt à commencer ?",
+    "Create your account and access our online services.": "Créez votre compte et accédez à nos services en ligne.",
+    "ANAC Mauritania": "ANAC Mauritanie",
+    "All rights reserved.": "Tous droits réservés.",
+    "Login": "Connexion",
+    "Register": "Inscription"
 }

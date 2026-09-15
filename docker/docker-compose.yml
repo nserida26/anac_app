@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  # --- Application Laravel (Apache) ---
+  app:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    container_name: anac-application
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ../:/var/www/html
+    ports:
+      - "8000:80"
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE:-laravel}
+      - DB_USERNAME=${DB_USERNAME:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-secret}
+      - MAIL_HOST=mailpit
+      - MAIL_PORT=1025
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - anac-network
+
+  # --- MySQL ---
+  db:
+    image: mysql:8.0
+    container_name: anac-database
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_DATABASE: ${DB_DATABASE:-laravel}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql/my.cnf:/etc/mysql/conf.d/custom.cnf
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - anac-network
+
+  # --- phpMyAdmin ---
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: anac-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 512M
+    ports:
+      - "8080:80"
+    volumes:
+      - ./phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - anac-network
+
+  # --- Mailpit ---
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: anac-mail-server
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+    networks:
+      - anac-network
+
+volumes:
+  mysql-data:
+
+networks:
+  anac-network:
+    driver: bridge

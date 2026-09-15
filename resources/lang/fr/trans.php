@@ -2,9 +2,8 @@
 
 return [
 
-    'word1' => 'MISE EN ŒUVRE DE SYSTÈMES DE GESTION AÉRONAUTIQUE EFFICACES ET SÉCURISÉS PAR L\'ANAC MAURITANIE',
-    'word2' => 'L\'Agence Nationale de l\'Aviation Civile (ANAC) de Mauritanie, engagée dans une démarche continue d\'amélioration de la qualité de ses services, a mis en place un système, à travers la Direction du Transport Aérien (DTA), destiné à assurer une gestion efficiente et sécurisée des demandes de survol et/ou d\'atterrissage, ainsi que le paiement en ligne desdites demandes avant leur traitement par les services compétents.
-    Par ailleurs, dans le cadre de sa politique en matière de sécurité de l\'aviation civile, l\'ANAC de Mauritanie, à travers la Direction de la Sécurité de l\'Aviation Civile (DSV), met en place un système d\'information dédié à la gestion du personnel aéronautique et à la délivrance des licences. Ce système vise à garantir une traçabilité complète et une gestion optimisée des compétences et des autorisations du personnel navigant et technique, en conformité avec les normes internationales de sécurité.',
+    'word1' => 'Gestion Aéronautique Simplifiée',
+    'word2' => 'L\'ANAC Mauritanie modernise la gestion des autorisations de survol, des licences et des paiements via une plateforme en ligne sécurisée.',
     'dashboard' => 'Espace demandeur',
     'dashboard_agent' => 'Tableau de bord Agent',
     'dashboard_sec' => 'Tableau de bord Chefs de section',

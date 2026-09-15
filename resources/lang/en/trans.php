@@ -2,9 +2,8 @@
 <?php
 
 return [
-    'word1' => 'IMPLEMENTATION OF EFFICIENT AND SECURE AVIATION MANAGEMENT SYSTEMS BY ANAC MAURITANIA',
-    'word2' => 'The National Civil Aviation Agency (NCAA) of Mauritania, committed to continuously improving the quality of its services, has implemented a system designed to ensure efficient and secure management of overflight and/or landing requests, as well as online payment of said requests before processing by the competent services.
-    Furthermore, as part of its aviation safety policy, ANAC Mauritania, through the Civil Aviation Safety Directorate (DSV), is establishing an information system dedicated to the management of aeronautical personnel and license issuance. This system aims to ensure complete traceability and optimized management of skills and authorizations for flight and technical personnel, in compliance with international safety standards.',
+    'word1' => 'Simplified Aviation Management',
+    'word2' => 'ANAC Mauritania modernizes overflight authorizations, licenses, and payments through a secure online platform.',
 
     'dashboard' => 'Applicant Dashboard',
     'dashboard_agent' => 'Agent Dashboard',
