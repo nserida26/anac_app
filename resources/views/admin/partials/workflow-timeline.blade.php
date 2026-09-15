@@ -1,6 +1,13 @@
 {{-- resources/views/admin/partials/workflow-timeline.blade.php --}}
 @php
-    $etat = $demande->etat_workflow;
+    // etat_workflow (DemandeAutorisation::getEtatWorkflowAttribute) ne va jamais
+    // au-delà de 'payment_confirmed' : il ne sait pas qu'une autorisation a été
+    // délivrée. « Signé » n'est donc atteint qu'en le déduisant explicitement de
+    // l'existence de l'Autorisation, comme le fait déjà le parcours côté demandeur
+    // (voir user/partials/autorisation-status-timeline.blade.php).
+    $isIssued = (bool) $demande->autorisation($demande->id);
+    $etat = $isIssued ? 'signed' : ($demande->etat_workflow ?? 'draft');
+
     $steps = [
         'submitted' => ['icon' => 'fa-paper-plane', 'label' => trans('trans.submitted')],
         'under_review' => ['icon' => 'fa-search', 'label' => trans('trans.under_review')],
@@ -11,7 +18,7 @@
     ];
 
     $currentStepIndex = array_search($etat, array_keys($steps));
-    if ($etat === 'rejected') {
+    if ($demande->etat_workflow === 'rejected') {
         $currentStepIndex = -1;
     }
 @endphp
