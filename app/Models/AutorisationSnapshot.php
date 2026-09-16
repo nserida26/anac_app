@@ -46,16 +46,20 @@ class AutorisationSnapshot extends Model
         $user      = $demande?->user;
         $demandeur = $user?->demandeur;
 
-        // Opérateur = exploitant du premier aéronef du dossier (distinct du demandeur).
-        // À défaut d'aéronef (ex. transport de dépouille mortelle) : l'opérateur
-        // explicitement choisi sur la demande, puis en dernier recours une compagnie
-        // du compte (arbitraire si le compte en représente plusieurs).
+        // Opérateur = celui explicitement choisi sur la demande (demande_autorisations
+        // .compagnie_id, obligatoire à la création — voir DemandeAutorisation::compagnie()) ;
+        // à défaut (anciennes demandes créées avant ce choix obligatoire), l'exploitant du
+        // premier aéronef du dossier ; en tout dernier recours une compagnie du compte
+        // (arbitraire si le compte en représente plusieurs, voir User::compagnies()).
         $premierAvion    = $demande?->avions->first();
-        $operateurEntite = optional($premierAvion)->compagnie ?: $demande?->compagnie ?: $user?->compagnie;
+        $operateurEntite = $demande?->compagnie ?: optional($premierAvion)->compagnie ?: $user?->compagnie;
 
-        // Le nom est celui figé sur l'aéronef au moment de sa saisie (Avion::booted) :
-        // un renommage ultérieur de la compagnie ne doit pas modifier l'historique.
-        $operateurNom = optional($premierAvion)->operateur_nom ?: optional($operateurEntite)->nom_entreprise;
+        // Le nom figé (compagnie choisie, ou à défaut celui figé sur l'aéronef au moment de
+        // sa saisie — voir Avion::booted) : un renommage ultérieur de la compagnie ne doit
+        // pas modifier l'historique.
+        $operateurNom = optional($demande?->compagnie)->nom_entreprise
+            ?: optional($premierAvion)->operateur_nom
+            ?: optional($operateurEntite)->nom_entreprise;
 
         return static::updateOrCreate(
             ['autorisation_id' => $autorisation->id],

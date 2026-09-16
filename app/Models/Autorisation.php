@@ -81,13 +81,14 @@ class Autorisation extends Model
 
         $demande = $this->demande;
 
-        // Opérateur = exploitant du 1ᵉʳ aéronef (nom figé à sa création, voir
-        // Avion::booted) ; à défaut (ex. dépouille mortelle, sans aéronef) l'opérateur
-        // explicitement choisi sur la demande ; en tout dernier recours (anciennes
-        // demandes créées avant ce choix explicite) une compagnie du compte demandeur —
-        // arbitraire si le compte en représente plusieurs, voir User::compagnies().
-        return optional(optional($demande)->avions->first())->operateur_nom
-            ?: optional(optional($demande)->compagnie)->nom_entreprise
+        // Opérateur = celui explicitement choisi sur la demande (demande_autorisations
+        // .compagnie_id, obligatoire à la création — voir DemandeAutorisation::compagnie()) ;
+        // à défaut (anciennes demandes créées avant ce choix obligatoire), l'exploitant du
+        // 1ᵉʳ aéronef (nom figé à sa création, voir Avion::booted) ; en tout dernier recours
+        // une compagnie du compte demandeur — arbitraire s'il en représente plusieurs, voir
+        // User::compagnies().
+        return optional(optional($demande)->compagnie)->nom_entreprise
+            ?: optional(optional($demande)->avions->first())->operateur_nom
             ?: optional(optional(optional($demande)->user)->compagnie)->nom_entreprise;
     }
 }
