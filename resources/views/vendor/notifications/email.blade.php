@@ -4,9 +4,9 @@
 # {{ $greeting }}
 @else
 @if ($level === 'error')
-# @lang('Whoops!')
+# Oups !
 @else
-# @lang('Hello!')
+# Bienvenue !
 @endif
 @endif
 
@@ -18,17 +18,7 @@
 
 {{-- Action Button --}}
 @isset($actionText)
-<?php
-    switch ($level) {
-        case 'success':
-        case 'error':
-            $color = $level;
-            break;
-        default:
-            $color = 'primary';
-    }
-?>
-@component('mail::button', ['url' => $actionUrl, 'color' => $color])
+@component('mail::button', ['url' => $actionUrl, 'color' => $level === 'error' ? 'error' : 'primary'])
 {{ $actionText }}
 @endcomponent
 @endisset
@@ -43,20 +33,19 @@
 @if (! empty($salutation))
 {{ $salutation }}
 @else
-@lang('Regards'),<br>
-{{ config('app.name') }}
+Cordialement,<br>
+<strong>{{ config('app.name') }}</strong>
 @endif
 
 {{-- Subcopy --}}
 @isset($actionText)
 @slot('subcopy')
 @lang(
-    "If you're having trouble clicking the \":actionText\" button, copy and paste the URL below\n".
-    'into your web browser:',
+    "Si le bouton \":actionText\" ne fonctionne pas, copiez et collez l'URL ci-dessous dans votre navigateur :",
     [
         'actionText' => $actionText,
     ]
-) <span class="break-all">[{{ $displayableActionUrl }}]({{ $actionUrl }})</span>
+) <span class="break-all" style="word-break: break-all; color: #0d2137;">{{ $displayableActionUrl }}</span>
 @endslot
 @endisset
 @endcomponent

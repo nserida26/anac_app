@@ -1,29 +1,40 @@
-@extends('layouts.app')
+<x-auth-layout title="{{ __('Verify email title') }}" route-name="verification.notice">
 
-@section('content')
-    <div class="container-fluid">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">{{ __('Verify Your Email Address') }}</div>
-
-                    <div class="card-body">
-                        @if (session('resent'))
-                            <div class="alert alert-success" role="alert">
-                                {{ __('A fresh verification link has been sent to your email address.') }}
-                            </div>
-                        @endif
-
-                        {{ __('Before proceeding, please check your email for a verification link.') }}
-                        {{ __('If you did not receive the email') }},
-                        <form class="d-inline" method="POST" action="{{ route('verification.resend') }}">
-                            @csrf
-                            <button type="submit"
-                                class="btn btn-link p-0 m-0 align-baseline">{{ __('click here to request another') }}</button>.
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+    {{-- Header --}}
+    <div class="auth-header">
+        <img src="{{ asset('assets/admin/imgs/logo.png') }}" alt="ANAC">
+        <h1>{{ __('Verify email title') }}</h1>
+        <p>{{ __('Verify email subtitle') }}</p>
     </div>
-@endsection
+
+    {{-- Alert --}}
+    <x-auth-alert type="info" icon="fas fa-envelope-open-text">
+        {{ __('Verify email message') }}
+    </x-auth-alert>
+
+    @if (Session::has('verification-link-sent'))
+        <x-auth-alert type="success">{{ __('Verification email sent') }}</x-auth-alert>
+    @endif
+
+    {{-- Resend Form --}}
+    <form action="{{ route('verification.send') }}" method="post" class="auth-form">
+        @csrf
+        <button type="submit" class="auth-btn">
+            <i class="fas fa-redo"></i>
+            {{ __('Resend verification email') }}
+        </button>
+    </form>
+
+    {{-- Links --}}
+    <div class="auth-links">
+        <div class="auth-divider">{{ __('or') }}</div>
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="auth-btn" style="background: transparent; border: 1.5px solid var(--anac-gray-200); color: var(--anac-gray-800);">
+                <i class="fas fa-sign-out-alt"></i>
+                {{ __('Logout') }}
+            </button>
+        </form>
+    </div>
+
+</x-auth-layout>

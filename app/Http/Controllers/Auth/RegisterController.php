@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Providers\RouteServiceProvider;
 use App\Models\User;
 use App\Services\WhatsAppService;
 use Illuminate\Foundation\Auth\RegistersUsers;
@@ -14,42 +13,19 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
-use Spatie\Permission\Models\Role;
 
 class RegisterController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Register Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles the registration of new users as well as their
-    | validation and creation. By default this controller uses a trait to
-    | provide this functionality without requiring any additional code.
-    |
-    */
-
     use RegistersUsers;
 
     /**
-     * Where to redirect users after registration.
-     *
-     * @var string
+     * After registration, redirect to login with a success message.
      */
-
-    protected function redirectTo()
+    public function redirectPath(): string
     {
-        if (Auth::user()->hasRole('user')) {
-            return '/user';
-        }
-        return '/';
+        return route('login');
     }
 
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->middleware('guest');
@@ -57,23 +33,15 @@ class RegisterController extends Controller
 
     /**
      * Get a validator for an incoming registration request.
-     *
-     * @param  array  $data
-     * @return \Illuminate\Contracts\Validation\Validator
      */
-    protected function validator(array $data)
+    protected function validator(array $data): \Illuminate\Contracts\Validation\Validator
     {
         return Validator::make($data, [
-            // Numéro mauritanien : exactement 8 chiffres (sans l'indicatif).
-            'whatsapp' =>  [
-                'required',
-                'string',
-                'regex:/^[0-9]{8}$/',
-            ],
+            'whatsapp'    => ['required', 'string', 'regex:/^[0-9]{8}$/'],
             'country_code' => ['required', 'string', 'max:5'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'user_type' => ['required', 'in:autorisation,licence'],
+            'email'       => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password'    => ['required', 'string', 'min:8', 'confirmed'],
+            'user_type'   => ['required', 'in:autorisation,licence'],
         ], [
             'whatsapp.regex' => __('register.whatsapp_digits'),
         ]);
@@ -81,38 +49,38 @@ class RegisterController extends Controller
 
     /**
      * Create a new user instance after a valid registration.
-     *
-     * @param  array  $data
-     * @return \App\Models\User
      */
-    protected function create(array $data)
+    protected function create(array $data): User
     {
-
         $user = User::create([
-            'email' => $data['email'],
-            'whatsapp' => '+' . $data['country_code'] . $data['whatsapp'],
-            'photo' => 'default.png',
-            'password' => Hash::make($data['password']),
+            'email'     => $data['email'],
+            'whatsapp'  => '+' . $data['country_code'] . $data['whatsapp'],
+            'photo'     => 'default.png',
+            'password'  => Hash::make($data['password']),
             'user_type' => $data['user_type'],
         ]);
 
         $user->assignRole('user');
+
         return $user;
     }
 
     /**
-     * Après l'inscription : l'e-mail de vérification est déjà envoyé par
-     * l'événement Registered ; on envoie en plus le lien d'activation par WhatsApp.
+     * After registration: send WhatsApp verification link, logout, redirect to login.
      */
     protected function registered(Request $request, $user)
     {
         $this->sendWhatsappVerificationLink($user);
+
+        Auth::logout();
+
+        return redirect()->route('login')
+            ->with('success', __('register.verify_email_message'));
     }
 
     /**
-     * Envoie le lien signé de vérification d'e-mail (le même que celui du mail)
-     * au numéro WhatsApp fourni à l'inscription. Un échec n'interrompt pas
-     * l'inscription : il est seulement journalisé.
+     * Send the signed verification URL via WhatsApp.
+     * Failure is logged but does not interrupt registration.
      */
     protected function sendWhatsappVerificationLink(User $user): void
     {
@@ -139,7 +107,7 @@ class RegisterController extends Controller
 
             app(WhatsAppService::class)->sendMessage($user->whatsapp, $message);
         } catch (\Throwable $e) {
-            Log::error("Lien d'activation WhatsApp non envoyé (user {$user->id}) : " . $e->getMessage());
+            Log::error("WhatsApp verification link failed (user {$user->id}): " . $e->getMessage());
         }
     }
 }
