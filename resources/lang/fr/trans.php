@@ -1624,4 +1624,5 @@ return [
     'confirm_dta_reverif' => 'Renvoyer le dossier à la SRTA pour revérification ?',
     'reverif_pending_srta' => 'Revérification demandée à la SRTA',
     'dta_reverif_requested' => 'La DTA demande une revérification de ce dossier.',
+    'confirm_srta_validation' => "Confirmer la validation SRTA de ce dossier ? Toutes les lignes ont déjà été validées.",
 ];

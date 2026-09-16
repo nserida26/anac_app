@@ -117,6 +117,17 @@
                                                     && empty($rowAutorisation)
                                                     && !$demande->hasInvalidComponents()
                                                     && !$demande->isFullyValidated();
+                                                // Une fois toutes les lignes validées (Tout Valider ci-dessus, ou une
+                                                // par une), la SRTA confirme le dossier via l'action srta_valider —
+                                                // distincte de service_valider (déclenchable aussi par la DTA) : voir
+                                                // authorizeWorkflowAction(). Sans ça, aucune fiche n'expose ce bouton
+                                                // pour la SRTA, qui doit alors attendre la DTA (service_valider).
+                                                $canSrtaValider = $canView
+                                                    && auth()->user()->hasRole('admin')
+                                                    && empty($rowAutorisation)
+                                                    && !$demande->hasInvalidComponents()
+                                                    && $demande->isFullyValidated()
+                                                    && !(optional($demande->etatDemande)->srta_valider ?? false);
                                             @endphp
                                             <tr data-etat="{{ $etat }}" data-type="{{ $demande->type->id }}">
                                                 <td data-order="{{ $demande->created_at ? strtotime($demande->created_at) : 0 }}">
@@ -187,6 +198,19 @@
                                                                     title="@lang('trans.validate_all')">
                                                                 <i class="fas fa-check-double"></i>
                                                             </button>
+                                                        @endif
+
+                                                        @if($canSrtaValider)
+                                                            <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline">
+                                                                @csrf
+                                                                <input type="hidden" name="action" value="srta_valider">
+                                                                <input type="hidden" name="is_approved" value="1">
+                                                                <button type="submit" class="btn btn-primary btn-sm"
+                                                                        onclick="return confirm('@lang('trans.confirm_srta_validation')')"
+                                                                        title="@lang('trans.validate_service')">
+                                                                    <i class="fas fa-stamp"></i>
+                                                                </button>
+                                                            </form>
                                                         @endif
 
                                                         @if(!empty($demande->autorisation($demande->id)))

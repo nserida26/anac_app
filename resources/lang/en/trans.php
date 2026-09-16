@@ -1298,4 +1298,5 @@ return [
     'confirm_dta_reverif' => 'Send the file back to the SRTA for re-verification?',
     'reverif_pending_srta' => 'Re-verification requested from the SRTA',
     'dta_reverif_requested' => 'The DTA requests a re-verification of this file.',
+    'confirm_srta_validation' => 'Confirm the SRTA validation of this file? All lines have already been validated.',
 ];
