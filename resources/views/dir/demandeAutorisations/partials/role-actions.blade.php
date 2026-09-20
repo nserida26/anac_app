@@ -5,6 +5,7 @@
     $role = $user->getRoleNames()->first();
     // Transport de dépouille mortelle (type 4) : pas d'avion attendu dans le dossier
     $avionOk = $demande->avions->isNotEmpty() || (int) optional($demande->type)->id === 4;
+    $hasAutorisation = !empty($demande->autorisation($demande->id));
 @endphp
 
 @if($role == 'dg')
@@ -179,7 +180,7 @@
         </div>
     @endif
 
-    @if(!$etat->dg_valider && !$etat->dta_dg_valider && $etat->dta_valider)
+    @if(!$hasAutorisation && !$etat->dg_valider && !$etat->dta_dg_valider && $etat->dta_valider)
         @if($demande->vols->isNotEmpty() && $avionOk)
             <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline">
                 @csrf
@@ -197,7 +198,7 @@
         @endif
     @endif
 
-    @if(!empty($demande->autorisation($demande->id)))
+    @if($hasAutorisation)
         <a target="_blank" href="{{ route('autorisations.print', $demande->autorisation($demande->id)) }}"
            class="btn btn-warning btn-sm mb-1">
             <i class="fas fa-print"></i> @lang('trans.print')

@@ -92,6 +92,7 @@ Route::group(
             return view('errors.500');
         })->name('errors.500');
         Route::get('public/autorisations/print/{autorisation}', [App\Http\Controllers\AdminController::class, 'print'])->name('public.autorisations.print');
+        Route::get('public/autorisations/download/{autorisation}', [App\Http\Controllers\AdminController::class, 'downloadAutorisationPdf'])->name('public.autorisations.download');
         Auth::routes();
         
         Route::get('/email/verify', function () {
@@ -606,6 +607,7 @@ Route::post('/demandes/{id}/update-type', [App\Http\Controllers\AdminController:
 
 
                 Route::post('/autorisations/rejeter', [App\Http\Controllers\AdminController::class, 'rejeter'])->name('autorisations.rejeter');
+                Route::post('/autorisations/retirer-rejet', [App\Http\Controllers\AdminController::class, 'retirerRejet'])->name('autorisations.retirer-rejet');
 
                 Route::get('/demandeApprobations', [App\Http\Controllers\AdminController::class, 'index_vr'])->name('demandeApprobations');
                 Route::get('/demandeApprobations/show/{id}', [App\Http\Controllers\AdminController::class, 'show_vr'])->name('demandeApprobations.show');

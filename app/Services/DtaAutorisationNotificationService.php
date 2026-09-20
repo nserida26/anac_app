@@ -519,6 +519,27 @@ public function sendDTARemoveFromDirectionsNotification(
         );
     }
 
+    public function sendRejectionCancelledNotification(
+        DemandeAutorisation $demande,
+        User $recipient
+    ): array {
+        $message = <<<MSG
+        ✅ *REJET RETIRÉ*
+        _Type:_ *{$demande->type->libelle}*
+        _Numéro:_ {$demande->code}
+
+        📌 *Message:* Le rejet précédent de votre demande était une erreur. Il a été retiré et votre dossier reprend son traitement.
+
+        🔗 *Accès direct:*
+        {$this->getApplicationLink($demande->code)}
+        MSG;
+
+        return $this->whatsApp->sendRichMessage(
+            $recipient->whatsapp,
+            $message
+        );
+    }
+
     /**
      * Méthodes privées utilitaires
      */
@@ -644,7 +665,7 @@ public function sendDTARemoveFromDirectionsNotification(
     }
     private function getLink(Autorisation $autorisation): string
     {
-        return route('public.autorisations.print',$autorisation);
+        return route('public.autorisations.download', $autorisation);
     }
 
     private function buildApplicationMessage(

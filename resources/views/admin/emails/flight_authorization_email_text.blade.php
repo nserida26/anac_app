@@ -20,7 +20,7 @@ Détails de l'autorisation :
 @endif
 
 Consulter l'autorisation complète :
-{{ route('public.autorisations.print', $autorisation) }}
+{{ route('public.autorisations.download', $autorisation) }}
 
 Toute anomalie, incident ou non-conformité constaté(e) devra être signalé(e)
 sans délai à nos services.

@@ -58,6 +58,7 @@ use DateTime;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminController extends Controller
 {
@@ -267,6 +268,16 @@ class AdminController extends Controller
     {
 
         return view('admin.autorisations.print', compact('autorisation'));
+    }
+
+    public function downloadAutorisationPdf(Autorisation $autorisation)
+    {
+        $pdf = Pdf::loadView('admin.autorisations.print', compact('autorisation'))
+            ->setPaper('a4');
+
+        $filename = 'autorisation-' . preg_replace('/[^A-Za-z0-9_-]+/', '-', $autorisation->code_autorisation) . '.pdf';
+
+        return $pdf->download($filename);
     }
 
     public function autorisations()
@@ -1360,6 +1371,43 @@ class AdminController extends Controller
         }
 
         return redirect()->back()->with('success', 'Information rejetée avec succès.');
+    }
+
+    public function retirerRejet(Request $request)
+    {
+        $validated = $request->validate([
+            'table' => 'required|string',
+            'id' => 'required|integer',
+            'demande_id' => 'required|integer|exists:demande_autorisations,id',
+        ]);
+
+        if (!DB::getSchemaBuilder()->hasTable($validated['table'])) {
+            return redirect()->back()->with('error', 'Table non trouvée.');
+        }
+
+        foreach (['valider', 'motif'] as $column) {
+            if (!DB::getSchemaBuilder()->hasColumn($validated['table'], $column)) {
+                return redirect()->back()->with('error', 'Colonne non trouvée dans la table.');
+            }
+        }
+
+        DB::table($validated['table'])
+            ->where('id', $validated['id'])
+            ->update([
+                'valider' => null,
+                'motif' => null,
+                'valide_par_role' => null,
+                'updated_at' => now(),
+            ]);
+
+        $demande = DemandeAutorisation::with('user')->findOrFail($validated['demande_id']);
+        Activity::log("rejet_retire: {$validated['table']}#{$validated['id']}", $demande->id);
+
+        if ($demande->user && !empty($demande->user->whatsapp)) {
+            $this->dtaAutorisationNotificationService->sendRejectionCancelledNotification($demande, $demande->user);
+        }
+
+        return redirect()->back()->with('success', 'Le rejet a été retiré et le demandeur a été notifié.');
     }
 
     /**

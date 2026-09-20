@@ -295,7 +295,7 @@
             
             <!-- Bouton d'accès direct -->
             <div class="access-button">
-                <a href="{{ route('public.autorisations.print', $autorisation) }}" class="btn-primary" target="_blank">
+                <a href="{{ route('public.autorisations.download', $autorisation) }}" class="btn-primary" target="_blank">
                     📄 Voir l'autorisation complète
                 </a>
             </div>

@@ -1137,12 +1137,16 @@ class DemandeAutorisationController extends Controller
                     $currentYear = now()->format('y');
                     $lastCode = Autorisation::where('code_autorisation', 'like', "{$prefix}-%{$currentYear}")->latest()->first();
                     $sequenceNumber = $lastCode && preg_match('/-(\d{4})-/', $lastCode->code_autorisation, $matches) ? (int)$matches[1] + 1 : 1;
+                    do {
+                        $codeAutorisation = "{$prefix}-" . str_pad($sequenceNumber, 4, '0', STR_PAD_LEFT) . "-{$currentYear}";
+                        $sequenceNumber++;
+                    } while (Autorisation::where('code_autorisation', $codeAutorisation)->exists());
 
                     Autorisation::create([
                         'demande_id' => $demandeId,
                         'date_delivrance' => $demande->date_debut,
                         'date_expiration' => $demande->date_fin,
-                        'code_autorisation' => "{$prefix}-" . str_pad($sequenceNumber, 4, '0', STR_PAD_LEFT) . "-{$currentYear}",
+                        'code_autorisation' => $codeAutorisation,
                         'statut' => 'generated',
                         'cachet' => $dg?->cachet->cachet ?? '',
                         'nom_signataire' => $dg?->signature->nom ?? '',
@@ -1223,12 +1227,16 @@ class DemandeAutorisationController extends Controller
                         $currentYear = now()->format('y');
                         $lastCode = Autorisation::where('code_autorisation', 'like', "{$prefix}-%{$currentYear}")->latest()->first();
                         $sequenceNumber = $lastCode && preg_match('/-(\d{4})-/', $lastCode->code_autorisation, $matches) ? (int)$matches[1] + 1 : 1;
+                        do {
+                            $codeAutorisation = "{$prefix}-" . str_pad($sequenceNumber, 4, '0', STR_PAD_LEFT) . "-{$currentYear}";
+                            $sequenceNumber++;
+                        } while (Autorisation::where('code_autorisation', $codeAutorisation)->exists());
 
                         Autorisation::create([
                             'demande_id' => $demandeId,
                             'date_delivrance' => $demande->date_debut,
                             'date_expiration' => $demande->date_fin,
-                            'code_autorisation' => "{$prefix}-" . str_pad($sequenceNumber, 4, '0', STR_PAD_LEFT) . "-{$currentYear}",
+                            'code_autorisation' => $codeAutorisation,
                             'statut' => 'generated',
                             'cachet' => $dg?->cachet->cachet ?? '',
                             'nom_signataire' => $dg?->signature->nom ?? '',
@@ -1251,8 +1259,8 @@ class DemandeAutorisationController extends Controller
 
                         if ($codeExists) {
                             // En cas de conflit (très improbable), trouver le prochain numéro disponible
-                            $existingCodes = Autorisation::where('code', 'like', "%/{$currentYear}")
-                                ->pluck('code')
+                            $existingCodes = Autorisation::where('code_autorisation', 'like', "%/{$currentYear}")
+                                ->pluck('code_autorisation')
                                 ->toArray();
 
                             // Extraire les numéros de séquence existants
@@ -1294,6 +1302,7 @@ class DemandeAutorisationController extends Controller
                             'signature_dta' => $dta?->signature->signature ?? '',
                             'signature_srta' => $srta?->signature->signature ?? '',
                         ]);
+                        $actionType = 'validated';
                     }
 
                     // Notifications
