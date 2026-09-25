@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Log;
 use App\Models\Activity;
 use App\Models\Approbation;
 use App\Models\Autorisation;
@@ -1336,7 +1337,7 @@ class AdminController extends Controller
             return;
         }
 
-        $cleQualification = fn ($q) => $q->qualification_id . '|' . $q->type_avion_id . '|' . $q->date_examen;
+        $cleQualification = fn($q) => $q->qualification_id . '|' . $q->type_avion_id . '|' . $q->date_examen;
         $qualificationsExistantes = $nouvelle->qualifications()->get()->map($cleQualification);
         foreach ($ancienne->qualifications as $qualification) {
             if ($qualificationsExistantes->contains($cleQualification($qualification))) {
@@ -1347,7 +1348,7 @@ class AdminController extends Controller
             $copie->save();
         }
 
-        $cleCompetence = fn ($c) => $c->type . '|' . $c->date . '|' . $c->niveau;
+        $cleCompetence = fn($c) => $c->type . '|' . $c->date . '|' . $c->niveau;
         $competencesExistantes = $nouvelle->competences()->get()->map($cleCompetence);
         foreach ($ancienne->competences as $competence) {
             if ($competencesExistantes->contains($cleCompetence($competence))) {
@@ -2456,7 +2457,7 @@ class AdminController extends Controller
             $demande->save();
 
             // Log pour audit si nécessaire
-            \Log::info('Type de demande mis à jour', [
+            Log::info('Type de demande mis à jour', [
                 'demande_id' => $id,
                 'new_type_id' => $request->type_demande_id,
                 'user_id' => auth()->id()
@@ -2472,7 +2473,7 @@ class AdminController extends Controller
                 'message' => __('trans.demande_not_found')
             ], 404);
         } catch (\Exception $e) {
-            \Log::error('Erreur mise à jour type demande: ' . $e->getMessage(), [
+            Log::error('Erreur mise à jour type demande: ' . $e->getMessage(), [
                 'demande_id' => $id,
                 'user_id' => auth()->id(),
                 'trace' => $e->getTraceAsString()
@@ -2532,7 +2533,7 @@ class AdminController extends Controller
             $examinateur->save();
 
             // Log de l'action
-            \Log::info('Examinateur validé', [
+            Log::info('Examinateur validé', [
                 'examinateur_id' => $id,
                 'validated_by' => Auth::id(),
                 'date' => now()
@@ -2547,7 +2548,7 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            \Log::error('Erreur validation examinateur: ' . $e->getMessage());
+            Log::error('Erreur validation examinateur: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
@@ -2578,7 +2579,7 @@ class AdminController extends Controller
             $examinateur->save();
 
             // Log de l'action
-            \Log::info('Examinateur rejeté', [
+            Log::info('Examinateur rejeté', [
                 'examinateur_id' => $id,
                 'rejected_by' => Auth::id(),
                 'motif' => $request->motif_refus
@@ -2593,7 +2594,7 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            \Log::error('Erreur rejet examinateur: ' . $e->getMessage());
+            Log::error('Erreur rejet examinateur: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
