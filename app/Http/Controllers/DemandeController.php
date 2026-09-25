@@ -986,13 +986,15 @@ class DemandeController extends Controller
 
     public function imprimer(LicenceExpirationService $expirationService, $id)
     {
-        $demande  = Demande::find($id);
+        $demande  = Demande::findOrFail($id);
+        // Un demandeur ne peut imprimer que l'authentification de ses propres demandes.
+        abort_unless((int) $demande->demandeur_id === (int) optional(Auth::user()->demandeur)->id, 403);
 
         $demandeur = $demande->demandeur;
         $licence = $demande->licence;
 
 
-        if ($licence->licence_valide) {
+        if ($demande->authentificationDisponible()) {
             # code...
             $medical_certificat = $demande->medicalExaminations()->orderByDesc('id')->where(
                 'valider',

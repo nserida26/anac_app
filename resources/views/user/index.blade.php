@@ -193,14 +193,10 @@
                                                             onclick="openPdfModal('{{ asset('/uploads/' . $demande->facture->facture) }}')">
                                                             Facture</button>
                                                     @endif
-                                                    @if (in_array($demande->typeDemande->id, [1, 3, 4, 5, 6, 8]) && !empty($demande->licence) && isset($demande->licence))
-                                                        @if (optional($demande->etatDemande)->dg_signer ||
-                                                                optional($demande->etatDemande)->dsv_signer ||
-                                                                optional($demande->etatDemande)->pel_dsv_signer)
-                                                            <a href="{{ route('user.imprimer', $demande->id) }}"
-                                                                class="btn btn-primary btn-sm"
-                                                                target="_blank">@lang('trans.print_authentication')</a>
-                                                        @endif
+                                                    @if ($demande->authentificationDisponible())
+                                                        <a href="{{ route('user.imprimer', $demande->id) }}"
+                                                            class="btn btn-primary btn-sm"
+                                                            target="_blank">@lang('trans.print_authentication')</a>
                                                     @endif
 
                                                     @if (in_array($demande->typeDemande->id, [7]) && !empty($demande->validation) && isset($demande->validation))

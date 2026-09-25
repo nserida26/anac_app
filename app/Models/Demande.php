@@ -49,6 +49,12 @@ class Demande extends Model
     {
         return $this->hasOne(Licence::class, 'demande_id');
     }
+
+    /** L'authentification est imprimable dès que la licence liée à la demande est validée. */
+    public function authentificationDisponible(): bool
+    {
+        return (bool) optional($this->licence)->licence_valide;
+    }
     public function carteStagiare()
     {
         return $this->hasOne(CarteStagiare::class, 'demande_id');
