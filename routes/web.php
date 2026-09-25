@@ -405,6 +405,7 @@ Route::get('/rapports/compagnie/{id}', [App\Http\Controllers\DgDsvController::cl
 
 
                 Route::get('/licences/edit/{id}', [App\Http\Controllers\DemandeController::class, 'edit'])->name('user.licences.edit');
+                Route::post('/licences/{id}/type', [App\Http\Controllers\DemandeController::class, 'updateType'])->name('user.licences.update-type');
                 Route::post('/storeDemandeLicence', [App\Http\Controllers\DemandeController::class, 'store'])->name('user.store');
 
 

@@ -75,4 +75,10 @@ class Demandeur extends Model
     {
         return $this->hasMany(Licence::class, 'demandeur_id');
     }
+
+    /** Un demandeur ne peut détenir qu'une seule licence par type. */
+    public function detientLicenceDeType(string $typeLicence): bool
+    {
+        return $this->licences()->where('type_licence', $typeLicence)->exists();
+    }
 }

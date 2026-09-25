@@ -700,7 +700,7 @@ function openEditTypeModal(demandeId, currentTypeId) {
     
     // Mettre à jour l'URL du formulaire
     const form = $('#editTypeForm');
-    form.attr('action', `/admin/demandes/${demandeId}/update-type`);
+    form.attr('action', "{{ route('admin.update-type', ':id') }}".replace(':id', demandeId));
     
     // Sélectionner le type actuel dans le dropdown
     $('#type_demande_id').val(currentTypeId);

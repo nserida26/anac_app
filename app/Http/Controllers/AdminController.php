@@ -14,7 +14,6 @@ use App\Models\Demande;
 use App\Models\DemandePiece;
 use App\Models\CarteStagiare;
 use App\Models\ChecklistDemande;
-use Illuminate\Support\Facades\Validator;
 use App\Models\ExaminateurCentre;
 use App\Models\CentreFormation;
 
@@ -55,6 +54,8 @@ use App\Services\DtaApplicationNotificationService;
 use App\Services\DtaAutorisationNotificationService;
 use App\Services\LicenseApplicationNotificationService;
 use App\Services\LicenceExpirationService;
+use App\Services\ChangementTypeDemandeService;
+use App\Http\Requests\UpdateTypeDemandeRequest;
 use DateInterval;
 use DateTime;
 use Illuminate\Support\Facades\Auth;
@@ -2356,34 +2357,23 @@ class AdminController extends Controller
             return redirect()->back()->with('error', __('trans.error_updating_photo') . ': ' . $e->getMessage());
         }
     }
-    public function updateType(Request $request, $id)
+    public function updateType(UpdateTypeDemandeRequest $request, ChangementTypeDemandeService $changementType, $id)
     {
         try {
-            $validator = Validator::make($request->all(), [
-                'type_demande_id' => 'required|exists:type_demandes,id'
-            ], [
-                'type_demande_id.required' => __('trans.type_required'),
-                'type_demande_id.exists' => __('trans.type_invalid')
-            ]);
+            $demande = Demande::findOrFail($id);
+            $nouveauType = TypeDemande::findOrFail($request->type_demande_id);
 
-            if ($validator->fails()) {
+            $refus = $changementType->verifier($demande, $nouveauType, true);
+            if ($refus) {
+                // Même format qu'une erreur de validation : le JS de la modale l'affiche déjà.
                 return response()->json([
                     'success' => false,
-                    'message' => __('trans.validation_error'),
-                    'errors' => $validator->errors()
+                    'message' => $refus,
+                    'errors' => ['type_demande_id' => [$refus]],
                 ], 422);
             }
 
-            $demande = Demande::findOrFail($id);
-            $demande->type_demande_id = $request->type_demande_id;
-            $demande->save();
-
-            // Log pour audit si nécessaire
-            Log::info('Type de demande mis à jour', [
-                'demande_id' => $id,
-                'new_type_id' => $request->type_demande_id,
-                'user_id' => auth()->id()
-            ]);
+            $changementType->changer($demande, $nouveauType);
 
             return response()->json([
                 'success' => true,

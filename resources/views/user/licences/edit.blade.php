@@ -30,6 +30,56 @@
                 <h4 class="text-center">
                     {{ LaravelLocalization::getCurrentLocale() == 'fr' ? $demande->typeDemande->nom_fr : $demande->typeDemande->nom_en }}
                     - {{ $demande->typeLicence->nom }}</h4>
+                @if ($typesDemandeModifiables->isNotEmpty())
+                    <div class="text-center mb-3">
+                        <button type="button" class="btn btn-sm btn-outline-warning" data-toggle="modal"
+                            data-target="#editTypeDemandeModal">
+                            <i class="fas fa-edit"></i> @lang('trans.modify_application_type')
+                        </button>
+                        @error('type_demande_id')
+                            <div class="text-danger small mt-1">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="modal fade" id="editTypeDemandeModal" tabindex="-1" role="dialog"
+                        aria-labelledby="editTypeDemandeModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <form action="{{ route('user.licences.update-type', $demande->id) }}" method="POST">
+                                    @csrf
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="editTypeDemandeModalLabel">
+                                            <i class="fas fa-edit"></i> @lang('trans.edit_type_demande')
+                                        </h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="form-group">
+                                            <label for="edit_type_demande_id">@lang('trans.select_type') <span class="text-danger">*</span></label>
+                                            <select name="type_demande_id" id="edit_type_demande_id" class="form-control" required>
+                                                @foreach ($typesDemandeModifiables as $typeDemande)
+                                                    <option value="{{ $typeDemande->id }}" {{ $typeDemande->id == $demande->type_demande_id ? 'selected' : '' }}>
+                                                        {{ LaravelLocalization::getCurrentLocale() == 'fr' ? $typeDemande->nom_fr : $typeDemande->nom_en }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <small class="form-text text-muted">@lang('trans.select_type_help')</small>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('trans.cancel')</button>
+                                        <button type="submit" class="btn btn-primary"
+                                            onclick="return confirm('{{ __('trans.edit_type_demande') }} ?')">
+                                            <i class="fas fa-save"></i> @lang('trans.update')
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                @endif
                 @if (!in_array($demande->typeDemande->id, [1,8]))
                     <div class="card">
                         <div class="card-header bg-primary text-white">
