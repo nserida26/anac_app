@@ -544,9 +544,8 @@
                             $showLang = false;
 
                             if (in_array($competence_demandeur->niveau, [4, 5])) {
-                                $langStartDate = $competence_demandeur->date;
-                                $langStartDate = Carbon::parse($langStartDate);
-                                $langExpiryDate = $langStartDate->copy()->addMonths($competence_demandeur->validite);
+                                $langStartDate = Carbon::parse($competence_demandeur->date);
+                                $langExpiryDate = $competence_demandeur->date_expiration;
 
                                 if ($currentDate->lte($langExpiryDate)) {
                                     $showLang = true;

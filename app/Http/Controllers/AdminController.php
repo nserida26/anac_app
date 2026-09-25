@@ -54,6 +54,7 @@ use App\Models\VolApprobation;
 use App\Services\DtaApplicationNotificationService;
 use App\Services\DtaAutorisationNotificationService;
 use App\Services\LicenseApplicationNotificationService;
+use App\Services\LicenceExpirationService;
 use DateInterval;
 use DateTime;
 use Illuminate\Support\Facades\Auth;
@@ -625,7 +626,7 @@ class AdminController extends Controller
     }
 
 
-    public function imprimerAuth($id)
+    public function imprimerAuth(LicenceExpirationService $expirationService, $id)
     {
         $demande  = Demande::find($id);
 
@@ -707,12 +708,7 @@ class AdminController extends Controller
                 ->where('demandes.id', $id)
                 ->orderByDesc('qualification_demandeurs.id')
                 ->get();
-            $competence_demandeur = CompetenceDemandeur::join('demandes', 'demandes.id', 'competence_demandeurs.demande_id')
-                ->select('competence_demandeurs.date', 'competence_demandeurs.validite', 'competence_demandeurs.niveau')
-                ->where('competence_demandeurs.type', 'Contrôle de compétence linguistique')
-                ->where('demandes.id', $id)
-                ->orderByDesc('competence_demandeurs.date')
-                ->first();
+            $competence_demandeur = $expirationService->competenceLinguistiqueCourante($demande);
 
 
 
@@ -723,7 +719,7 @@ class AdminController extends Controller
             return redirect()->back()->with('error', 'Licence n\' est pas encore valide.');
         }
     }
-    public function imprimer($id)
+    public function imprimer(LicenceExpirationService $expirationService, $id)
     {
         $demande  = Demande::find($id);
 
@@ -814,12 +810,7 @@ class AdminController extends Controller
                 ->where('demandes.id', $id)
                 ->orderByDesc('qualification_demandeurs.id')
                 ->get();
-            $competence_demandeur = CompetenceDemandeur::join('demandes', 'demandes.id', 'competence_demandeurs.demande_id')
-                ->select('competence_demandeurs.date', 'competence_demandeurs.validite', 'competence_demandeurs.niveau')
-                ->where('competence_demandeurs.type', 'Contrôle de compétence linguistique')
-                ->where('demandes.id', $id)
-                ->orderByDesc('competence_demandeurs.date')
-                ->first();
+            $competence_demandeur = $expirationService->competenceLinguistiqueCourante($demande);
 
 
 
@@ -1077,7 +1068,7 @@ class AdminController extends Controller
 
         return view('admin.licences.print', compact('validation', 'qualification_types', 'qualification_amts', 'dg'));
     }
-    function generateLicence($id)
+    function generateLicence(LicenceExpirationService $expirationService, $id)
     {
         $demande = Demande::findOrFail($id);
         $demandeur = $demande->demandeur;
@@ -1106,41 +1097,7 @@ class AdminController extends Controller
         // La validation (7) a une durée fixe de 12 mois et la carte stagiaire (8)
         // n'expire pas selon les qualifications/compétences.
         if (!in_array($demande->typeDemande->id, array(7, 8))) {
-            $qualification_demandeurs = $demande->qualifications;
-            $competence_demandeurs = $demande->competences;
-            $maxExpirationDateCompetence = null;
-            if ($competence_demandeurs->isNotEmpty()) {
-                $maxExpirationDateCompetence = $competence_demandeurs->map(function ($item) {
-                    if (intval($item->niveau) === 6) {
-                        return INF; // Special value for "never expires"
-                    } else {
-                        $startDate = \Carbon\Carbon::parse($item->date);
-                        return $startDate->addMonths($item->validite);
-                    }
-                })->max();
-                if ($maxExpirationDateCompetence === INF) {
-                    $maxExpirationDateCompetence = null;
-                } else {
-                    $maxExpirationDateCompetence = $maxExpirationDateCompetence->format('Y-m-d');
-                }
-            }
-            $maxExpirationDateQualification = null;
-            if ($qualification_demandeurs->isNotEmpty()) {
-                # code...
-                $maxExpirationDateQualification = $qualification_demandeurs->map(function ($item) use ($demande) {
-                    $startDate = \Carbon\Carbon::parse($item->date_examen);
-                    if (in_array($demande->typeLicence->id, [35, 36, 37, 38])) {
-                        # code...
-                        $expirationDate = $startDate->copy()->addMonths(24)->endOfMonth();
-                    } else {
-                        $expirationDate = $startDate->copy()->addMonths(12)->endOfMonth();
-                    }
-
-                    return $expirationDate->format('Y-m-d');
-                })->max();
-            }
-
-            $minDate = $this->findMinDate([$maxExpirationDateQualification, $maxExpirationDateCompetence]);
+            $minDate = $expirationService->calculer($demande);
             if (is_null($minDate)) {
                 return back()->with('error', "Impossible de calculer la date d'expiration : la demande ne contient aucune qualification ni compétence avec une date valide.");
             }
@@ -1358,41 +1315,6 @@ class AdminController extends Controller
             $copie->demande_id = $nouvelle->id;
             $copie->save();
         }
-    }
-
-    /**
-     * Finds the minimum non-null DateTime from an array of DateTime objects
-     * 
-     * @param \DateTime[] $dateTimes
-     * @return \DateTime|null
-     */
-    function findMinDate(array $dateTimes): ?DateTime
-    {
-        $validDates = array_filter($dateTimes, function ($date) {
-            // Accept both DateTime objects and valid date strings
-            if ($date instanceof DateTime || $date instanceof \Carbon\Carbon) {
-                return true;
-            }
-            if (is_string($date) && strtotime($date) !== false) {
-                return new \DateTime($date);
-            }
-            return false;
-        });
-
-        if (empty($validDates)) {
-            return null;
-        }
-
-        // Convert strings to DateTime if needed
-        $validDates = array_map(function ($date) {
-            if (is_string($date)) {
-                return new \DateTime($date);
-            }
-            return $date;
-        }, $validDates);
-
-        $minDate = min($validDates);
-        return $minDate;
     }
 
 

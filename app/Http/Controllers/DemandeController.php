@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\LicenceExpirationService;
 use App\Models\Activity;
 use App\Models\Autorite;
 use App\Models\CentreFormation;
@@ -983,7 +984,7 @@ class DemandeController extends Controller
         ]);
     }
 
-    public function imprimer($id)
+    public function imprimer(LicenceExpirationService $expirationService, $id)
     {
         $demande  = Demande::find($id);
 
@@ -1067,12 +1068,7 @@ class DemandeController extends Controller
                 ->where('demandes.id', $id)
                 ->orderByDesc('qualification_demandeurs.id')
                 ->first();
-            $competence_demandeur = CompetenceDemandeur::join('demandes', 'demandes.id', 'competence_demandeurs.demande_id')
-                ->select('competence_demandeurs.date', 'competence_demandeurs.validite', 'competence_demandeurs.niveau')
-                ->where('competence_demandeurs.type', 'Contrôle de compétence linguistique')
-                ->where('demandes.id', $id)
-                ->orderByDesc('competence_demandeurs.id')
-                ->first();
+            $competence_demandeur = $expirationService->competenceLinguistiqueCourante($demande);
 
 
 
