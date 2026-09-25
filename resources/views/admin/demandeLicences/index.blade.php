@@ -151,7 +151,17 @@
                                                 </button>
                                             @endif
                                         </td>
-                                        <td>{{ LaravelLocalization::getCurrentLocale() == 'fr' ? optional($demande->typeLicence)->fr : optional($demande->typeLicence)->en }}</td>
+                                        <td>
+                                            {{ LaravelLocalization::getCurrentLocale() == 'fr' ? optional($demande->typeLicence)->fr : optional($demande->typeLicence)->en }}
+                                            @if(auth()->user()->hasRole('admin') || auth()->user()->isAdmin())
+                                                <button type="button"
+                                                        class="btn btn-sm btn-warning edit-type-licence"
+                                                        data-demand-id="{{ $demande->id }}"
+                                                        data-current-type="{{ $demande->type_licence_id }}">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            @endif
+                                        </td>
                                         <td>
                                             @php
                                                 $badgeClass = match($etatDemande) {
@@ -355,6 +365,46 @@
                                 </tbody>
                             </table>
                                 <!-- Modal pour éditer le type de demande -->
+<div class="modal fade" id="editTypeLicenceModal" tabindex="-1" role="dialog" aria-labelledby="editTypeLicenceModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editTypeLicenceModalLabel">
+                    <i class="fas fa-edit"></i> @lang('trans.edit_type_licence')
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="editTypeLicenceForm" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="type_licence_id">
+                            @lang('trans.select_type_licence') <span class="text-danger">*</span>
+                        </label>
+                        <select name="type_licence_id" id="type_licence_id" class="form-control" required style="width: 100%">
+                            @foreach($typesLicences as $typeLicence)
+                                <option value="{{ $typeLicence->id }}">
+                                    {{ $typeLicence->nom }} &ndash; {{ LaravelLocalization::getCurrentLocale() == 'fr' ? $typeLicence->fr : $typeLicence->en }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="form-text text-muted">@lang('trans.select_type_licence_help')</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times"></i> @lang('trans.cancel')
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> @lang('trans.update')
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <div class="modal fade" id="editTypeModal" tabindex="-1" role="dialog" aria-labelledby="editTypeModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -615,7 +665,7 @@ $(document).ready(function() {
     // Store the current demande ID when edit button is clicked
     let currentDemandeId = null;
     // Handle form submission
-$('#editTypeForm').on('submit', function(e) {
+$('#editTypeForm, #editTypeLicenceForm').on('submit', function(e) {
     e.preventDefault();
     
     const form = $(this);
@@ -637,7 +687,7 @@ $('#editTypeForm').on('submit', function(e) {
         success: function(response) {
             if (response.success) {
                 // Fermer le modal d'abord
-                $('#editTypeModal').modal('hide');
+                form.closest('.modal').modal('hide');
                 
                 // Afficher le message de succès avec Toastr
                 toastr.success(response.message);
@@ -679,8 +729,8 @@ $('#editTypeForm').on('submit', function(e) {
 });
 
 // Nettoyer le modal à sa fermeture
-$('#editTypeModal').on('hidden.bs.modal', function() {
-    const form = $('#editTypeForm');
+$('#editTypeModal, #editTypeLicenceModal').on('hidden.bs.modal', function() {
+    const form = $(this).find('form');
     const submitBtn = form.find('button[type="submit"]');
     
     // Réinitialiser le formulaire
@@ -715,6 +765,14 @@ $(document).on('click', '.edit-type-application', function() {
     const currentType = $(this).data('current-type');
     
     openEditTypeModal(demandeId, currentType);
+});
+
+// Gestionnaire pour le bouton d'édition du type de licence
+$(document).on('click', '.edit-type-licence', function() {
+    const form = $('#editTypeLicenceForm');
+    form.attr('action', "{{ route('admin.update-type-licence', ':id') }}".replace(':id', $(this).data('demand-id')));
+    $('#type_licence_id').val($(this).data('current-type'));
+    $('#editTypeLicenceModal').modal('show');
 });
 });
 </script>

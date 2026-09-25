@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Services\LicenceExpirationService;
-use App\Services\ChangementTypeDemandeService;
+use App\Services\ModificationDemandeService;
 use App\Http\Requests\UpdateTypeDemandeRequest;
+use App\Http\Requests\UpdateTypeLicenceRequest;
 use App\Models\Activity;
 use App\Models\Autorite;
 use App\Models\CentreFormation;
@@ -140,28 +141,57 @@ class DemandeController extends Controller
         return redirect()->route('user')->with('success', 'Demande créée avec succès.');
     }
 
-    public function updateType(UpdateTypeDemandeRequest $request, ChangementTypeDemandeService $changementType, $id)
+    public function updateType(UpdateTypeDemandeRequest $request, ModificationDemandeService $modification, $id)
+    {
+        $demande = $this->demandeDuDemandeurConnecte($id);
+        $nouveauType = TypeDemande::findOrFail($request->type_demande_id);
+
+        return $this->appliquerModification(
+            $demande,
+            $modification->verifierTypeDemande($demande, $nouveauType, false),
+            fn () => $modification->changerTypeDemande($demande, $nouveauType),
+            __('trans.type_updated_successfully')
+        );
+    }
+
+    public function updateTypeLicence(UpdateTypeLicenceRequest $request, ModificationDemandeService $modification, $id)
+    {
+        $demande = $this->demandeDuDemandeurConnecte($id);
+        $nouveauType = TypeLicence::findOrFail($request->type_licence_id);
+
+        return $this->appliquerModification(
+            $demande,
+            $modification->verifierTypeLicence($demande, $nouveauType, false),
+            fn () => $modification->changerTypeLicence($demande, $nouveauType),
+            __('trans.type_licence_updated_successfully')
+        );
+    }
+
+    /** Un demandeur n'accède qu'à ses propres demandes. */
+    private function demandeDuDemandeurConnecte($id): Demande
     {
         $demande = Demande::findOrFail($id);
         abort_unless((int) $demande->demandeur_id === (int) optional(Auth::user()->demandeur)->id, 403);
 
-        $nouveauType = TypeDemande::findOrFail($request->type_demande_id);
-        $refus = $changementType->verifier($demande, $nouveauType, false);
+        return $demande;
+    }
+
+    private function appliquerModification(Demande $demande, ?string $refus, callable $modifier, string $messageSucces)
+    {
         if ($refus) {
             return back()->with('error', $refus);
         }
+        $modifier();
 
-        $changementType->changer($demande, $nouveauType);
-
-        return redirect()->route('user.licences.edit', $demande->id)->with('success', __('trans.type_updated_successfully'));
+        return redirect()->route('user.licences.edit', $demande->id)->with('success', $messageSucces);
     }
 
-    public function edit(ChangementTypeDemandeService $changementType, $id)
+    public function edit(ModificationDemandeService $modification, $id)
     {
         $demande = Demande::find($id);
-        $typesDemandeModifiables = $changementType->modifiableParUtilisateur($demande)
-            ? $changementType->typesDisponiblesPourUtilisateur()
-            : collect();
+        $modifiable = $modification->modifiableParUtilisateur($demande);
+        $typesDemandeModifiables = $modifiable ? $modification->typesDemandePourUtilisateur() : collect();
+        $typesLicenceModifiables = $modifiable ? TypeLicence::orderBy('id')->get() : collect();
 
         $qualifications = $demande->typeLicence->qualifications;
         $centre_formations = CentreFormation::all();
@@ -235,7 +265,7 @@ class DemandeController extends Controller
             ->where('documents.demande_id', $id)
             ->select('type_documents.*', 'documents.*')
             ->get();
-        return view('user.licences.edit', compact('typesDemandeModifiables', 'type_documents','type_avions', 'licence_demandeurs', 'autorites', 'id', 'employeur_demandeurs', 'experience_maintenance_demandeurs', 'interruption_demandeurs', 'formation_demandeurs', 'documents', 'entrainement_demandeurs', 'competence_demandeurs', 'experience_demandeurs', 'medical_examinations', 'qualification_demandeurs', 'demande', 'centre_formations', 'qualifications', 'simulateurs', 'centre_medicals'));
+        return view('user.licences.edit', compact('typesDemandeModifiables', 'typesLicenceModifiables', 'type_documents','type_avions', 'licence_demandeurs', 'autorites', 'id', 'employeur_demandeurs', 'experience_maintenance_demandeurs', 'interruption_demandeurs', 'formation_demandeurs', 'documents', 'entrainement_demandeurs', 'competence_demandeurs', 'experience_demandeurs', 'medical_examinations', 'qualification_demandeurs', 'demande', 'centre_formations', 'qualifications', 'simulateurs', 'centre_medicals'));
     }
 
     public function update(Request $request, Paiement $paiement)
@@ -1006,9 +1036,7 @@ class DemandeController extends Controller
 
     public function imprimer(LicenceExpirationService $expirationService, $id)
     {
-        $demande  = Demande::findOrFail($id);
-        // Un demandeur ne peut imprimer que l'authentification de ses propres demandes.
-        abort_unless((int) $demande->demandeur_id === (int) optional(Auth::user()->demandeur)->id, 403);
+        $demande = $this->demandeDuDemandeurConnecte($id);
 
         $demandeur = $demande->demandeur;
         $licence = $demande->licence;

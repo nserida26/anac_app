@@ -30,52 +30,82 @@
                 <h4 class="text-center">
                     {{ LaravelLocalization::getCurrentLocale() == 'fr' ? $demande->typeDemande->nom_fr : $demande->typeDemande->nom_en }}
                     - {{ $demande->typeLicence->nom }}</h4>
-                @if ($typesDemandeModifiables->isNotEmpty())
+                @if ($typesDemandeModifiables->isNotEmpty() || $typesLicenceModifiables->isNotEmpty())
                     <div class="text-center mb-3">
                         <button type="button" class="btn btn-sm btn-outline-warning" data-toggle="modal"
-                            data-target="#editTypeDemandeModal">
-                            <i class="fas fa-edit"></i> @lang('trans.modify_application_type')
+                            data-target="#modifierDemandeModal">
+                            <i class="fas fa-edit"></i> @lang('trans.edit_application')
                         </button>
                         @error('type_demande_id')
                             <div class="text-danger small mt-1">{{ $message }}</div>
                         @enderror
+                        @error('type_licence_id')
+                            <div class="text-danger small mt-1">{{ $message }}</div>
+                        @enderror
                     </div>
 
-                    <div class="modal fade" id="editTypeDemandeModal" tabindex="-1" role="dialog"
-                        aria-labelledby="editTypeDemandeModalLabel" aria-hidden="true">
+                    <div class="modal fade" id="modifierDemandeModal" tabindex="-1" role="dialog"
+                        aria-labelledby="modifierDemandeModalLabel" aria-hidden="true">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
-                                <form action="{{ route('user.licences.update-type', $demande->id) }}" method="POST">
-                                    @csrf
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="editTypeDemandeModalLabel">
-                                            <i class="fas fa-edit"></i> @lang('trans.edit_type_demande')
-                                        </h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="modifierDemandeModalLabel">
+                                        <i class="fas fa-edit"></i> @lang('trans.edit_application')
+                                    </h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form action="{{ route('user.licences.update-type', $demande->id) }}" method="POST">
+                                        @csrf
                                         <div class="form-group">
-                                            <label for="edit_type_demande_id">@lang('trans.select_type') <span class="text-danger">*</span></label>
-                                            <select name="type_demande_id" id="edit_type_demande_id" class="form-control" required>
-                                                @foreach ($typesDemandeModifiables as $typeDemande)
-                                                    <option value="{{ $typeDemande->id }}" {{ $typeDemande->id == $demande->type_demande_id ? 'selected' : '' }}>
-                                                        {{ LaravelLocalization::getCurrentLocale() == 'fr' ? $typeDemande->nom_fr : $typeDemande->nom_en }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
+                                            <label for="edit_type_demande_id">@lang('trans.edit_type_demande') <span class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <select name="type_demande_id" id="edit_type_demande_id" class="form-control" required>
+                                                    @foreach ($typesDemandeModifiables as $typeDemande)
+                                                        <option value="{{ $typeDemande->id }}" {{ $typeDemande->id == $demande->type_demande_id ? 'selected' : '' }}>
+                                                            {{ LaravelLocalization::getCurrentLocale() == 'fr' ? $typeDemande->nom_fr : $typeDemande->nom_en }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-primary"
+                                                        onclick="return confirm('{{ __('trans.edit_type_demande') }} ?')">
+                                                        <i class="fas fa-save"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
                                             <small class="form-text text-muted">@lang('trans.select_type_help')</small>
                                         </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('trans.cancel')</button>
-                                        <button type="submit" class="btn btn-primary"
-                                            onclick="return confirm('{{ __('trans.edit_type_demande') }} ?')">
-                                            <i class="fas fa-save"></i> @lang('trans.update')
-                                        </button>
-                                    </div>
-                                </form>
+                                    </form>
+                                    <hr>
+                                    <form action="{{ route('user.licences.update-type-licence', $demande->id) }}" method="POST">
+                                        @csrf
+                                        <div class="form-group mb-0">
+                                            <label for="edit_type_licence_id">@lang('trans.edit_type_licence') <span class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <select name="type_licence_id" id="edit_type_licence_id" class="form-control" required>
+                                                    @foreach ($typesLicenceModifiables as $typeLicence)
+                                                        <option value="{{ $typeLicence->id }}" {{ $typeLicence->id == $demande->type_licence_id ? 'selected' : '' }}>
+                                                            {{ $typeLicence->nom }} &ndash; {{ LaravelLocalization::getCurrentLocale() == 'fr' ? $typeLicence->fr : $typeLicence->en }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-primary"
+                                                        onclick="return confirm('{{ __('trans.edit_type_licence') }} ?')">
+                                                        <i class="fas fa-save"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <small class="form-text text-muted">@lang('trans.select_type_licence_help')</small>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('trans.close')</button>
+                                </div>
                             </div>
                         </div>
                     </div>

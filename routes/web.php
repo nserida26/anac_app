@@ -406,6 +406,7 @@ Route::get('/rapports/compagnie/{id}', [App\Http\Controllers\DgDsvController::cl
 
                 Route::get('/licences/edit/{id}', [App\Http\Controllers\DemandeController::class, 'edit'])->name('user.licences.edit');
                 Route::post('/licences/{id}/type', [App\Http\Controllers\DemandeController::class, 'updateType'])->name('user.licences.update-type');
+                Route::post('/licences/{id}/type-licence', [App\Http\Controllers\DemandeController::class, 'updateTypeLicence'])->name('user.licences.update-type-licence');
                 Route::post('/storeDemandeLicence', [App\Http\Controllers\DemandeController::class, 'store'])->name('user.store');
 
 
@@ -571,6 +572,8 @@ Route::get('/rapports/compagnie/{id}', [App\Http\Controllers\DgDsvController::cl
 // Make sure the route is properly defined
 Route::post('/demandes/{id}/update-type', [App\Http\Controllers\AdminController::class, 'updateType'])
     ->name('admin.update-type');
+Route::post('/demandes/{id}/update-type-licence', [App\Http\Controllers\AdminController::class, 'updateTypeLicence'])
+    ->name('admin.update-type-licence');
 
 
                 Route::get('/licences', [App\Http\Controllers\AdminController::class, 'licences'])->name('licences');

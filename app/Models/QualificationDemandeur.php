@@ -45,6 +45,11 @@ class QualificationDemandeur extends Model
     {
         return $this->belongsTo(Demande::class);
     }
+
+    public function qualification()
+    {
+        return $this->belongsTo(Qualification::class);
+    }
     function typeAvion()
     {
 

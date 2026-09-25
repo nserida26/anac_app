@@ -10,6 +10,7 @@ use App\Models\Avion;
 use Illuminate\Http\Request;
 
 use App\Models\TypeDemande;
+use App\Models\TypeLicence;
 use App\Models\Demande;
 use App\Models\DemandePiece;
 use App\Models\CarteStagiare;
@@ -54,8 +55,9 @@ use App\Services\DtaApplicationNotificationService;
 use App\Services\DtaAutorisationNotificationService;
 use App\Services\LicenseApplicationNotificationService;
 use App\Services\LicenceExpirationService;
-use App\Services\ChangementTypeDemandeService;
+use App\Services\ModificationDemandeService;
 use App\Http\Requests\UpdateTypeDemandeRequest;
+use App\Http\Requests\UpdateTypeLicenceRequest;
 use DateInterval;
 use DateTime;
 use Illuminate\Support\Facades\Auth;
@@ -89,7 +91,8 @@ class AdminController extends Controller
         //
         $demandes = Demande::with('demandeur')->where('status', '<>', 'En attente')->get();
         $typesDemandes = TypeDemande::all();
-        return view('admin.demandeLicences.index', compact('demandes', 'typesDemandes'));
+        $typesLicences = TypeLicence::orderBy('id')->get();
+        return view('admin.demandeLicences.index', compact('demandes', 'typesDemandes', 'typesLicences'));
     }
 
     public function indexDemandeur()
@@ -2357,27 +2360,56 @@ class AdminController extends Controller
             return redirect()->back()->with('error', __('trans.error_updating_photo') . ': ' . $e->getMessage());
         }
     }
-    public function updateType(UpdateTypeDemandeRequest $request, ChangementTypeDemandeService $changementType, $id)
+    public function updateType(UpdateTypeDemandeRequest $request, ModificationDemandeService $modification, $id)
+    {
+        return $this->modifierDemandeJson($id, 'type_demande_id', function (Demande $demande) use ($request, $modification) {
+            $nouveauType = TypeDemande::findOrFail($request->type_demande_id);
+
+            return [
+                $modification->verifierTypeDemande($demande, $nouveauType, true),
+                fn () => $modification->changerTypeDemande($demande, $nouveauType),
+                __('trans.type_updated_successfully'),
+            ];
+        });
+    }
+
+    public function updateTypeLicence(UpdateTypeLicenceRequest $request, ModificationDemandeService $modification, $id)
+    {
+        return $this->modifierDemandeJson($id, 'type_licence_id', function (Demande $demande) use ($request, $modification) {
+            $nouveauType = TypeLicence::findOrFail($request->type_licence_id);
+
+            return [
+                $modification->verifierTypeLicence($demande, $nouveauType, true),
+                fn () => $modification->changerTypeLicence($demande, $nouveauType),
+                __('trans.type_licence_updated_successfully'),
+            ];
+        });
+    }
+
+    /**
+     * Applique une modification de demande et répond en JSON pour les modales admin.
+     * $preparer renvoie [motif de refus ou null, action à exécuter, message de succès].
+     */
+    private function modifierDemandeJson($id, string $champ, callable $preparer)
     {
         try {
             $demande = Demande::findOrFail($id);
-            $nouveauType = TypeDemande::findOrFail($request->type_demande_id);
+            [$refus, $modifier, $messageSucces] = $preparer($demande);
 
-            $refus = $changementType->verifier($demande, $nouveauType, true);
             if ($refus) {
-                // Même format qu'une erreur de validation : le JS de la modale l'affiche déjà.
+                // Même format qu'une erreur de validation : le JS des modales l'affiche déjà.
                 return response()->json([
                     'success' => false,
                     'message' => $refus,
-                    'errors' => ['type_demande_id' => [$refus]],
+                    'errors' => [$champ => [$refus]],
                 ], 422);
             }
 
-            $changementType->changer($demande, $nouveauType);
+            $modifier();
 
             return response()->json([
                 'success' => true,
-                'message' => __('trans.type_updated_successfully')
+                'message' => $messageSucces,
             ]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
@@ -2385,7 +2417,7 @@ class AdminController extends Controller
                 'message' => __('trans.demande_not_found')
             ], 404);
         } catch (\Exception $e) {
-            Log::error('Erreur mise à jour type demande: ' . $e->getMessage(), [
+            Log::error('Erreur modification demande (' . $champ . '): ' . $e->getMessage(), [
                 'demande_id' => $id,
                 'user_id' => auth()->id(),
                 'trace' => $e->getTraceAsString()
