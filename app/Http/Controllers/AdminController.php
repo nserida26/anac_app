@@ -1091,24 +1091,20 @@ class AdminController extends Controller
             ->latest('date_expiration')
             ->first();
 
-        if (in_array($demande->typeDemande->id, array(2, 4, 5, 6, 8)) && !empty($licenceConcernee)) {
-            $oldDemande = $licenceConcernee->demande;
-            if ($oldDemande->qualifications->isNotEmpty()) {
-                foreach ($oldDemande->qualifications as $qualification) {
-                    $newQualification = $qualification->replicate();
-                    $newQualification->demande_id = $demande->id;
-                    $newQualification->save();
-                }
-            }
-            if ($oldDemande->competences->isNotEmpty()) {
-                foreach ($oldDemande->competences as $competence) {
-                    $newCompetence = $competence->replicate();
-                    $newCompetence->demande_id = $demande->id;
-                    $newCompetence->save();
-                }
-            }
+        // Garde-fous exécutés avant toute écriture en base.
+        if (in_array($demande->typeDemande->id, array(2, 4, 5, 6, 9)) && empty($licenceConcernee)) {
+            return back()->with('error', "Aucune licence de type {$demande->typeLicence->nom} n'a été trouvée pour ce demandeur : impossible de traiter cette demande.");
         }
-        if (!in_array($demande->typeDemande->id, array(8))) {
+        if ($demande->typeDemande->id === 8 && CarteStagiare::where('demande_id', $demande->id)->exists()) {
+            return back()->with('error', "Une carte stagiaire a déjà été générée pour cette demande.");
+        }
+
+        if (in_array($demande->typeDemande->id, array(2, 4, 5, 6, 8)) && !empty($licenceConcernee)) {
+            $this->copierAcquisPrecedents($licenceConcernee->demande, $demande);
+        }
+        // La validation (7) a une durée fixe de 12 mois et la carte stagiaire (8)
+        // n'expire pas selon les qualifications/compétences.
+        if (!in_array($demande->typeDemande->id, array(7, 8))) {
             $qualification_demandeurs = $demande->qualifications;
             $competence_demandeurs = $demande->competences;
             $maxExpirationDateCompetence = null;
@@ -1143,8 +1139,11 @@ class AdminController extends Controller
                 })->max();
             }
 
-            $dateExpiration = $this->findMinDate(array($maxExpirationDateQualification, $maxExpirationDateCompetence));
-            $dateExpiration  =  $dateExpiration->format('Y-m-d');
+            $minDate = $this->findMinDate([$maxExpirationDateQualification, $maxExpirationDateCompetence]);
+            if (is_null($minDate)) {
+                return back()->with('error', "Impossible de calculer la date d'expiration : la demande ne contient aucune qualification ni compétence avec une date valide.");
+            }
+            $dateExpiration = $minDate->format('Y-m-d');
         }
 
         $licenseId = '';
@@ -1212,7 +1211,7 @@ class AdminController extends Controller
                     'nationalite' => $demandeur->nationalite,
                     'photo' => $demandeur->photo,
                     'signature' =>  $demandeur->signature,
-                    'cachet' => $dg ? $dg->cachet->cachet : '',
+                    'cachet' => optional(optional($dg)->cachet)->cachet ?? '',
                     'signature_dg' => $dg ? $dg->signature->signature : '',
                     'signature_dsv' => $dsv ? $dsv->signature->signature : '',
                     'signature_pel' => $pel ? $pel->signature->signature : '',
@@ -1221,17 +1220,26 @@ class AdminController extends Controller
                 ]
             );
         } else if ($demande->typeDemande->id === 7) {
+            $licenceEtrangere = $demande->licences->first();
+            if (empty($licenceEtrangere)) {
+                return back()->with('error', "La demande ne contient aucune licence étrangère à valider.");
+            }
+            if (empty($dsv)) {
+                return back()->with('error', "Aucun DSV disposant d'une signature n'est configuré.");
+            }
+            if (ValidationLicence::where('demande_id', $demande->id)->exists()) {
+                return back()->with('error', "Une validation a déjà été générée pour cette demande.");
+            }
             $currentDate = Carbon::now();
             $dateExpiration = $currentDate->copy()->addMonths(12)->endOfMonth();
-            $demande = Demande::findOrFail($id);
             $validation = ValidationLicence::create([
                 'demande_id' => $demande->id,
                 'type_licence_id' => $demande->type_licence_id,
                 'compagnie_id' => $demande->demandeur->compagnie_id,
                 'numero_validation' => 'ANAC-' . now()->format('Y') . '-' . str_pad(ValidationLicence::count() + 1, 4, '0', STR_PAD_LEFT),
-                'num_licence' => $demande->licences->first()->num_licence,
-                'date_delivrance_licence' => $demande->licences->first()->date_licence,
-                'lieu_delivrance_licence' => $demande->licences->first()->lieu_delivrance,
+                'num_licence' => $licenceEtrangere->num_licence,
+                'date_delivrance_licence' => $licenceEtrangere->date_licence,
+                'lieu_delivrance_licence' => $licenceEtrangere->lieu_delivrance,
                 'type_appareil' => '',
                 'immatriculation_appareil' => '',
                 'date_debut_validite' => now(),
@@ -1242,7 +1250,7 @@ class AdminController extends Controller
                 'signataire_nom' => 'Abba SIDI MHAMED',
                 'signataire_titre' => 'Directeur de la Sécurité des Vols',
                 'signature_path' => $dsv->signature->signature,
-                'cachet_path' => $dsv->cachet->cachet,
+                'cachet_path' => optional($dsv->cachet)->cachet ?? '',
             ]);
         } else if ($demande->typeDemande->id === 9 && !empty($licenceConcernee)) {
             // reemission
@@ -1315,6 +1323,42 @@ class AdminController extends Controller
         }
         return redirect()->route('licences')->with('success', 'Licence cree avec succès.');
     }
+
+    /**
+     * Recopie les qualifications et compétences de l'ancienne demande vers la
+     * nouvelle. Idempotent : ne recopie ni sur elle-même (la licence peut déjà
+     * pointer vers la nouvelle demande après une première génération), ni un
+     * élément déjà présent sur la nouvelle demande.
+     */
+    private function copierAcquisPrecedents(?Demande $ancienne, Demande $nouvelle): void
+    {
+        if (empty($ancienne) || $ancienne->id === $nouvelle->id) {
+            return;
+        }
+
+        $cleQualification = fn ($q) => $q->qualification_id . '|' . $q->type_avion_id . '|' . $q->date_examen;
+        $qualificationsExistantes = $nouvelle->qualifications()->get()->map($cleQualification);
+        foreach ($ancienne->qualifications as $qualification) {
+            if ($qualificationsExistantes->contains($cleQualification($qualification))) {
+                continue;
+            }
+            $copie = $qualification->replicate();
+            $copie->demande_id = $nouvelle->id;
+            $copie->save();
+        }
+
+        $cleCompetence = fn ($c) => $c->type . '|' . $c->date . '|' . $c->niveau;
+        $competencesExistantes = $nouvelle->competences()->get()->map($cleCompetence);
+        foreach ($ancienne->competences as $competence) {
+            if ($competencesExistantes->contains($cleCompetence($competence))) {
+                continue;
+            }
+            $copie = $competence->replicate();
+            $copie->demande_id = $nouvelle->id;
+            $copie->save();
+        }
+    }
+
     /**
      * Finds the minimum non-null DateTime from an array of DateTime objects
      * 
