@@ -243,53 +243,20 @@ public function store(Request $request)
     
     public function storeExaminateur(Request $request)
     {
-        $request->validate([
-            'nom' => 'required|string|max:255',
-            'prenom' => 'required|string|max:255',
-            'email' => 'required|email|unique:examinateurs_centre,email',
-            'telephone' => 'required|string|max:20',
-            'numero_licence_examinateur' => 'required|string|max:50',
-            'date_naissance' => 'required|date',
-            'nationalite' => 'required|string|max:100',
-            'adresse' => 'required|string',
-            'document_justificatif' => 'required|file|mimes:pdf|max:10240',
-            'date_debut_validite' => 'required|date',
-            'date_fin_validite' => 'required|date|after:date_debut_validite'
-        ]);
-        
+        $request->validate(ExaminateurCentre::reglesDeclaration());
+
         try {
-            $user = Auth::user();
-            $centre = $this->centreConnecte();
-            
-            $examinateur = new ExaminateurCentre();
-            $examinateur->centre_formation_id = $centre->id;
-            $examinateur->nom = $request->nom;
-            $examinateur->prenom = $request->prenom;
-            $examinateur->email = $request->email;
-            $examinateur->telephone = $request->telephone;
-            $examinateur->numero_licence_examinateur = $request->numero_licence_examinateur;
-            $examinateur->date_naissance = $request->date_naissance;
-            $examinateur->nationalite = $request->nationalite;
-            $examinateur->adresse = $request->adresse;
-            $examinateur->date_debut_validite = $request->date_debut_validite;
-            $examinateur->date_fin_validite = $request->date_fin_validite;
-            
-            if ($request->hasFile('document_justificatif')) {
-                $path = $request->file('document_justificatif')->store('examinateurs/documents', 'public');
-                $examinateur->document_justificatif = $path;
-            }
-            
-            $examinateur->save();
-            
+            ExaminateurCentre::declarer($this->centreConnecte()->id, $request->all(), $request->file('document_justificatif'));
+
             return redirect()->route('centre.examinateurs')
                              ->with('success', __('trans.examinateur_added_successfully'));
-                             
+
         } catch (\Exception $e) {
             return back()->withInput()
                          ->with('error', __('trans.error_adding_examinateur') . ': ' . $e->getMessage());
         }
     }
-    
+
     // Gestion des dispositifs de formation
     public function dispositifs()
     {

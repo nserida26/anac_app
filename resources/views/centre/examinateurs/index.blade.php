@@ -1,4 +1,6 @@
 {{-- resources/views/centre/examinateurs/index.blade.php --}}
+{{-- Partagée par les centres de formation et d'expertise médicale :
+     $routeDeclaration et $libelleNumero sont fournis par le contrôleur du centre médical. --}}
 @extends('centre.layouts.app')
 
 @section('title')
@@ -36,7 +38,7 @@
                                 <th>#</th>
                                 <th>@lang('trans.name')</th>
                                 <th>@lang('trans.email')</th>
-                                <th>@lang('trans.licence_number')</th>
+                                <th>@lang($libelleNumero ?? 'trans.licence_number')</th>
                                 <th>@lang('trans.validity_period')</th>
                                 <th>@lang('trans.validation_status')</th>
                                 <th>@lang('trans.actions')</th>
@@ -114,7 +116,7 @@
 <div class="modal fade" id="addExaminateurModal" tabindex="-1" role="dialog" aria-labelledby="addExaminateurModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <form action="{{ route('centre.examinateurs.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ $routeDeclaration ?? route('centre.examinateurs.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-header">
                     <h5 class="modal-title" id="addExaminateurModalLabel">
@@ -163,7 +165,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="numero_licence_examinateur">@lang('trans.examiner_licence_number') <span class="text-danger">*</span></label>
+                                <label for="numero_licence_examinateur">@lang($libelleNumero ?? 'trans.examiner_licence_number') <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="numero_licence_examinateur" name="numero_licence_examinateur" required>
                             </div>
                         </div>

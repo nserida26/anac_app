@@ -692,6 +692,19 @@ Route::middleware(['auth:web', 'verified', 'role:admin'])->prefix('admin')->name
     Route::post('/centre/examinateurs/{id}/reject', [AdminController::class, 'rejectExaminateur'])->name('examinateurs.reject');
     Route::get('/centre//examinateurs', [App\Http\Controllers\AdminController::class, 'allExaminateurs'])->name('examinateurs.index');
     Route::get('/centre//examinateurs/{id}', [App\Http\Controllers\AdminController::class, 'showExaminateur'])->name('examinateurs.show');
+    // Comptes des centres d'expertise médicale (rattachement d'un compte à un centre de la liste)
+    Route::resource('centres-expertise-medicale', App\Http\Controllers\Admin\CentreExpertiseMedicaleController::class)
+        ->only(['index', 'store', 'destroy'])
+        ->parameters(['centres-expertise-medicale' => 'centreMedical']);
+});
+
+// Compte d'un centre d'expertise médicale (ex. CEMPA)
+Route::middleware(['auth:web', 'verified', 'role:centre_medical'])->prefix('centre-medical')->name('centre_medical.')->group(function () {
+    Route::get('/', [App\Http\Controllers\CentreExpertiseMedicaleController::class, 'index'])->name('index');
+    Route::get('/medecins', [App\Http\Controllers\CentreExpertiseMedicaleController::class, 'medecins'])->name('medecins');
+    Route::post('/medecins/store', [App\Http\Controllers\CentreExpertiseMedicaleController::class, 'storeMedecin'])->name('medecins.store');
+    Route::get('/examinateurs', [App\Http\Controllers\CentreExpertiseMedicaleController::class, 'examinateurs'])->name('examinateurs');
+    Route::post('/examinateurs/store', [App\Http\Controllers\CentreExpertiseMedicaleController::class, 'storeExaminateur'])->name('examinateurs.store');
 });
     }
 );

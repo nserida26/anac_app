@@ -36,7 +36,7 @@
         
         <table class="table table-sm">
             <tr>
-                <th width="40%">@lang('trans.licence_number'):</th>
+                <th width="40%">@lang($type === 'medical' ? 'trans.approval_number' : 'trans.licence_number'):</th>
                 <td>
                     <span class="badge badge-primary">
                         {{ $examinateur->numero_licence_examinateur }}
@@ -51,8 +51,8 @@
                 </td>
             </tr>
             <tr>
-                <th>@lang('trans.training_center'):</th>
-                <td>{{ $examinateur->centreFormation->libelle ?? 'N/A' }}</td>
+                <th>@lang($type === 'medical' ? 'trans.medical_expertise_centre' : 'trans.training_center'):</th>
+                <td>{{ $examinateur->centre->libelle ?? 'N/A' }}</td>
             </tr>
             <tr>
                 <th>@lang('trans.status'):</th>
@@ -88,7 +88,7 @@
     </div>
 </div>
 
-@if($examinateur->formations->count() > 0)
+@if($type === 'formation' && $examinateur->formations->count() > 0)
 <div class="row mt-3">
     <div class="col-md-12">
         <h6 class="mb-3"><i class="fas fa-graduation-cap"></i> @lang('trans.trainings_assigned')</h6>

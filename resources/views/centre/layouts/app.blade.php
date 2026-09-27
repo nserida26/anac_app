@@ -1,11 +1,17 @@
 {{-- resources/views/centre/layouts/app.blade.php --}}
+{{-- Mise en page commune aux comptes centre : $espace = 'formation' (défaut) ou 'medical'. --}}
+@php
+    $espace = $espace ?? 'formation';
+    $accueilEspace = $espace === 'medical' ? route('centre_medical.index') : route('centre.index');
+    $titreEspace = __($espace === 'medical' ? 'trans.medical_expertise_centre' : 'trans.training_center');
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title') - @lang('trans.training_center')</title>
+    <title>@yield('title') - {{ $titreEspace }}</title>
     
     <!-- Bootstrap 4 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
@@ -63,54 +69,14 @@
         
         <!-- Sidebar -->
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
-            <a href="{{ route('centre.index') }}" class="brand-link">
-                <span class="brand-text font-weight-light">@lang('trans.training_center')</span>
+            <a href="{{ $accueilEspace }}" class="brand-link">
+                <span class="brand-text font-weight-light">{{ $titreEspace }}</span>
             </a>
-            
+
             <div class="sidebar">
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
-                        <li class="nav-item">
-                            <a href="{{ route('centre.index') }}" class="nav-link {{ request()->routeIs('centre.index') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-tachometer-alt"></i>
-                                <p>@lang('trans.dashboard')</p>
-                            </a>
-                        </li>
-                        
-                        <li class="nav-item">
-                            <a href="{{ route('centre.create') }}" class="nav-link {{ request()->routeIs('centre.create') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-plus-circle"></i>
-                                <p>@lang('trans.add_training')</p>
-                            </a>
-                        </li>
-                        
-                        <li class="nav-item">
-                            <a href="{{ route('centre.instructeurs') }}" class="nav-link {{ request()->routeIs('centre.instructeurs*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-chalkboard-teacher"></i>
-                                <p>@lang('trans.instructors')</p>
-                            </a>
-                        </li>
-                        
-                        <li class="nav-item">
-                            <a href="{{ route('centre.examinateurs') }}" class="nav-link {{ request()->routeIs('centre.examinateurs*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-user-check"></i>
-                                <p>@lang('trans.examiners')</p>
-                            </a>
-                        </li>
-                        
-                        <li class="nav-item">
-                            <a href="{{ route('centre.dispositifs') }}" class="nav-link {{ request()->routeIs('centre.dispositifs*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-microchip"></i>
-                                <p>@lang('trans.training_devices')</p>
-                            </a>
-                        </li>
-                        
-                        <li class="nav-item">
-                            <a href="{{ route('centre.licences') }}" class="nav-link {{ request()->routeIs('centre.licences*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-certificate"></i>
-                                <p>@lang('trans.licences')</p>
-                            </a>
-                        </li>
+                        @include('centre.layouts.menus.' . $espace)
                     </ul>
                 </nav>
             </div>
@@ -127,7 +93,7 @@
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
                                 <li class="breadcrumb-item">
-                                    <a href="{{ route('centre.index') }}">@lang('trans.home')</a>
+                                    <a href="{{ $accueilEspace }}">@lang('trans.home')</a>
                                 </li>
                                 @hasSection('contentheaderlink')
                                     <li class="breadcrumb-item">@yield('contentheaderlink')</li>
@@ -185,6 +151,11 @@
         @if(session('info'))
             toastr.info("{{ session('info') }}");
         @endif
+
+        // Erreurs de validation des formulaires
+        @foreach ($errors->all() as $erreur)
+            toastr.error(@json($erreur));
+        @endforeach
         
         // CSRF Token pour AJAX
         $.ajaxSetup({

@@ -11,6 +11,8 @@
 
 @section('content')
 <div class="container-fluid">
+    @include('admin.centre-examinateurs.partials.onglets', ['routeOnglet' => 'admin.examinateurs.pending'])
+
     {{-- Statistiques --}}
     <div class="row">
         <div class="col-lg-3 col-md-6">
@@ -72,7 +74,7 @@
                         @lang('trans.pending_examiners_list')
                     </h3>
                     <div class="card-tools">
-                        <a href="{{ route('admin.examinateurs.index') }}" class="btn btn-default btn-sm">
+                        <a href="{{ route('admin.examinateurs.index', ['type' => $type]) }}" class="btn btn-default btn-sm">
                             <i class="fas fa-list"></i> @lang('trans.all_examiners')
                         </a>
                     </div>
@@ -84,8 +86,8 @@
                             <tr>
                                 <th>#</th>
                                 <th>@lang('trans.examiner')</th>
-                                <th>@lang('trans.training_center')</th>
-                                <th>@lang('trans.licence_number')</th>
+                                <th>@lang($type === 'medical' ? 'trans.medical_expertise_centre' : 'trans.training_center')</th>
+                                <th>@lang($type === 'medical' ? 'trans.approval_number' : 'trans.licence_number')</th>
                                 <th>@lang('trans.request_date')</th>
                                 <th>@lang('trans.validity_period')</th>
                                 <th>@lang('trans.actions')</th>
@@ -103,9 +105,9 @@
                                     </small>
                                 </td>
                                 <td>
-                                    {{ $examinateur->centreFormation->libelle ?? 'N/A' }}<br>
+                                    {{ $examinateur->centre->libelle ?? 'N/A' }}<br>
                                     <small class="text-muted">
-                                        <i class="fas fa-user"></i> {{ $examinateur->centreFormation->user->email ?? 'N/A' }}
+                                        <i class="fas fa-user"></i> {{ $examinateur->centre->user->email ?? 'N/A' }}
                                     </small>
                                 </td>
                                 <td>
@@ -283,7 +285,7 @@ $(document).ready(function() {
         var formData = $(this).serialize();
         
         $.ajax({
-            url: '{{ route("admin.examinateurs.validate", ":id") }}'.replace(':id', currentExaminerId),
+            url: '{{ route("admin.examinateurs.validate", ["id" => ":id", "type" => $type]) }}'.replace(':id', currentExaminerId),
             type: 'POST',
             data: formData,
             beforeSend: function() {
@@ -324,7 +326,7 @@ $(document).ready(function() {
         var formData = $(this).serialize();
         
         $.ajax({
-            url: '{{ route("admin.examinateurs.reject", "") }}/' + currentExaminerId,
+            url: '{{ route("admin.examinateurs.reject", ["id" => ":id", "type" => $type]) }}'.replace(':id', currentExaminerId),
             type: 'POST',
             data: formData,
             beforeSend: function() {
@@ -355,7 +357,7 @@ $(document).ready(function() {
         var id = $(this).data('id');
         
         $.ajax({
-            url: '{{ route("admin.examinateurs.show", "") }}/' + id,
+            url: '{{ route("admin.examinateurs.show", ["id" => ":id", "type" => $type]) }}'.replace(':id', id),
             type: 'GET',
             success: function(response) {
                 $('#examinerDetailsContent').html(response);

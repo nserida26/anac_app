@@ -79,6 +79,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(CentreFormation::class, 'user_id');
     }
 
+    /** Centre d'expertise médicale dont ce compte est le titulaire (rôle centre_medical). */
+    public function centreMedical(): HasOne
+    {
+        return $this->hasOne(CentreMedical::class, 'user_id');
+    }
+
     public function demandeAutorisations(): HasMany
     {
         return $this->hasMany(DemandeAutorisation::class, 'user_id');

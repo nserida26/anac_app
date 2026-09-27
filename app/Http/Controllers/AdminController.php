@@ -16,6 +16,7 @@ use App\Models\DemandePiece;
 use App\Models\CarteStagiare;
 use App\Models\ChecklistDemande;
 use App\Models\ExaminateurCentre;
+use App\Models\Examinateur;
 use App\Models\CentreFormation;
 
 use App\Models\Checklist;
@@ -2431,23 +2432,47 @@ class AdminController extends Controller
     }
 
 
-    public function pendingExaminateurs()
+    /**
+     * Examinateurs déclarés par un centre puis validés par l'ANAC, par type de centre.
+     */
+    private const EXAMINATEURS_DECLARES = [
+        'formation' => ExaminateurCentre::class,
+        'medical' => Examinateur::class,
+    ];
+
+    /** Type demandé (?type=medical), « formation » par défaut. */
+    private function typeExaminateur(Request $request): string
     {
-        $examinateurs = ExaminateurCentre::with(['centreFormation', 'centreFormation.user'])
-            ->where('statut_validation', 'en_attente')
+        return array_key_exists($request->input('type'), self::EXAMINATEURS_DECLARES) ? $request->input('type') : 'formation';
+    }
+
+    private function examinateursDeclares(string $type)
+    {
+        $classe = self::EXAMINATEURS_DECLARES[$type];
+
+        return $classe::declares();
+    }
+
+    public function pendingExaminateurs(Request $request)
+    {
+        $type = $this->typeExaminateur($request);
+
+        $examinateurs = $this->examinateursDeclares($type)->with(['centre', 'centre.user'])
+            ->enAttente()
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         $stats = [
-            'total_pending' => ExaminateurCentre::where('statut_validation', 'en_attente')->count(),
-            'total_validated' => ExaminateurCentre::where('statut_validation', 'valide')->count(),
-            'total_rejected' => ExaminateurCentre::where('statut_validation', 'refuse')->count(),
-            'total_expired' => ExaminateurCentre::where('statut_validation', 'valide')
-                ->where('date_fin_validite', '<', now())
+            'total_pending' => $this->examinateursDeclares($type)->enAttente()->count(),
+            'total_validated' => $this->examinateursDeclares($type)->where('statut_validation', 'valide')->count(),
+            'total_rejected' => $this->examinateursDeclares($type)->where('statut_validation', 'refuse')->count(),
+            'total_expired' => $this->examinateursDeclares($type)->where('statut_validation', 'valide')
+                ->where('date_fin_validite', '<', now()->toDateString())
                 ->count()
         ];
 
-        return view('admin.centre-examinateurs.pending', compact('examinateurs', 'stats'));
+        return view('admin.centre-examinateurs.pending', compact('examinateurs', 'stats', 'type'));
     }
 
     /**
@@ -2460,38 +2485,17 @@ class AdminController extends Controller
             'commentaire' => 'nullable|string|max:500'
         ]);
 
+        // Hors du try : un examinateur introuvable pour ce type donne une 404, pas une erreur 500.
+        $examinateur = $this->examinateursDeclares($this->typeExaminateur($request))->findOrFail($id);
+
         try {
-            DB::beginTransaction();
-
-            $examinateur = ExaminateurCentre::findOrFail($id);
-
-            $examinateur->statut_validation = 'valide';
-            $examinateur->valide_par = Auth::id();
-            $examinateur->date_validation = now();
-            $examinateur->motif_refus = null;
-
-            if ($request->has('date_fin_validite')) {
-                $examinateur->date_fin_validite = $request->date_fin_validite;
-            }
-
-            $examinateur->save();
-
-            // Log de l'action
-            Log::info('Examinateur validé', [
-                'examinateur_id' => $id,
-                'validated_by' => Auth::id(),
-                'date' => now()
-            ]);
-
-            DB::commit();
+            $examinateur->valider($request->input('date_fin_validite'));
 
             return response()->json([
                 'success' => true,
                 'message' => __('trans.examiner_validated_successfully')
             ]);
         } catch (\Exception $e) {
-            DB::rollBack();
-
             Log::error('Erreur validation examinateur: ' . $e->getMessage());
 
             return response()->json([
@@ -2510,34 +2514,16 @@ class AdminController extends Controller
             'motif_refus' => 'required|string|max:500'
         ]);
 
+        $examinateur = $this->examinateursDeclares($this->typeExaminateur($request))->findOrFail($id);
+
         try {
-            DB::beginTransaction();
-
-            $examinateur = ExaminateurCentre::findOrFail($id);
-
-            $examinateur->statut_validation = 'refuse';
-            $examinateur->motif_refus = $request->motif_refus;
-            $examinateur->valide_par = Auth::id();
-            $examinateur->date_validation = now();
-
-            $examinateur->save();
-
-            // Log de l'action
-            Log::info('Examinateur rejeté', [
-                'examinateur_id' => $id,
-                'rejected_by' => Auth::id(),
-                'motif' => $request->motif_refus
-            ]);
-
-            DB::commit();
+            $examinateur->refuser($request->motif_refus);
 
             return response()->json([
                 'success' => true,
                 'message' => __('trans.examiner_rejected_successfully')
             ]);
         } catch (\Exception $e) {
-            DB::rollBack();
-
             Log::error('Erreur rejet examinateur: ' . $e->getMessage());
 
             return response()->json([
@@ -2552,18 +2538,15 @@ class AdminController extends Controller
      */
     public function allExaminateurs(Request $request)
     {
-        $query = ExaminateurCentre::with(['centreFormation', 'validePar']);
+        $type = $this->typeExaminateur($request);
+        $query = $this->examinateursDeclares($type)->with(['centre', 'validePar']);
 
         // Filtres
-        if ($request->has('statut') && $request->statut != '') {
+        if ($request->filled('statut')) {
             $query->where('statut_validation', $request->statut);
         }
 
-        if ($request->has('centre_id') && $request->centre_id != '') {
-            $query->where('centre_formation_id', $request->centre_id);
-        }
-
-        if ($request->has('search')) {
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('nom', 'LIKE', "%{$search}%")
@@ -2573,32 +2556,30 @@ class AdminController extends Controller
             });
         }
 
-        $examinateurs = $query->orderBy('created_at', 'desc')->paginate(15);
-
-        $centres = CentreFormation::all();
+        $examinateurs = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
 
         $stats = [
-            'total' => ExaminateurCentre::count(),
-            'pending' => ExaminateurCentre::where('statut_validation', 'en_attente')->count(),
-            'validated' => ExaminateurCentre::where('statut_validation', 'valide')->count(),
-            'rejected' => ExaminateurCentre::where('statut_validation', 'refuse')->count()
+            'total' => $this->examinateursDeclares($type)->count(),
+            'pending' => $this->examinateursDeclares($type)->enAttente()->count(),
+            'validated' => $this->examinateursDeclares($type)->where('statut_validation', 'valide')->count(),
+            'rejected' => $this->examinateursDeclares($type)->where('statut_validation', 'refuse')->count()
         ];
 
-        return view('admin.centre-examinateurs.index', compact('examinateurs', 'centres', 'stats'));
+        return view('admin.centre-examinateurs.index', compact('examinateurs', 'stats', 'type'));
     }
 
     /**
      * Afficher les détails d'un examinateur
      */
-    public function showExaminateur($id)
+    public function showExaminateur(Request $request, $id)
     {
-        $examinateur = ExaminateurCentre::with([
-            'centreFormation',
-            'validePar',
-            'formations.typeFormation',
-            'formations.demandeur'
-        ])->findOrFail($id);
+        $type = $this->typeExaminateur($request);
+        $relations = $type === 'formation'
+            ? ['centre', 'validePar', 'formations.typeFormation', 'formations.demandeur']
+            : ['centre', 'validePar'];
 
-        return view('admin.centre-examinateurs.partials.details', compact('examinateur'));
+        $examinateur = $this->examinateursDeclares($type)->with($relations)->findOrFail($id);
+
+        return view('admin.centre-examinateurs.partials.details', compact('examinateur', 'type'));
     }
 }

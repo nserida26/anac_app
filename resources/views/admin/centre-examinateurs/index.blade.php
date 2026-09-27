@@ -11,12 +11,15 @@
 
 @section('content')
 <div class="container-fluid">
+    @include('admin.centre-examinateurs.partials.onglets', ['routeOnglet' => 'admin.examinateurs.index'])
+
     {{-- Filtres --}}
     <div class="row mb-3">
         <div class="col-md-12">
             <div class="card">
                 <div class="card-body">
                     <form method="GET" class="form-inline">
+                        <input type="hidden" name="type" value="{{ $type }}">
                         <div class="form-group mr-2">
                             <label class="mr-2">@lang('trans.status'):</label>
                             <select class="form-control" name="statut">
@@ -46,7 +49,7 @@
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-filter"></i> @lang('trans.filter')
                         </button>
-                        <a href="{{ route('admin.examinateurs.index') }}" class="btn btn-secondary ml-2">
+                        <a href="{{ route('admin.examinateurs.index', ['type' => $type]) }}" class="btn btn-secondary ml-2">
                             <i class="fas fa-times"></i> @lang('trans.reset')
                         </a>
                     </form>
@@ -61,6 +64,11 @@
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">@lang('trans.examiners_list')</h3>
+                    <div class="card-tools">
+                        <a href="{{ route('admin.examinateurs.pending', ['type' => $type]) }}" class="btn btn-warning btn-sm">
+                            <i class="fas fa-user-clock"></i> @lang('trans.pending_validation') ({{ $stats['pending'] }})
+                        </a>
+                    </div>
                 </div>
                 <div class="card-body table-responsive p-0">
                     <table class="table table-hover">
@@ -68,8 +76,8 @@
                             <tr>
                                 <th>#</th>
                                 <th>@lang('trans.examiner')</th>
-                                <th>@lang('trans.training_center')</th>
-                                <th>@lang('trans.licence_number')</th>
+                                <th>@lang($type === 'medical' ? 'trans.medical_expertise_centre' : 'trans.training_center')</th>
+                                <th>@lang($type === 'medical' ? 'trans.approval_number' : 'trans.licence_number')</th>
                                 <th>@lang('trans.validity_period')</th>
                                 <th>@lang('trans.status')</th>
                                 <th>@lang('trans.actions')</th>
@@ -83,7 +91,7 @@
                                     {{ $examinateur->nom }} {{ $examinateur->prenom }}<br>
                                     <small>{{ $examinateur->email }}</small>
                                 </td>
-                                <td>{{ $examinateur->centreFormation->libelle ?? 'N/A' }}</td>
+                                <td>{{ $examinateur->centre->libelle ?? 'N/A' }}</td>
                                 <td>{{ $examinateur->numero_licence_examinateur }}</td>
                                 <td>
                                     {{ $examinateur->date_debut_validite->format('d/m/Y') }} - 
@@ -99,7 +107,7 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.examinateurs.show', $examinateur->id) }}" 
+                                    <a href="{{ route('admin.examinateurs.show', ['id' => $examinateur->id, 'type' => $type]) }}"
                                        class="btn btn-info btn-sm">
                                         <i class="fas fa-eye"></i>
                                     </a>

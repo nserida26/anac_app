@@ -29,6 +29,7 @@ class LoginController extends Controller
         'daf'         => '/daf',
         'agent'       => '/agent',
         'centre'      => '/centre',
+        'centre_medical' => '/centre-medical',
         'compagnie'   => '/compagnie',
     ];
 
