@@ -8,13 +8,16 @@ use Illuminate\Http\Request;
 use App\Models\ExamenMedical;
 use App\Models\MedicalExamination;
 use App\Models\EtatDemande;
+use App\Models\User;
 use App\Services\LicenseApplicationNotificationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class EvaluateurController extends Controller
 {
-    //
+    /** Tables dont l'évaluateur peut valider une ligne via valider(). */
+    private const TABLES_VALIDABLES = ['medical_examinations', 'examens_medicaux'];
+
     protected $notificationService;
 
     public function __construct(LicenseApplicationNotificationService $notificationService)
@@ -56,10 +59,11 @@ class EvaluateurController extends Controller
             'rapport_evaluateur' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
             'validite_evaluateur' => 'integer'
         ]);
+        // Sans nouveau fichier, on garde le rapport déjà déposé.
+        $rapportPath = $examen->rapport_evaluateur;
         if ($request->hasFile('rapport_evaluateur')) {
             $rapportPath = $request->file('rapport_evaluateur')->store('rapports', 'public');
         }
-
 
         $examen->update([
             'validite_evaluateur' => $request->validite_evaluateur,
@@ -74,14 +78,17 @@ class EvaluateurController extends Controller
 
     public function valider($table, $id)
     {
-        // Vérifiez si la table existe dans la base de données
-        if (!DB::getSchemaBuilder()->hasTable($table)) {
-            return redirect()->back()->with('error', 'Table non trouvée.');
-        }
+        // Seules ces tables peuvent être validées par un évaluateur (le nom vient de l'URL).
+        abort_unless(in_array($table, self::TABLES_VALIDABLES, true), 404);
+        abort_unless(DB::table($table)->where('id', $id)->exists(), 404);
 
-        // Vérifiez si la colonne 'valider_evaluateur' existe dans la table
-        if (!DB::getSchemaBuilder()->hasColumn($table, 'valider_evaluateur')) {
-            return redirect()->back()->with('error', 'Colonne "valider_evaluateur" non trouvée dans la table.');
+        // Une visite médicale ne peut être validée que par l'évaluateur affecté à la demande.
+        if ($table === 'medical_examinations') {
+            $evaluateurId = DB::table('medical_examinations')
+                ->join('demandes', 'demandes.id', 'medical_examinations.demande_id')
+                ->where('medical_examinations.id', $id)
+                ->value('demandes.evaluateur_id');
+            abort_unless((int) $evaluateurId === (int) Auth::id(), 403);
         }
 
         // Mettez à jour la valeur du booléen 'valider_evaluateur' à 1

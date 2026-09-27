@@ -9,6 +9,7 @@ use App\Models\DispositifFormation;
 use App\Models\CentreFormation;
 use App\Models\Demandeur;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -21,14 +22,20 @@ use App\Models\Simulateur;
 class CentreController extends Controller
 {
 
+    /** Centre de formation du compte connectÃ© ; refuse l'accÃ¨s si le compte n'en a pas. */
+    private function centreConnecte(): CentreFormation
+    {
+        $centre = CentreFormation::where('user_id', Auth::id())->first();
+        abort_unless($centre, 403, __('trans.create_centre_first'));
+
+        return $centre;
+    }
+
 public function index(Request $request)
 {
     $user = Auth::user();
-    $centre = CentreFormation::where('user_id', $user->id)->first();
+    $centre = $this->centreConnecte();
     
-    if (!$centre) {
-        return redirect()->route('centre.profile')->with('error', __('trans.create_centre_first'));
-    }
     
     // Statistiques
     $totalFormations = Formation::where('centre_formation_id', $centre->id)->count();
@@ -61,11 +68,8 @@ public function index(Request $request)
 public function create(Request $request)
 {
     $user = Auth::user();
-    $centre = CentreFormation::where('user_id', $user->id)->first();
+    $centre = $this->centreConnecte();
     
-    if (!$centre) {
-        return redirect()->route('centre.profile')->with('error', __('trans.create_centre_first'));
-    }
     
     // Récupérer le demandeur présélectionné si présent
     $preselectedDemandeur = null;
@@ -108,15 +112,21 @@ public function create(Request $request)
 public function store(Request $request)
 {
     
+    // Le centre est toujours celui du compte connectÃ©, jamais une valeur du formulaire.
+    $centre = $this->centreConnecte();
+
     $validated = $request->validate([
-        'centre_formation_id' => 'required|exists:centre_formations,id',
         'demandeur_id' => 'required|exists:demandeurs,id',
         'type_formation_id' => 'required|exists:type_formations,id',
         'type_licence_id' => 'nullable|exists:type_licences,id',
         'intitule_formation' => 'nullable|string|max:255',
-        'instructeur_id' => 'nullable|exists:instructeurs,id',
-        'examinateur_id' => 'nullable|exists:examinateurs_centre,id',
-        'dispositif_formation_id' => 'nullable|exists:dispositifs_formation,id',
+        'instructeur_id' => ['nullable', Rule::exists('instructeurs', 'id')
+            ->where('centre_formation_id', $centre->id)->where('statut', 'actif')],
+        'examinateur_id' => ['nullable', Rule::exists('examinateurs_centre', 'id')
+            ->where('centre_formation_id', $centre->id)->where('statut_validation', 'valide')
+            ->where(fn ($q) => $q->where('date_fin_validite', '>=', now()->toDateString()))],
+        'dispositif_formation_id' => ['nullable', Rule::exists('dispositifs_formation', 'id')
+            ->where('centre_formation_id', $centre->id)->where('statut', 'operationnel')],
         'date_formation' => 'required|date',
         'lieu' => 'nullable|string|max:255',
         'attestation' => 'required|file|mimes:pdf|max:10240'
@@ -141,6 +151,7 @@ public function store(Request $request)
         }
         
         // Création directe
+        $validated['centre_formation_id'] = $centre->id;
         $formation = Formation::create($validated);
  
         
@@ -161,7 +172,7 @@ public function store(Request $request)
     public function instructeurs()
     {
         $user = Auth::user();
-        $centre = CentreFormation::where('user_id', $user->id)->first();
+        $centre = $this->centreConnecte();
         
         $instructeurs = Instructeur::where('centre_formation_id', $centre->id)
                                    ->latest()
@@ -187,7 +198,7 @@ public function store(Request $request)
         
         try {
             $user = Auth::user();
-            $centre = CentreFormation::where('user_id', $user->id)->first();
+            $centre = $this->centreConnecte();
             
             $instructeur = new Instructeur();
             $instructeur->centre_formation_id = $centre->id;
@@ -221,7 +232,7 @@ public function store(Request $request)
     public function examinateurs()
     {
         $user = Auth::user();
-        $centre = CentreFormation::where('user_id', $user->id)->first();
+        $centre = $this->centreConnecte();
         
         $examinateurs = ExaminateurCentre::where('centre_formation_id', $centre->id)
                                          ->latest()
@@ -248,7 +259,7 @@ public function store(Request $request)
         
         try {
             $user = Auth::user();
-            $centre = CentreFormation::where('user_id', $user->id)->first();
+            $centre = $this->centreConnecte();
             
             $examinateur = new ExaminateurCentre();
             $examinateur->centre_formation_id = $centre->id;
@@ -283,7 +294,7 @@ public function store(Request $request)
     public function dispositifs()
     {
         $user = Auth::user();
-        $centre = CentreFormation::where('user_id', $user->id)->first();
+        $centre = $this->centreConnecte();
         
         $dispositifs = DispositifFormation::where('centre_formation_id', $centre->id)
                                           ->with('simulateur')
@@ -308,7 +319,7 @@ public function store(Request $request)
         
         try {
             $user = Auth::user();
-            $centre = CentreFormation::where('user_id', $user->id)->first();
+            $centre = $this->centreConnecte();
             
             $dispositif = new DispositifFormation();
             $dispositif->centre_formation_id = $centre->id;
@@ -486,11 +497,8 @@ public function getDemandeurDetails(Request $request)
 public function show($id)
 {
     $user = Auth::user();
-    $centre = CentreFormation::where('user_id', $user->id)->first();
+    $centre = $this->centreConnecte();
     
-    if (!$centre) {
-        return redirect()->route('centre.index')->with('error', __('trans.create_centre_first'));
-    }
     
     // Récupérer la formation avec toutes ses relations
     $formation = Formation::with([
@@ -512,11 +520,8 @@ public function show($id)
 public function licences()
 {
     $user = Auth::user();
-    $centre = CentreFormation::where('user_id', $user->id)->first();
+    $centre = $this->centreConnecte();
     
-    if (!$centre) {
-        return redirect()->route('centre.index')->with('error', __('trans.create_centre_first'));
-    }
     
     $licences = CentreLicence::where('centre_formation_id', $centre->id)
         ->with('typeLicence')
@@ -539,11 +544,8 @@ public function storeLicence(Request $request)
     
     try {
         $user = Auth::user();
-        $centre = CentreFormation::where('user_id', $user->id)->first();
+        $centre = $this->centreConnecte();
         
-        if (!$centre) {
-            return back()->with('error', __('trans.centre_not_found'));
-        }
         
         $licence = new CentreLicence();
         $licence->centre_formation_id = $centre->id;
@@ -573,7 +575,7 @@ public function storeLicence(Request $request)
 public function editLicence($id)
 {
     $user = Auth::user();
-    $centre = CentreFormation::where('user_id', $user->id)->first();
+    $centre = $this->centreConnecte();
     
     $licence = CentreLicence::where('centre_formation_id', $centre->id)
         ->findOrFail($id);
@@ -594,7 +596,7 @@ public function updateLicence(Request $request, $id)
     
     try {
         $user = Auth::user();
-        $centre = CentreFormation::where('user_id', $user->id)->first();
+        $centre = $this->centreConnecte();
         
         $licence = CentreLicence::where('centre_formation_id', $centre->id)
             ->findOrFail($id);
@@ -637,7 +639,7 @@ public function destroyLicence($id)
 {
     try {
         $user = Auth::user();
-        $centre = CentreFormation::where('user_id', $user->id)->first();
+        $centre = $this->centreConnecte();
         
         $licence = CentreLicence::where('centre_formation_id', $centre->id)
             ->findOrFail($id);

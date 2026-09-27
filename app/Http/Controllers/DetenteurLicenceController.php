@@ -12,6 +12,7 @@ use App\Models\CentreFormation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DetenteurLicenceController extends Controller
 {
@@ -234,7 +235,8 @@ class DetenteurLicenceController extends Controller
             'intitule_formation' => 'nullable|string|max:255',
             'date_formation' => 'required|date',
             'lieu' => 'nullable|string|max:255',
-            'dispositif_formation_id' => 'nullable|exists:dispositif_formations,id',
+            'dispositif_formation_id' => 'nullable|exists:dispositifs_formation,id',
+            'centre_formation_id' => 'nullable|exists:centre_formations,id',
             'attestation' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ]);
         
@@ -277,7 +279,7 @@ class DetenteurLicenceController extends Controller
                 
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Erreur lors de la création de la formation: ' . $e->getMessage());
+            Log::error('Erreur lors de la création de la formation: ' . $e->getMessage());
             
             return redirect()->back()
                 ->with('error', trans('trans.error_assigning_training') . ': ' . $e->getMessage())
@@ -397,10 +399,10 @@ class DetenteurLicenceController extends Controller
             if ($formation->demandeur && $formation->demandeur->user && $formation->demandeur->user->whatsapp) {
                 // Logique d'envoi de notification WhatsApp
                 // Vous pouvez implémenter votre service WhatsApp ici
-                \Log::info('Notification WhatsApp à envoyer à: ' . $formation->demandeur->user->whatsapp);
+                Log::info('Notification WhatsApp à envoyer à: ' . $formation->demandeur->user->whatsapp);
             }
         } catch (\Exception $e) {
-            \Log::error('Erreur envoi notification: ' . $e->getMessage());
+            Log::error('Erreur envoi notification: ' . $e->getMessage());
         }
     }
 }
