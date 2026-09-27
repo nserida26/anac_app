@@ -4,10 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreMedecinCentreRequest;
 use App\Models\CentreMedical;
+use App\Models\Demandeur;
+use App\Models\ExamenMedical;
 use App\Models\Examinateur;
 use App\Models\MedecinCentre;
+use App\Services\RapportMedicalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 /**
  * Compte d'un centre d'expertise médicale (ex. CEMPA) : sur le modèle du compte
@@ -78,6 +82,100 @@ class CentreExpertiseMedicaleController extends Controller
         Examinateur::declarer($this->centreConnecte()->id, $request->all(), $request->file('document_justificatif'));
 
         return redirect()->route('centre_medical.examinateurs')->with('success', __('trans.examinateur_added_successfully'));
+    }
+
+    // ----- Rapports médicaux (rapport + attestation d'une visite) -----
+
+    public function examens()
+    {
+        $centre = $this->centreConnecte();
+        $examens = ExamenMedical::duCentre($centre)->with(['demandeur', 'examinateur'])->latest()->paginate(15);
+
+        return view('centre_medical.examens.index', compact('centre', 'examens'));
+    }
+
+    public function createExamen()
+    {
+        $centre = $this->centreConnecte();
+
+        return view('centre_medical.examens.create', [
+            'centre' => $centre,
+            'demandeurs' => Demandeur::orderBy('np')->get(['id', 'np', 'date_naissance']),
+            'examinateurs' => $centre->examinateursDeclares()->valide()->orderBy('nom')->get(),
+        ]);
+    }
+
+    public function storeExamen(Request $request, RapportMedicalService $rapports)
+    {
+        $centre = $this->centreConnecte();
+        $donnees = $request->validate(RapportMedicalService::regles(true) + [
+            'demandeur_id' => 'required|exists:demandeurs,id',
+            'examinateur_id' => ['required', $this->regleExaminateurDuCentre($centre)],
+        ]);
+
+        $rapports->creer($donnees, $request->file('rapport'), $request->file('attestation'), Examinateur::findOrFail($donnees['examinateur_id']), $centre);
+
+        return redirect()->route('centre_medical.examens')->with('success', __('trans.rapport_medical_enregistre'));
+    }
+
+    public function showExamen(ExamenMedical $examen)
+    {
+        $this->authorize('view', $examen);
+
+        return view('centre_medical.examens.show', ['centre' => $this->centreConnecte(), 'examen' => $examen]);
+    }
+
+    public function editExamen(ExamenMedical $examen)
+    {
+        $this->authorize('update', $examen);
+        $centre = $this->centreConnecte();
+
+        return view('centre_medical.examens.edit', [
+            'centre' => $centre,
+            'examen' => $examen,
+            'examinateurs' => $centre->examinateursDeclares()->valide()->orderBy('nom')->get(),
+        ]);
+    }
+
+    public function updateExamen(Request $request, ExamenMedical $examen, RapportMedicalService $rapports)
+    {
+        $this->authorize('update', $examen);
+        $centre = $this->centreConnecte();
+        $donnees = $request->validate(RapportMedicalService::regles(false) + [
+            'examinateur_id' => ['required', $this->regleExaminateurDuCentre($centre)],
+        ]);
+
+        $examen->examinateur_id = $donnees['examinateur_id'];
+        $rapports->modifier($examen, $donnees, $request->file('rapport'), $request->file('attestation'));
+
+        return redirect()->route('centre_medical.examens')->with('success', __('trans.rapport_medical_enregistre'));
+    }
+
+    public function destroyExamen(ExamenMedical $examen, RapportMedicalService $rapports)
+    {
+        $this->authorize('delete', $examen);
+        $rapports->supprimer($examen);
+
+        return redirect()->route('centre_medical.examens')->with('success', __('trans.rapport_medical_supprime'));
+    }
+
+    /** Transmet le rapport à l'ANAC (évaluateur) : il n'est plus modifiable ensuite. */
+    public function transmettreExamen(ExamenMedical $examen)
+    {
+        $this->authorize('transmettre', $examen);
+        $examen->update(['valider_examinateur' => true]);
+
+        return redirect()->route('centre_medical.examens')->with('success', __('trans.rapport_medical_transmis'));
+    }
+
+    /** L'examinateur doit être l'un des examinateurs validés (validité en cours) de ce centre. */
+    private function regleExaminateurDuCentre(CentreMedical $centre)
+    {
+        return Rule::exists('examinateurs', 'id')
+            ->where('centre_medical_id', $centre->id)
+            ->whereNull('user_id')
+            ->where('statut_validation', 'valide')
+            ->where(fn ($q) => $q->where('date_fin_validite', '>=', now()->toDateString()));
     }
 
     /** Centre d'expertise médicale du compte connecté ; refuse l'accès si le compte n'en a pas. */

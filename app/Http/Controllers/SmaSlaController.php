@@ -6,6 +6,7 @@ use App\Models\Activity;
 use App\Models\Demande;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 use App\Models\CompetenceDemandeur;
 
@@ -24,6 +25,7 @@ use App\Models\QualificationDemandeur;
 use App\Models\TrainingDemandeur;
 use App\Models\ExamenMedical;
 use App\Models\Evaluateur;
+use App\Models\User;
 use App\Services\LicenseApplicationNotificationService;
 
 class SmaSlaController extends Controller
@@ -44,7 +46,10 @@ class SmaSlaController extends Controller
         //
         $evaluateurs = Evaluateur::all();
         $demandes = Demande::with('demandeur')->where('status', '<>', 'En attente')->get();
-        $examens = ExamenMedical::with(['demandeur', 'examinateur', 'evaluateur'])->get();
+        // Les rapports médicaux ne sont visibles que de la SMA (pas de la SLA ni de l'admin).
+        $examens = Auth::user()->hasRole('sma')
+            ? ExamenMedical::transmis()->with(['demandeur', 'examinateur', 'evaluateur', 'centreMedical'])->latest()->get()
+            : collect();
 
         return view('sec.index', compact('demandes', 'evaluateurs', 'examens'));
     }
@@ -163,20 +168,38 @@ class SmaSlaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+    /** Détail d'un rapport médical pour la SMA. */
+    public function showExamen(ExamenMedical $examen)
+    {
+        $this->authorize('view', $examen);
+
+        return view('sec.examen', compact('examen'));
+    }
+
     public function relaunch(ExamenMedical $examen)
     {
+        $this->authorize('relancer', $examen);
 
+        // L'évaluateur rattaché au rapport s'il y en a un ; sinon (avant tout avis) tous les évaluateurs.
+        $destinataires = $examen->evaluateur && $examen->evaluateur->user
+            ? collect([$examen->evaluateur->user])
+            : User::role('evaluateur')->get();
+        $destinataires = $destinataires->filter(fn ($user) => !empty($user->whatsapp));
 
-        if (!empty($examen->evaluateur->user->whatsapp)) {
+        foreach ($destinataires as $destinataire) {
             $this->notificationService->sendMedicalValidationRequest(
                 demandeNumber: $examen->id,
                 applicantName: $examen->demandeur->np,
-                medicalEvaluator: $examen->evaluateur->user,
+                medicalEvaluator: $destinataire,
                 examen: $examen
             );
         }
-        //
-        return back()->with('success', 'Validation relanceé avec succès.');
+
+        if ($destinataires->isEmpty()) {
+            return back()->with('warning', __('trans.relance_aucun_evaluateur_joignable'));
+        }
+
+        return back()->with('success', __('trans.relance_envoyee', ['nombre' => $destinataires->count()]));
     }
 
     function annoter(Request $request)
@@ -272,6 +295,7 @@ class SmaSlaController extends Controller
     }
     public function valider(ExamenMedical $examen)
     {
+        $this->authorize('validerSma', $examen);
         $examen->update(
             [
                 'valider_sma' => true

@@ -112,7 +112,7 @@
                 "autoWidth": false,
                 "responsive": true,
                 "columnDefs": [{
-                        "targets": 5,
+                        "targets": 4,
                         "orderable": false
                     },
                     {

@@ -12,40 +12,61 @@
 @section('contentheaderactive')
     @lang('trans.dashboard_evaluator')
 @endsection
-@push('css')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-bs4.min.css">
-@endpush
 @section('content')
     <div class="container-fluid">
         <div class="row">
-
-            <div class="col-md-12">
+            <div class="col-lg-6">
                 <div class="card">
-                    <div class="card-header">@lang('trans.update_medical_fitness')</div>
+                    <div class="card-header">@lang('trans.examen')</div>
                     <div class="card-body">
+                        @include('examens_medicaux.partials.details', ['examen' => $examen])
+                    </div>
+                </div>
+            </div>
 
-
-
-                        <!-- Formulaire -->
-                        <form action="{{ route('evaluateur.update', $examen) }}" method="POST"
-                            enctype="multipart/form-data">
+            <div class="col-lg-6">
+                <div class="card card-primary card-outline">
+                    <div class="card-header">@lang('trans.avis_de_l_evaluateur')</div>
+                    <div class="card-body">
+                        <form action="{{ route('evaluateur.update', $examen) }}" method="POST" enctype="multipart/form-data">
                             @csrf
 
-                            <div class="mb-3">
-                                <label class="form-label">@lang('trans.medical_fitness_by_evaluator')</label>
-                                <input type="number" min="0" name="validite_evaluateur" class="form-control"
-                                    value="{{ $examen->validite }}" required>
+                            <div class="form-group">
+                                <label>@lang('trans.avis') <span class="text-danger">*</span></label>
+                                @foreach (['valide' => 'trans.avis_valide', 'reserve' => 'trans.avis_reserve', 'suggestion' => 'trans.avis_suggestion'] as $valeur => $libelle)
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" id="avis_{{ $valeur }}" name="avis_evaluateur" value="{{ $valeur }}"
+                                            class="custom-control-input" required
+                                            {{ old('avis_evaluateur', $examen->avis_evaluateur) === $valeur ? 'checked' : '' }}>
+                                        <label class="custom-control-label" for="avis_{{ $valeur }}">@lang($libelle)</label>
+                                    </div>
+                                @endforeach
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">@lang('trans.report_by_evaluator')</label>
-                                <input type="file" name="rapport_evaluateur" class="form-control"
-                                    accept="application/pdf" required>
+
+                            <div class="form-group">
+                                <label for="observations_evaluateur">@lang('trans.observations')</label>
+                                <textarea name="observations_evaluateur" id="observations_evaluateur" class="form-control" rows="4">{{ old('observations_evaluateur', $examen->observations_evaluateur) }}</textarea>
+                                <small class="form-text text-muted">@lang('trans.observations_obligatoires_reserve')</small>
                             </div>
 
+                            <div class="form-group">
+                                <label for="validite_evaluateur">@lang('trans.validity_evaluator') <span class="text-danger">*</span></label>
+                                <input type="number" min="1" max="{{ (int) $examen->validite }}" name="validite_evaluateur" id="validite_evaluateur"
+                                    class="form-control" required
+                                    value="{{ old('validite_evaluateur', $examen->validite_evaluateur ?? $examen->validite) }}">
+                                <small class="form-text text-muted">
+                                    @lang('trans.validite_reduction_seulement', ['max' => (int) $examen->validite])
+                                </small>
+                            </div>
 
+                            <div class="form-group">
+                                <label for="rapport_evaluateur">@lang('trans.report_by_evaluator')</label>
+                                <input type="file" name="rapport_evaluateur" id="rapport_evaluateur" class="form-control-file"
+                                    accept=".pdf,.jpg,.jpeg,.png">
+                            </div>
 
-
-                            <button type="submit" class="btn btn-success">@lang('trans.update')</button>
+                            <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> @lang('trans.save')</button>
+                            <a href="{{ route('evaluateur') }}" class="btn btn-secondary">@lang('trans.cancel')</a>
                         </form>
                     </div>
                 </div>
@@ -53,17 +74,3 @@
         </div>
     </div>
 @endsection
-@push('script')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-bs4.min.js"></script>
-@endpush
-@push('custom')
-    <script>
-        $(document).ready(function() {
-            $('.summernote').summernote({
-                height: 200, // Set height of the editor
-                placeholder: 'Enter your text...',
-
-            });
-        });
-    </script>
-@endpush

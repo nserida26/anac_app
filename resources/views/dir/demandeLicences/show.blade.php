@@ -136,8 +136,8 @@
                                                 <tr>
                                                     <td>{{ $examen->date_examen }}</td>
                                                     <td>{{ $examen->validite }}</td>
-                                                    <td>{{ $examen->examinateur->np }}</td>
-                                                    <td>{{ $examen->examinateur->centreMedical->libelle }}</td>
+                                                    <td>{{ $examen->examinateur->np ?? '-' }}</td>
+                                                    <td>{{ $examen->centreMedical->libelle ?? ($examen->examinateur->centreMedical->libelle ?? '-') }}</td>
                                                     <td>
                                                         @if ($examen->valider_examinateur)
                                                             @lang('trans.validated')

@@ -316,6 +316,7 @@ Route::get('/rapports/compagnie/{id}', [App\Http\Controllers\DgDsvController::cl
                 Route::patch('/sma/valider/{id}', [App\Http\Controllers\SmaSlaController::class, 'validerSma'])->name('sma.valider');
                 Route::patch('/sma/annoter', [App\Http\Controllers\SmaSlaController::class, 'annoter'])->name('sma.annoter');
                 Route::patch('/sma/relaunch/{examen}', [App\Http\Controllers\SmaSlaController::class, 'relaunch'])->name('sma.relaunch');
+                Route::get('/sma/examens/{examen}', [App\Http\Controllers\SmaSlaController::class, 'showExamen'])->name('sma.examen.show');
 
                 Route::get('/sla', [App\Http\Controllers\SmaSlaController::class, 'index'])->name('sla');
                 Route::get('/sla/show/{id}', [App\Http\Controllers\SmaSlaController::class, 'show'])->name('sla.show');
@@ -705,7 +706,22 @@ Route::middleware(['auth:web', 'verified', 'role:centre_medical'])->prefix('cent
     Route::post('/medecins/store', [App\Http\Controllers\CentreExpertiseMedicaleController::class, 'storeMedecin'])->name('medecins.store');
     Route::get('/examinateurs', [App\Http\Controllers\CentreExpertiseMedicaleController::class, 'examinateurs'])->name('examinateurs');
     Route::post('/examinateurs/store', [App\Http\Controllers\CentreExpertiseMedicaleController::class, 'storeExaminateur'])->name('examinateurs.store');
+    // Rapports médicaux envoyés par le centre pour l'un de ses examinateurs validés
+    Route::get('/examens', [App\Http\Controllers\CentreExpertiseMedicaleController::class, 'examens'])->name('examens');
+    Route::get('/examens/create', [App\Http\Controllers\CentreExpertiseMedicaleController::class, 'createExamen'])->name('examens.create');
+    Route::post('/examens', [App\Http\Controllers\CentreExpertiseMedicaleController::class, 'storeExamen'])->name('examens.store');
+    Route::get('/examens/{examen}', [App\Http\Controllers\CentreExpertiseMedicaleController::class, 'showExamen'])->name('examens.show');
+    Route::get('/examens/{examen}/edit', [App\Http\Controllers\CentreExpertiseMedicaleController::class, 'editExamen'])->name('examens.edit');
+    Route::post('/examens/{examen}', [App\Http\Controllers\CentreExpertiseMedicaleController::class, 'updateExamen'])->name('examens.update');
+    Route::delete('/examens/{examen}', [App\Http\Controllers\CentreExpertiseMedicaleController::class, 'destroyExamen'])->name('examens.destroy');
+    Route::patch('/examens/{examen}/transmettre', [App\Http\Controllers\CentreExpertiseMedicaleController::class, 'transmettreExamen'])->name('examens.transmettre');
 });
+
+// Fichiers d'un rapport médical (disque privé) : droits vérifiés par ExamenMedicalPolicy
+Route::middleware(['auth:web', 'verified'])
+    ->get('/examens-medicaux/{examen}/documents/{document}', App\Http\Controllers\DocumentExamenMedicalController::class)
+    ->where('document', 'rapport|attestation|rapport_evaluateur')
+    ->name('examens-medicaux.document');
     }
 );
 

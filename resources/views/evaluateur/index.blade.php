@@ -113,10 +113,10 @@
                                             <th>@lang('trans.applicant')</th>
 
                                             <th>@lang('trans.exam_date')</th>
-                                            <th>@lang('trans.validity')</th>
+                                            <th>@lang('trans.validite_mois')</th>
                                             <th>@lang('trans.validity_evaluator')</th>
                                             <th>@lang('trans.medical_fitness')</th>
-                                            <th>@lang('trans.restriction')</th>
+                                            <th>@lang('trans.avis')</th>
                                             <th>@lang('trans.period_for_execution')</th>
 
                                             <th>@lang('trans.actions')</th>
@@ -140,17 +140,7 @@
                                                 <td>{{ $examen->validite }}</td>
                                                 <td>{{ $examen->validite_evaluateur }}</td>
                                                 <td>{{ $examen->aptitude }}</td>
-                                                <td>
-                                                    @if ($examen->validite_evaluateur === $examen->validite)
-                                                        <span class="badge badge-danger">
-                                                            @lang('trans.no')
-                                                        </span>
-                                                    @else
-                                                        <span class="badge badge-primary">
-                                                            @lang('trans.yes')
-                                                        </span>
-                                                    @endif
-                                                </td>
+                                                <td>@include('examens_medicaux.partials.badge-avis', ['examen' => $examen])</td>
                                                 <td>
                                                     @if ($examen->valider_examinateur && !$examen->valider_evaluateur)
                                                         @if ($daysRemaining > 0)
@@ -177,8 +167,9 @@
                                                         class="btn btn-info btn-sm">@lang('trans.view')</a>
                                                     @if ($examen->valider_examinateur && !$examen->valider_evaluateur)
                                                         <a href="{{ route('evaluateur.edit', $examen) }}"
-                                                            class="btn btn-primary btn-sm">@lang('trans.edit')</a>
-
+                                                            class="btn btn-primary btn-sm">@lang('trans.donner_avis')</a>
+                                                    @endif
+                                                    @if ($examen->valider_examinateur && !$examen->valider_evaluateur && $examen->avis_evaluateur)
                                                         <form
                                                             action="{{ route('evaluateur.valider', ['table' => 'examens_medicaux', 'id' => $examen->id]) }}"
                                                             method="POST" class="d-inline">

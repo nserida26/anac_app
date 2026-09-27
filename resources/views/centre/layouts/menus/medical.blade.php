@@ -7,6 +7,13 @@
 </li>
 
 <li class="nav-item">
+    <a href="{{ route('centre_medical.examens') }}" class="nav-link {{ request()->routeIs('centre_medical.examens*') ? 'active' : '' }}">
+        <i class="nav-icon fas fa-file-medical"></i>
+        <p>@lang('trans.rapports_medicaux')</p>
+    </a>
+</li>
+
+<li class="nav-item">
     <a href="{{ route('centre_medical.medecins') }}" class="nav-link {{ request()->routeIs('centre_medical.medecins*') ? 'active' : '' }}">
         <i class="nav-icon fas fa-user-md"></i>
         <p>@lang('trans.medecins')</p>

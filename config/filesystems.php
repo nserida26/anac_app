@@ -42,6 +42,14 @@ return [
             'url' => env('APP_URL').'/uploads',
         ],
 
+        // Documents confidentiels (rapports médicaux) : hors du dossier uploads servi
+        // publiquement ; ils ne sont délivrés que par une route qui vérifie les droits.
+        'prive' => [
+            'driver' => 'local',
+            'root' => storage_path('app/prive'),
+            'visibility' => 'private',
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

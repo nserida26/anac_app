@@ -153,12 +153,12 @@
                                             <th>@lang('trans.examiner')</th>
                                             <th>@lang('trans.evaluator')</th>
                                             <th>@lang('trans.exam_date')</th>
-                                            <th>@lang('trans.validity')</th>
+                                            <th>@lang('trans.validite_mois')</th>
                                             <th>@lang('trans.validity_evaluator')</th>
                                             <th>@lang('trans.medical_fitness')</th>
 
 
-                                            <th>@lang('trans.restriction')</th>
+                                            <th>@lang('trans.avis')</th>
                                             <th>@lang('trans.validated')</th>
                                             <th>@lang('trans.period_for_execution')</th>
                                             <th>@lang('trans.actions')</th>
@@ -179,23 +179,18 @@
                                             <tr>
 
                                                 <td>{{ $examen->demandeur->np }}</td>
-                                                <td>{{ $examen->examinateur->np }}</td>
-                                                <td>{{ $examen->evaluateur->np }}</td>
+                                                <td>
+                                                    {{ $examen->examinateur->np ?? '-' }}
+                                                    @if ($examen->centre_medical_id)
+                                                        <br><small class="text-muted"><i class="fas fa-hospital"></i> {{ $examen->centreMedical->libelle ?? '' }}</small>
+                                                    @endif
+                                                </td>
+                                                <td>{{ $examen->evaluateur->np ?? '-' }}</td>
                                                 <td>{{ $examen->date_examen }}</td>
                                                 <td>{{ $examen->validite }}</td>
                                                 <td>{{ $examen->validite_evaluateur }}</td>
                                                 <td>{{ $examen->aptitude }}</td>
-                                                <td>
-                                                    @if ($examen->validite_evaluateur === $examen->validite)
-                                                        <span class="badge badge-danger">
-                                                            @lang('trans.no')
-                                                        </span>
-                                                    @else
-                                                        <span class="badge badge-primary">
-                                                            @lang('trans.yes')
-                                                        </span>
-                                                    @endif
-                                                </td>
+                                                <td>@include('examens_medicaux.partials.badge-avis', ['examen' => $examen])</td>
                                                 <td>
                                                     @if ($examen->valider_examinateur && $examen->valider_evaluateur)
                                                         <span class="badge bg-success">@lang('trans.yes')</span>
@@ -220,6 +215,16 @@
                                                     @endif
                                                 </td>
                                                 <td>
+                                                    <a href="{{ route('sma.examen.show', $examen) }}" class="btn btn-info btn-sm">@lang('trans.view')</a>
+                                                    @if ($examen->valider_evaluateur && !$examen->valider_sma)
+                                                        <form action="{{ route('sma.valider_examen', $examen) }}" method="POST" class="d-inline">
+                                                            @csrf
+                                                            @method('PATCH')
+                                                            <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm(@json(__('trans.confirmer_validation_sma')))">
+                                                                @lang('trans.validate')
+                                                            </button>
+                                                        </form>
+                                                    @endif
                                                     @if ($examen->valider_examinateur && !$examen->valider_evaluateur)
                                                         <form action="{{ route('sma.relaunch', $examen) }}" method="POST"
                                                             class="d-inline">

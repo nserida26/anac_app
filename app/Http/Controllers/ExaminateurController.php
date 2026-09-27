@@ -6,6 +6,7 @@ use App\Models\ExamenMedical;
 use App\Models\Demandeur;
 use App\Models\Examinateur;
 use App\Models\Licence;
+use App\Services\RapportMedicalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +20,8 @@ class ExaminateurController extends Controller
         $examinateur = $user->examinateur;
         if(!empty($examinateur)){
             $demandeurs = Demandeur::distinct()->get();
-            $examens = ExamenMedical::with(['demandeur', 'examinateur'])->get();
+            // Uniquement ses propres rapports (pas ceux des autres examinateurs ni des centres).
+            $examens = ExamenMedical::deLExaminateurIndividuel($examinateur)->with(['demandeur', 'examinateur'])->latest()->get();
             return view('examinateur.index', compact('examens', 'demandeurs'));
         } else {
             return redirect()->back()->with('error', 'Aucun examinateur n’est associé à votre compte.');
@@ -172,30 +174,17 @@ class ExaminateurController extends Controller
     }
 
     // Stocker un nouvel examen
-    public function store(Request $request)
+    public function store(Request $request, RapportMedicalService $rapports)
     {
-        $request->validate([
+        // L'examinateur est celui du compte connecté, jamais une valeur du formulaire.
+        $examinateur = Auth::user()->examinateur;
+        abort_unless($examinateur, 403);
+
+        $donnees = $request->validate(RapportMedicalService::regles(true) + [
             'demandeur_id' => 'required|exists:demandeurs,id',
-            'examinateur_id' => 'required|exists:examinateurs,id',
-            'date_examen' => 'required|date',
-            'validite' => 'required|integer',
-            'aptitude' => 'required|in:Apte,Inapte',
-            'rapport' => 'required|file|mimes:pdf,jpg,png|max:2048',
-            'attestation' => 'required|file|mimes:pdf,jpg,png|max:2048',
         ]);
 
-        $attestationPath = $request->file('attestation')->store('attestations', 'public');
-        $rapportPath = $request->file('rapport')->store('rapports', 'public');
-
-        ExamenMedical::create([
-            'demandeur_id' => $request->demandeur_id,
-            'examinateur_id' => $request->examinateur_id,
-            'date_examen' => $request->date_examen,
-            'validite' => $request->validite,
-            'aptitude' => $request->aptitude,
-            'rapport' => $rapportPath,
-            'attestation' => $attestationPath,
-        ]);
+        $rapports->creer($donnees, $request->file('rapport'), $request->file('attestation'), $examinateur);
 
         return redirect()->route('examinateur')->with('success', 'Examen médical ajouté avec succès.');
     }
@@ -203,60 +192,47 @@ class ExaminateurController extends Controller
     // Afficher un examen
     public function show(ExamenMedical $examen)
     {
+        $this->authorize('view', $examen);
+
         return view('examinateur.show', compact('examen'));
     }
 
     // Formulaire d'édition
     public function edit(ExamenMedical $examen)
     {
+        $this->authorize('update', $examen);
+
         return view('examinateur.edit', compact('examen'));
     }
 
     // Mettre à jour un examen
-    public function update(Request $request, ExamenMedical $examen)
+    public function update(Request $request, ExamenMedical $examen, RapportMedicalService $rapports)
     {
-        $request->validate([
-            'demandeur_id' => 'required|exists:demandeurs,id',
-            'examinateur_id' => 'required|exists:examinateurs,id',
-            'date_examen' => 'required|date',
-            'validite' => 'required|integer',
-            'aptitude' => 'required|in:Apte,Inapte',
-            'rapport' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'attestation' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-        ]);
+        $this->authorize('update', $examen);
+        $donnees = $request->validate(RapportMedicalService::regles(false));
 
-        if ($request->hasFile('attestation')) {
-            $attestationPath = $request->file('attestation')->store('attestations', 'public');
-            $examen->attestation = $attestationPath;
-        }
-        if ($request->hasFile('rapport')) {
-            $rapportPath = $request->file('rapport')->store('rapports', 'public');
-            $examen->rapport = $rapportPath;
-        }
-
-        $examen->update([
-            'demandeur_id' => $request->demandeur_id,
-            'examinateur_id' => $request->examinateur_id,
-            'date_examen' => $request->date_examen,
-            'validite' => $request->validite,
-            'aptitude' => $request->aptitude
-        ]);
+        $rapports->modifier($examen, $donnees, $request->file('rapport'), $request->file('attestation'));
 
         return redirect()->route('examinateur')->with('success', 'Examen médical mis à jour.');
     }
 
     // Supprimer un examen
-    public function destroy(ExamenMedical $examen)
+    public function destroy(ExamenMedical $examen, RapportMedicalService $rapports)
     {
-        $examen->delete();
+        $this->authorize('delete', $examen);
+        $rapports->supprimer($examen);
+
         return redirect()->route('examinateur')->with('success', 'Examen médical supprimé.');
     }
-    
+
+    /** Transmet le rapport à l'ANAC (évaluateur) : il n'est plus modifiable ensuite. */
     public function valider(ExamenMedical $examen)
     {
+        $this->authorize('transmettre', $examen);
         $examen->update([
             'valider_examinateur' => true
         ]);
+
         return redirect()->route('examinateur')->with('success', 'Examen médical validé.');
     }
 }

@@ -10,6 +10,7 @@ use App\Models\MedicalExamination;
 use App\Models\EtatDemande;
 use App\Models\User;
 use App\Services\LicenseApplicationNotificationService;
+use App\Services\RapportMedicalService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
@@ -35,37 +36,53 @@ class EvaluateurController extends Controller
             ->where('demandes.evaluateur_id', $userId)
             ->select('centre_medicals.libelle as centre_medical', 'medical_examinations.*')
             ->get();
-        $examens = ExamenMedical::with(['demandeur', 'examinateur'])->get();
+        // Seuls les rapports transmis par leur auteur arrivent chez l'évaluateur.
+        $examens = ExamenMedical::transmis()->with(['demandeur', 'examinateur', 'centreMedical'])->latest()->get();
         return view('evaluateur.index', compact('examens', 'medical_examinations'));
     }
 
     // Afficher un examen
     public function show(ExamenMedical $examen)
     {
+        $this->authorize('view', $examen);
+
         return view('evaluateur.show', compact('examen'));
     }
 
-    // Formulaire d'édition
+    // Formulaire d'avis
     public function edit(ExamenMedical $examen)
     {
+        $this->authorize('evaluer', $examen);
+
         return view('evaluateur.edit', compact('examen'));
     }
 
-    // Mettre à jour un examen
-    public function update(Request $request, ExamenMedical $examen)
+    /**
+     * Avis de l'évaluateur : valider, émettre une réserve ou une suggestion,
+     * et éventuellement réduire la validité (jamais l'augmenter).
+     */
+    public function update(Request $request, ExamenMedical $examen, RapportMedicalService $rapports)
     {
+        $this->authorize('evaluer', $examen);
         $evaluateur = Auth::user()->evaluateur;
+        abort_unless($evaluateur, 403);
+
         $request->validate([
-            'rapport_evaluateur' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'validite_evaluateur' => 'integer'
+            'avis_evaluateur' => 'required|in:' . implode(',', ExamenMedical::AVIS),
+            'observations_evaluateur' => 'required_unless:avis_evaluateur,valide|nullable|string|max:5000',
+            'validite_evaluateur' => 'required|integer|min:1|max:' . (int) $examen->validite,
+            'rapport_evaluateur' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ]);
+
         // Sans nouveau fichier, on garde le rapport déjà déposé.
         $rapportPath = $examen->rapport_evaluateur;
         if ($request->hasFile('rapport_evaluateur')) {
-            $rapportPath = $request->file('rapport_evaluateur')->store('rapports', 'public');
+            $rapportPath = $rapports->stocker($request->file('rapport_evaluateur'), 'evaluateur');
         }
 
         $examen->update([
+            'avis_evaluateur' => $request->avis_evaluateur,
+            'observations_evaluateur' => $request->observations_evaluateur,
             'validite_evaluateur' => $request->validite_evaluateur,
             'rapport_evaluateur' => $rapportPath,
             'evaluateur_id' =>  $evaluateur->id
@@ -89,6 +106,15 @@ class EvaluateurController extends Controller
                 ->where('medical_examinations.id', $id)
                 ->value('demandes.evaluateur_id');
             abort_unless((int) $evaluateurId === (int) Auth::id(), 403);
+        }
+
+        // Un rapport médical ne se valide qu'une fois l'avis de l'évaluateur donné.
+        if ($table === 'examens_medicaux') {
+            $examen = ExamenMedical::findOrFail($id);
+            $this->authorize('evaluer', $examen);
+            if (!$examen->avis_evaluateur) {
+                return redirect()->back()->with('error', __('trans.avis_evaluateur_requis'));
+            }
         }
 
         // Mettez à jour la valeur du booléen 'valider_evaluateur' à 1
