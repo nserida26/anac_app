@@ -725,6 +725,11 @@ Route::middleware(['auth:web', 'verified'])
     ->get('/examens-medicaux/{examen}/documents/{document}', App\Http\Controllers\DocumentExamenMedicalController::class)
     ->where('document', 'rapport|attestation|rapport_evaluateur')
     ->name('examens-medicaux.document');
+
+// Rapport d'examen d'une formation (disque privé) : droits vérifiés par FormationPolicy
+Route::middleware(['auth:web', 'verified'])
+    ->get('/formations/{formation}/rapport', App\Http\Controllers\RapportFormationController::class)
+    ->name('formations.rapport');
     }
 );
 

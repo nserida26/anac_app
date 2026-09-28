@@ -249,7 +249,7 @@ class DetenteurLicenceController extends Controller
         try {
             // Upload de l'attestation (et du rapport d'examen)
             $attestationPath = $request->file('attestation')->store('attestations_formation', 'public');
-            $rapportPath = $request->hasFile('rapport') ? $request->file('rapport')->store('rapports_formation', 'public') : null;
+            $rapportPath = $request->hasFile('rapport') ? $request->file('rapport')->store('formations/rapports', Formation::DISQUE_RAPPORT) : null;
 
             // Créer la formation
             $formation = Formation::create([

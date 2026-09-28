@@ -13,6 +13,9 @@ class Formation extends Model
 
     public const QUALITES_FORMATEUR = ['instructeur', 'examinateur'];
 
+    /** Le rapport d'examen est confidentiel : disque privé, servi via RapportFormationController. */
+    public const DISQUE_RAPPORT = 'prive';
+
     protected $fillable = [
         'attestation',
         'rapport',

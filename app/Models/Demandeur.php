@@ -24,7 +24,6 @@ class Demandeur extends Model
         'nationalite',
         'valider_compagnie',
         'dossier',
-        'is_examinateur',
         'is_instructeur'
     ];
     public function userAccount()

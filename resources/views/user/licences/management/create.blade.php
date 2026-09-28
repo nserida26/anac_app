@@ -249,7 +249,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>@lang('trans.examiner')</label>
-                                        @if($demandeur->is_examinateur)
+                                        @if($demandeur->estExaminateurDesigne())
                                             <input class="form-control" name="is_examinateur" id="is_examinateur" value = {{ $demandeur->id }}>
                                         @endif
                                     </div>

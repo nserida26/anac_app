@@ -152,7 +152,7 @@ public function store(Request $request)
                 ->store('formations/attestations', 'public');
         }
         if ($request->hasFile('rapport')) {
-            $validated['rapport'] = $request->file('rapport')->store('formations/rapports', 'public');
+            $validated['rapport'] = $request->file('rapport')->store('formations/rapports', Formation::DISQUE_RAPPORT);
         }
         
         // Création directe

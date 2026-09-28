@@ -149,13 +149,8 @@ $(document).ready(function() {
                 
                 // Update badge
                 const badge = toggleElement.closest('.d-flex').find('.badge');
-                if (field === 'is_examinateur') {
-                    badge.text(isActive ? 'Examinateur' : 'Non Examinateur');
-                    badge.removeClass('bg-success bg-secondary').addClass(isActive ? 'bg-success' : 'bg-secondary');
-                } else {
-                    badge.text(isActive ? 'Instructeur' : 'Non Instructeur');
-                    badge.removeClass('bg-success bg-secondary').addClass(isActive ? 'bg-success' : 'bg-secondary');
-                }
+                badge.text(isActive ? 'Instructeur' : 'Non Instructeur');
+                badge.removeClass('bg-success bg-secondary').addClass(isActive ? 'bg-success' : 'bg-secondary');
                 
                 // Show success message
                 showAlert('Statut updated!', 'success');

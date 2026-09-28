@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\ServitDocumentPrive;
 use App\Models\ExamenMedical;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * Seul accès aux fichiers d'un rapport médical (disque privé) : les droits sont
@@ -11,17 +11,13 @@ use Illuminate\Support\Facades\Storage;
  */
 class DocumentExamenMedicalController extends Controller
 {
+    use ServitDocumentPrive;
+
     public function __invoke(ExamenMedical $examen, string $document)
     {
         abort_unless(in_array($document, ExamenMedical::DOCUMENTS, true) && $examen->{$document}, 404);
         $this->authorize('view', $examen);
 
-        $disque = Storage::disk(ExamenMedical::DISQUE);
-        abort_unless($disque->exists($examen->{$document}), 404);
-
-        // Affiché dans le navigateur (visionneuse PDF / image), jamais mis en cache public.
-        return $disque->response($examen->{$document}, null, [
-            'Cache-Control' => 'private, no-store',
-        ]);
+        return $this->servirDocumentPrive(ExamenMedical::DISQUE, $examen->{$document});
     }
 }
