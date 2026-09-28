@@ -57,6 +57,8 @@ use App\Services\DtaAutorisationNotificationService;
 use App\Services\LicenseApplicationNotificationService;
 use App\Services\LicenceExpirationService;
 use App\Services\ModificationDemandeService;
+use App\Services\DesignationExaminateurService;
+use App\Models\DesignationExaminateur;
 use App\Http\Requests\UpdateTypeDemandeRequest;
 use App\Http\Requests\UpdateTypeLicenceRequest;
 use DateInterval;
@@ -544,9 +546,35 @@ class AdminController extends Controller
     public function showDemandeur($id)
     {
 
-        $demandeur = Demandeur::with('user')->find($id);
+        $demandeur = Demandeur::with(['user', 'designationsExaminateur.typesLicence'])->findOrFail($id);
+        $typesLicence = TypeLicence::orderBy('id')->get();
 
-        return view('admin.demandeurs.show', compact('demandeur'));
+        return view('admin.demandeurs.show', compact('demandeur', 'typesLicence'));
+    }
+
+    /** Désigne un détenteur de licence (déjà instructeur) comme examinateur. */
+    public function designerExaminateur(Request $request, Demandeur $demandeur, DesignationExaminateurService $designations)
+    {
+        $request->validate([
+            'types_licence' => 'required|array|min:1',
+            'types_licence.*' => 'integer|exists:type_licences,id',
+            'date_debut' => 'required|date',
+            'date_fin' => 'required|date|after:date_debut',
+        ]);
+
+        $refus = $designations->designer($demandeur, $request->date_debut, $request->date_fin, $request->types_licence);
+        if ($refus) {
+            return back()->with('error', $refus);
+        }
+
+        return back()->with('success', __('trans.examinateur_designe'));
+    }
+
+    public function retirerDesignation(DesignationExaminateur $designation, DesignationExaminateurService $designations)
+    {
+        $designations->retirer($designation);
+
+        return back()->with('success', __('trans.designation_retiree_succes'));
     }
 
     /**
@@ -2117,7 +2145,8 @@ class AdminController extends Controller
     public function toggleStatus(Request $request, Demandeur $demandeur)
     {
         $request->validate([
-            'field' => 'required|in:is_examinateur,is_instructeur',
+            // La qualité d'examinateur passe désormais par une désignation (types de licence + période).
+            'field' => 'required|in:is_instructeur',
             'value' => 'required|boolean'
         ]);
 

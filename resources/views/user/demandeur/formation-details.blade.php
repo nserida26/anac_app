@@ -234,6 +234,15 @@
                         </div>
                     </div>
 
+                    {{-- Qualité et rapport d'examen --}}
+                    @if($formation->qualite_formateur || $formation->rapport)
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            @include('formations.partials.rapport-examen', ['formation' => $formation])
+                        </div>
+                    </div>
+                    @endif
+
                     {{-- Section Certificat --}}
                     @if($formation->attestation)
                     <div class="row mt-4">

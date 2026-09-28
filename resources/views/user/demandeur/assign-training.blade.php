@@ -131,6 +131,28 @@
                             </h5>
                         </div>
                         <div class="card-body">
+                            {{-- En quelle qualité le détenteur enregistre cette formation / cet examen --}}
+                            <div class="form-group">
+                                <label class="required-field">@lang('trans.qualite_formateur')</label>
+                                <div>
+                                    @foreach($qualites as $qualite)
+                                        <div class="custom-control custom-radio custom-control-inline">
+                                            <input type="radio" id="qualite_{{ $qualite }}" name="qualite_formateur" value="{{ $qualite }}"
+                                                   class="custom-control-input" required
+                                                   {{ old('qualite_formateur', count($qualites) === 1 ? $qualite : null) === $qualite ? 'checked' : '' }}>
+                                            <label class="custom-control-label" for="qualite_{{ $qualite }}">
+                                                @lang($qualite === 'examinateur' ? 'trans.en_tant_qu_examinateur' : 'trans.en_tant_qu_instructeur')
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                @if($typesLicenceDesignes->isNotEmpty())
+                                    <small class="form-text text-muted">
+                                        @lang('trans.types_licence_designes') : {{ $typesLicenceDesignes->pluck('nom')->implode(', ') }}
+                                    </small>
+                                @endif
+                            </div>
+
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -201,6 +223,16 @@
                                 </div>
                                 <small>@lang('trans.accepted_format_pdf_image', ['max' => '10MB'])</small>
                             </div>
+
+                            {{-- Rapport d'examen : obligatoire en tant qu'examinateur --}}
+                            <div class="form-group" id="bloc_rapport_examen" style="display: none;">
+                                <label class="required-field">@lang('trans.rapport_examen')</label>
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="rapport" name="rapport" accept=".pdf,.jpg,.jpeg,.png">
+                                    <label class="custom-file-label" for="rapport">@lang('trans.choose_file')</label>
+                                </div>
+                                <small>@lang('trans.accepted_format_pdf_image', ['max' => '10MB'])</small>
+                            </div>
                         </div>
                         <div class="card-footer">
                             <button type="submit" class="btn btn-primary btn-lg">
@@ -226,9 +258,19 @@
 <script>
 $(document).ready(function() {
     let selectedDemandeurId = null;
-    
+
     $('.select2').select2();
-    
+
+    // En tant qu'examinateur : rapport d'examen et type de licence obligatoires
+    function majQualiteFormateur() {
+        const examinateur = $('input[name="qualite_formateur"]:checked').val() === 'examinateur';
+        $('#bloc_rapport_examen').toggle(examinateur);
+        $('#rapport').prop('required', examinateur);
+        $('#type_licence_id').prop('required', examinateur);
+    }
+    $('input[name="qualite_formateur"]').on('change', majQualiteFormateur);
+    majQualiteFormateur();
+
     $('#search_btn').on('click', function() {
         performSearch();
     });

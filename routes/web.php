@@ -558,6 +558,9 @@ Route::get('/rapports/compagnie/{id}', [App\Http\Controllers\DgDsvController::cl
                 Route::get('/demandeurs/show/{id}', [App\Http\Controllers\AdminController::class, 'showDemandeur'])->name('demandeurs.show');
                 Route::post('/demandeurs/update/{demandeur}', [App\Http\Controllers\AdminController::class, 'updateDemandeur'])->name('demandeurs.update');
                 Route::patch('/demandeurs/{demandeur}/toggle-status', [App\Http\Controllers\AdminController::class, 'toggleStatus'])->name('demandeurs.toggle-status');
+                // Désignation d'examinateur par l'ANAC (types de licence + période)
+                Route::post('/demandeurs/{demandeur}/designations', [App\Http\Controllers\AdminController::class, 'designerExaminateur'])->name('demandeurs.designations.store');
+                Route::delete('/designations-examinateur/{designation}', [App\Http\Controllers\AdminController::class, 'retirerDesignation'])->name('demandeurs.designations.retirer');
 
 
                 Route::get('/demandes', [App\Http\Controllers\AdminController::class, 'index'])->name('demandes');

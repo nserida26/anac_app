@@ -9,6 +9,7 @@ use App\Models\TypeFormation;
 use App\Models\TypeLicence;
 use App\Models\DispositifFormation;
 use App\Models\CentreFormation;
+use App\Services\DesignationExaminateurService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -29,41 +30,23 @@ class DetenteurLicenceController extends Controller
             return redirect()->back()->with('error', trans('trans.demandeur_not_found'));
         }
         
-        // Statistiques
+        // Statistiques (formations enregistrées par ce détenteur, en tant qu'instructeur ou examinateur)
         $stats = [
-            'total_formations' => Formation::where('instructeur_id', $demandeur->id)
-                ->orWhere('examinateur_id', $demandeur->id)
-                ->count(),
-            'formations_a_venir' => Formation::where(function($q) use ($demandeur) {
-                    $q->where('instructeur_id', $demandeur->id)
-                      ->orWhere('examinateur_id', $demandeur->id);
-                })
-                ->where('date_formation', '>=', now())
-                ->count(),
-            'formations_passees' => Formation::where(function($q) use ($demandeur) {
-                    $q->where('instructeur_id', $demandeur->id)
-                      ->orWhere('examinateur_id', $demandeur->id);
-                })
-                ->where('date_formation', '<', now())
-                ->count(),
-            'total_stagiaires' => Formation::where(function($q) use ($demandeur) {
-                    $q->where('instructeur_id', $demandeur->id)
-                      ->orWhere('examinateur_id', $demandeur->id);
-                })
-                ->distinct('demandeur_id')
-                ->count('demandeur_id'),
+            'total_formations' => Formation::duFormateur($demandeur)->count(),
+            'formations_a_venir' => Formation::duFormateur($demandeur)->where('date_formation', '>=', now())->count(),
+            'formations_passees' => Formation::duFormateur($demandeur)->where('date_formation', '<', now())->count(),
+            'total_stagiaires' => Formation::duFormateur($demandeur)->distinct('demandeur_id')->count('demandeur_id'),
         ];
-        
-        $recentFormations = Formation::where(function($q) use ($demandeur) {
-                $q->where('instructeur_id', $demandeur->id)
-                  ->orWhere('examinateur_id', $demandeur->id);
-            })
+
+        $recentFormations = Formation::duFormateur($demandeur)
             ->with(['demandeur', 'typeFormation'])
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();
-        
-        return view('user.demandeur.dashboard', compact('demandeur', 'stats', 'recentFormations'));
+
+        $designations = $demandeur->designationsExaminateur()->enVigueur()->with('typesLicence')->get();
+
+        return view('user.demandeur.dashboard', compact('demandeur', 'stats', 'recentFormations', 'designations'));
     }
 
     /**
@@ -73,29 +56,34 @@ class DetenteurLicenceController extends Controller
     {
         $user = Auth::user();
         $demandeur = $user->demandeur;
-        
+
         if (!$demandeur) {
             return redirect()->back()->with('error', trans('trans.demandeur_not_found'));
         }
-        
-        // Vérifier si le demandeur peut attribuer des formations
-        if (!$demandeur->is_instructeur && !$demandeur->is_examinateur) {
+
+        // Instructeur, ou examinateur désigné par l'ANAC (désignation en vigueur)
+        if (!$demandeur->estFormateur()) {
             return redirect()->route('demandeur.dashboard')
                 ->with('error', trans('trans.not_authorized_to_assign_training'));
         }
-        
-        if($demandeur->is_instructeur){
-            $typeFormations = TypeFormation::where('is_instructor', true)->get();
-        }else{
-            $typeFormations = TypeFormation::get();
-        }
-        
+
+        $designations = $demandeur->designationsExaminateur()->enVigueur()->with('typesLicence')->get();
+        $qualites = array_values(array_filter([
+            $demandeur->is_instructeur ? 'instructeur' : null,
+            $designations->isNotEmpty() ? 'examinateur' : null,
+        ]));
+
+        // Types de formation : ceux d'instructeur, plus tous les autres pour un examinateur désigné.
+        $typeFormations = $designations->isNotEmpty() ? TypeFormation::get() : TypeFormation::where('is_instructor', true)->get();
+
         $typeLicences = TypeLicence::get();
-        
+        // Types de licence pour lesquels il est désigné examinateur
+        $typesLicenceDesignes = $designations->flatMap->typesLicence->unique('id')->values();
+
         // Centres de formation (si nécessaire)
         $centres = CentreFormation::get();
-        
-        return view('user.demandeur.assign-training', compact('demandeur', 'typeFormations', 'typeLicences', 'centres'));
+
+        return view('user.demandeur.assign-training', compact('demandeur', 'typeFormations', 'typeLicences', 'centres', 'qualites', 'typesLicenceDesignes'));
     }
 
     /**
@@ -218,7 +206,7 @@ class DetenteurLicenceController extends Controller
                 ] : null,
                 'licence' => $licenceData,
                 'is_instructeur' => $demandeur->is_instructeur,
-                'is_examinateur' => $demandeur->is_examinateur,
+                'is_examinateur' => $demandeur->estExaminateurDesigne(),
             ]
         ]);
     }
@@ -226,33 +214,43 @@ class DetenteurLicenceController extends Controller
     /**
      * Enregistrer la formation attribuée
      */
-    public function storeFormation(Request $request)
+    public function storeFormation(Request $request, DesignationExaminateurService $designations)
     {
         $request->validate([
             'demandeur_id' => 'required|exists:demandeurs,id',
+            'qualite_formateur' => 'required|in:' . implode(',', Formation::QUALITES_FORMATEUR),
             'type_formation_id' => 'required|exists:type_formations,id',
-            'type_licence_id' => 'nullable|exists:type_licences,id',
+            // Un examen se rattache à un type de licence pour lequel l'examinateur est désigné.
+            'type_licence_id' => 'nullable|required_if:qualite_formateur,examinateur|exists:type_licences,id',
             'intitule_formation' => 'nullable|string|max:255',
             'date_formation' => 'required|date',
             'lieu' => 'nullable|string|max:255',
             'dispositif_formation_id' => 'nullable|exists:dispositifs_formation,id',
             'centre_formation_id' => 'nullable|exists:centre_formations,id',
             'attestation' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            // Rapport d'examen obligatoire dès que l'on agit en tant qu'examinateur.
+            'rapport' => 'nullable|required_if:qualite_formateur,examinateur|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ]);
-        
+
         $user = Auth::user();
         $formateurDemandeur = $user->demandeur;
-        
-        if (!$formateurDemandeur || (!$formateurDemandeur->is_instructeur && !$formateurDemandeur->is_examinateur)) {
+
+        if (!$formateurDemandeur || !$formateurDemandeur->estFormateur()) {
             return redirect()->back()->with('error', trans('trans.not_authorized_to_assign_training'));
         }
-        
+
+        $refus = $designations->verifierFormation($formateurDemandeur, $request->qualite_formateur, $request->date_formation, $request->type_licence_id ? (int) $request->type_licence_id : null);
+        if ($refus) {
+            return redirect()->back()->withInput()->with('error', $refus);
+        }
+
         DB::beginTransaction();
-        
+
         try {
-            // Upload de l'attestation
+            // Upload de l'attestation (et du rapport d'examen)
             $attestationPath = $request->file('attestation')->store('attestations_formation', 'public');
-            
+            $rapportPath = $request->hasFile('rapport') ? $request->file('rapport')->store('rapports_formation', 'public') : null;
+
             // Créer la formation
             $formation = Formation::create([
                 'demandeur_id' => $request->demandeur_id, // Le stagiaire
@@ -263,8 +261,9 @@ class DetenteurLicenceController extends Controller
                 'lieu' => $request->lieu,
                 'dispositif_formation_id' => $request->dispositif_formation_id,
                 'attestation' => $attestationPath,
-                'instructeur_id' => $formateurDemandeur->is_instructeur ? $formateurDemandeur->id : null,
-                'examinateur_id' => $formateurDemandeur->is_examinateur ? $formateurDemandeur->id : null,
+                'rapport' => $rapportPath,
+                'formateur_demandeur_id' => $formateurDemandeur->id,
+                'qualite_formateur' => $request->qualite_formateur,
                 'centre_formation_id' => $request->centre_formation_id,
                 'status' => 'planifiee',
             ]);
@@ -299,10 +298,7 @@ class DetenteurLicenceController extends Controller
             return redirect()->back()->with('error', trans('trans.demandeur_not_found'));
         }
         
-        $query = Formation::where(function($q) use ($demandeur) {
-            $q->where('instructeur_id', $demandeur->id)
-              ->orWhere('examinateur_id', $demandeur->id);
-        });
+        $query = Formation::duFormateur($demandeur);
         
         // Filtres
         if ($request->filled('status')) {
@@ -317,25 +313,14 @@ class DetenteurLicenceController extends Controller
             $query->whereDate('date_formation', '<=', $request->date_to);
         }
         
-        $formations = $query->with(['demandeur', 'typeFormation', 'instructeur', 'examinateur'])
+        $formations = $query->with(['demandeur', 'typeFormation', 'typeLicence'])
             ->orderBy('date_formation', 'desc')
             ->paginate(20);
-        
+
         $stats = [
-            'total' => Formation::where(function($q) use ($demandeur) {
-                $q->where('instructeur_id', $demandeur->id)
-                  ->orWhere('examinateur_id', $demandeur->id);
-            })->count(),
-            'planifiees' => Formation::where('status', 'planifiee')
-                ->where(function($q) use ($demandeur) {
-                    $q->where('instructeur_id', $demandeur->id)
-                      ->orWhere('examinateur_id', $demandeur->id);
-                })->count(),
-            'terminees' => Formation::where('status', 'terminee')
-                ->where(function($q) use ($demandeur) {
-                    $q->where('instructeur_id', $demandeur->id)
-                      ->orWhere('examinateur_id', $demandeur->id);
-                })->count(),
+            'total' => Formation::duFormateur($demandeur)->count(),
+            'planifiees' => Formation::duFormateur($demandeur)->where('status', 'planifiee')->count(),
+            'terminees' => Formation::duFormateur($demandeur)->where('status', 'terminee')->count(),
         ];
         
         return view('user.demandeur.formations-list', compact('formations', 'demandeur', 'stats'));
@@ -349,14 +334,10 @@ class DetenteurLicenceController extends Controller
         $user = Auth::user();
         $demandeur = $user->demandeur;
         
-        $formation = Formation::with(['demandeur', 'typeFormation', 'typeLicence', 'instructeur', 'examinateur', 'dispositifFormation'])
+        // Uniquement les formations que ce détenteur a lui-même enregistrées
+        $formation = Formation::duFormateur($demandeur)
+            ->with(['demandeur', 'typeFormation', 'typeLicence', 'dispositifFormation'])
             ->findOrFail($id);
-        
-        // Vérifier l'autorisation
-        if ($formation->instructeur_id != $demandeur->id && 
-            $formation->examinateur_id != $demandeur->id) {
-            return redirect()->back()->with('error', trans('trans.unauthorized'));
-        }
         
         return view('user.demandeur.formation-details', compact('formation', 'demandeur'));
     }
@@ -374,10 +355,9 @@ class DetenteurLicenceController extends Controller
         $user = Auth::user();
         $demandeur = $user->demandeur;
         
-        $formation = Formation::findOrFail($id);
-        
-        // Vérifier l'autorisation
-        if ($formation->instructeur_id != $demandeur->id && $formation->examinateur_id != $demandeur->id) {
+        // Uniquement les formations que ce détenteur a lui-même enregistrées
+        $formation = Formation::duFormateur($demandeur)->find($id);
+        if (!$formation) {
             return response()->json(['success' => false, 'message' => trans('trans.unauthorized')], 403);
         }
         

@@ -270,6 +270,7 @@
                                                                 onclick="openPdfModal('{{ asset('/uploads/' . $formation->attestation) }}')"><i
                                                                     class="fas fa-eye"></i></button>
                                                         @endif
+                                                        @include('formations.partials.rapport-examen', ['formation' => $formation])
                                                     </td>
 
 

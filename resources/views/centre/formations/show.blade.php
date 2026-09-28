@@ -93,6 +93,7 @@
                     <i class="fas fa-download"></i> @lang('trans.download_certificate')
                 </a>
                 @endif
+                @include('formations.partials.rapport-examen', ['formation' => $formation])
             </div>
             
             {{-- Informations du détenteur de licence --}}

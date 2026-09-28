@@ -60,7 +60,7 @@
             <div class="collapse navbar-collapse order-3" id="navbarCollapse">
                 <!-- Left navbar links -->
                 <ul class="navbar-nav">
-@if(auth()->user()->demandeur && auth()->user()->demandeur->is_examinateur)
+@if(auth()->user()->demandeur && auth()->user()->demandeur->estExaminateurDesigne())
     <li class="nav-item">
         <a href="{{ route('demandeur.dashboard') }}" class="nav-link">@lang('trans.examinateur_dashboard')</a>
     </li>

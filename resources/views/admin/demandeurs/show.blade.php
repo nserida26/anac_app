@@ -82,19 +82,7 @@
                             </div>
                             <div class="row mb-3">
                                 <div class="col-md-6">
-                                    <label class="form-label">Examinateur Status</label>
-                                    <div class="d-flex align-items-center">
-                                        <div class="form-check form-switch me-3">
-                                            <input class="form-check-input examinateur-toggle" 
-                                                   type="checkbox" 
-                                                   id="is_examinateur"
-                                                   data-demandeur-id="{{ $demandeur->id }}"
-                                                   {{ $demandeur->is_examinateur ? 'checked' : '' }}>
-                                        </div>
-                                        <span class="badge bg-{{ $demandeur->is_examinateur ? 'success' : 'secondary' }}">
-                                            {{ $demandeur->is_examinateur ? 'Examinateur' : 'Non Examinateur' }}
-                                        </span>
-                                    </div>
+                                    @include('admin.demandeurs.partials.designations', ['demandeur' => $demandeur])
                                 </div>
                                 
                                 <div class="col-md-6">
@@ -132,14 +120,6 @@ $(document).ready(function() {
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
-    });
-
-    // Examinateur toggle
-    $('.examinateur-toggle').change(function() {
-        const demandeurId = $(this).data('demandeur-id');
-        const isActive = $(this).is(':checked');
-        
-        toggleStatus(demandeurId, 'is_examinateur', isActive, $(this));
     });
 
     // Instructeur toggle

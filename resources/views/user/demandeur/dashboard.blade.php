@@ -16,12 +16,14 @@
                     @lang('trans.you_are_instructor')
                 </div>
             @endif
-            @if($demandeur->is_examinateur)
+            @foreach($designations as $designation)
                 <div class="alert alert-success">
                     <i class="fas fa-stethoscope"></i>
-                    @lang('trans.you_are_examiner')
+                    @lang('trans.you_are_examiner') :
+                    <strong>{{ $designation->typesLicence->pluck('nom')->implode(', ') }}</strong>
+                    ({{ $designation->date_debut->format('d/m/Y') }} – {{ $designation->date_fin->format('d/m/Y') }})
                 </div>
-            @endif
+            @endforeach
         </div>
     </div>
 

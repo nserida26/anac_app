@@ -81,4 +81,32 @@ class Demandeur extends Model
     {
         return $this->licences()->where('type_licence', $typeLicence)->exists();
     }
+
+    /** Au moins une licence validée, non bloquée et non expirée. */
+    public function detientLicenceValide(): bool
+    {
+        return $this->licences()->valid()->exists();
+    }
+
+    public function designationsExaminateur()
+    {
+        return $this->hasMany(DesignationExaminateur::class);
+    }
+
+    /**
+     * Examinateur désigné par l'ANAC à la date donnée (aujourd'hui par défaut),
+     * éventuellement pour un type de licence précis. Remplace l'ancienne case is_examinateur.
+     */
+    public function estExaminateurDesigne($date = null, ?int $typeLicenceId = null): bool
+    {
+        return $this->designationsExaminateur()->enVigueur($date)
+            ->when($typeLicenceId, fn ($q) => $q->whereHas('typesLicence', fn ($t) => $t->where('type_licences.id', $typeLicenceId)))
+            ->exists();
+    }
+
+    /** Peut enregistrer des formations depuis son compte : instructeur ou examinateur désigné. */
+    public function estFormateur(): bool
+    {
+        return (bool) $this->is_instructeur || $this->estExaminateurDesigne();
+    }
 }

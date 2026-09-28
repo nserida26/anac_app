@@ -129,7 +129,9 @@ public function store(Request $request)
             ->where('centre_formation_id', $centre->id)->where('statut', 'operationnel')],
         'date_formation' => 'required|date',
         'lieu' => 'nullable|string|max:255',
-        'attestation' => 'required|file|mimes:pdf|max:10240'
+        'attestation' => 'required|file|mimes:pdf|max:10240',
+        // Rapport d'examen obligatoire dÃ¨s qu'un examinateur intervient
+        'rapport' => 'nullable|required_with:examinateur_id|file|mimes:pdf|max:10240'
     ]);
 
     try {
@@ -148,6 +150,9 @@ public function store(Request $request)
         if ($request->hasFile('attestation')) {
             $validated['attestation'] = $request->file('attestation')
                 ->store('formations/attestations', 'public');
+        }
+        if ($request->hasFile('rapport')) {
+            $validated['rapport'] = $request->file('rapport')->store('formations/rapports', 'public');
         }
         
         // Création directe

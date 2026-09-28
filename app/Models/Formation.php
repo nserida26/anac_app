@@ -11,15 +11,22 @@ class Formation extends Model
     
     protected $table = 'formations';
 
+    public const QUALITES_FORMATEUR = ['instructeur', 'examinateur'];
+
     protected $fillable = [
         'attestation',
+        'rapport',
         'demandeur_id',
         'centre_formation_id',
         'type_formation_id',
         'type_licence_id',
         'intitule_formation',
+        // Personnel d'un centre de formation (tables instructeurs / examinateurs_centre)
         'instructeur_id',
         'examinateur_id',
+        // Détenteur de licence agissant lui-même, en tant qu'instructeur ou examinateur
+        'formateur_demandeur_id',
+        'qualite_formateur',
         'dispositif_formation_id',
         'lieu',
         'date_formation',
@@ -28,6 +35,18 @@ class Formation extends Model
     protected $casts = [
         'date_formation' => 'date',
     ];
+
+    /** Détenteur de licence ayant enregistré la formation (instructeur ou examinateur désigné). */
+    public function formateurDemandeur()
+    {
+        return $this->belongsTo(Demandeur::class, 'formateur_demandeur_id');
+    }
+
+    /** Formations enregistrées par ce détenteur de licence. */
+    public function scopeDuFormateur($query, Demandeur $formateur)
+    {
+        return $query->where('formateur_demandeur_id', $formateur->id);
+    }
 
     /**
      * Relation avec le Demandeur

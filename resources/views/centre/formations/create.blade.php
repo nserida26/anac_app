@@ -348,6 +348,16 @@
                                     @lang('trans.accepted_format'): PDF (Max 10MB)
                                 </small>
                             </div>
+
+                            {{-- Rapport d'examen : obligatoire dès qu'un examinateur est indiqué --}}
+                            <div class="form-group">
+                                <label id="label_rapport">@lang('trans.rapport_examen')</label>
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="rapport" name="rapport" accept=".pdf">
+                                    <label class="custom-file-label" for="rapport">@lang('trans.choose_file')</label>
+                                </div>
+                                <small class="form-text text-muted">@lang('trans.rapport_examen_obligatoire_examinateur')</small>
+                            </div>
                         </div>
                         <div class="card-footer">
                             <button type="submit" class="btn btn-primary btn-lg">
@@ -372,6 +382,15 @@
 $(document).ready(function() {
     let selectedDemandeurData = null;
     let searchTimeout = null;
+
+    // Rapport d'examen obligatoire dès qu'un examinateur est sélectionné
+    function majRapportExamen() {
+        const examinateur = !!$('#examinateur_id').val();
+        $('#rapport').prop('required', examinateur);
+        $('#label_rapport').toggleClass('required-field', examinateur);
+    }
+    $('#examinateur_id').on('change', majRapportExamen);
+    majRapportExamen();
     
     // Vérifier que toastr est disponible
     if (typeof toastr === 'undefined') {
