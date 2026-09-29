@@ -271,6 +271,15 @@
 @push('custom')
 <script>
 $(document).ready(function() {
+    // Empêche la double-soumission d'une action de workflow (ex: double-clic sur
+    // "Valider") : un double-clic proche dans le temps peut générer deux demandes de
+    // génération d'autorisation avant que la première n'ait committé, provoquant un
+    // doublon de code_autorisation. On désactive le bouton dès l'envoi réel du formulaire
+    // (après confirm(), pas au clic — sinon un clic annulé bloquerait le bouton).
+    $(document).on('submit', 'form', function() {
+        $(this).find('button[type="submit"]').prop('disabled', true);
+    });
+
     // Initialiser les Select2 pour tous les modals de notification
     $('.email-recipients').each(function() {
         const modalId = $(this).attr('id');
@@ -484,22 +493,29 @@ $(document).ready(function() {
                 initSelect2();
                 initFlightTypeFilter(this.api());
                 
-                // Appliquer le filtre pending si présent dans l'URL
+                // Appliquer le filtre présent dans l'URL (utilisé notamment par les cartes
+                // du tableau de bord DG/DTA, qui pointaient auparavant toutes vers cette
+                // même liste non filtrée).
                 var statusFilter = getUrlParameter('status_filter');
                 if (statusFilter === 'pending') {
                     var api = this.api();
-                    
+
                     // Mettre à jour le select de filtre
                     $('#etatDemandeFilter').val('pending');
-                    
+
                     // Appliquer le filtre sur la colonne des statuts (index 9)
                     api.column(9).search('submitted|under_review', true, false).draw();
-                    
+
                     // Mettre en évidence le filtre
                     highlightPendingFilter();
-                    
+
                     // Afficher une notification
                     toastr.info('Affichage des demandes en attente (soumises et en cours)');
+                } else if (statusFilter) {
+                    // Filtre simple sur une valeur unique de la colonne état (ex: service_approved, rejected...)
+                    var api = this.api();
+                    $('#etatDemandeFilter').val(statusFilter);
+                    api.column(9).search(statusFilter).draw();
                 }
             }
         });

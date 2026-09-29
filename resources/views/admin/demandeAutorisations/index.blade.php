@@ -329,6 +329,12 @@
     });
 
     $(document).ready(function() {
+        // Empêche la double-soumission d'une action de workflow (double-clic sur
+        // "Valider"/"Valider SRTA"...), source possible de doublons de code_autorisation.
+        $(document).on('submit', 'form', function() {
+            $(this).find('button[type="submit"]').prop('disabled', true);
+        });
+
         // Initialisation des Select2
         $('.select2').select2({
             theme: 'bootstrap4',

@@ -1753,4 +1753,6 @@ return [
     'reverif_pending_srta' => 'Revérification demandée à la SRTA',
     'dta_reverif_requested' => 'La DTA demande une revérification de ce dossier.',
     'confirm_srta_validation' => "Confirmer la validation SRTA de ce dossier ? Toutes les lignes ont déjà été validées.",
+    'retirer_rejet' => 'Retirer le rejet',
+    'confirm_retirer_rejet' => "Confirmer le retrait de ce rejet ? Le demandeur sera notifié que c'était une erreur.",
 ];

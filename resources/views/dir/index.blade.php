@@ -214,7 +214,7 @@
                                     <div class="icon">
                                         <i class="fas fa-check-circle"></i>
                                     </div>
-                                    <a href="{{ route('dir.demandeAutorisations') }}" class="small-box-footer">
+                                    <a href="{{ route('dir.demandeAutorisations') }}?status_filter=service_approved" class="small-box-footer">
                                         Voir détails <i class="fas fa-arrow-circle-right"></i>
                                     </a>
                                 </div>
@@ -228,7 +228,7 @@
                                     <div class="icon">
                                         <i class="fas fa-clock"></i>
                                     </div>
-                                    <a href="{{ route('dir.demandeAutorisations') }}" class="small-box-footer">
+                                    <a href="{{ route('dir.demandeAutorisations') }}?status_filter=pending" class="small-box-footer">
                                         Traiter <i class="fas fa-arrow-circle-right"></i>
                                     </a>
                                 </div>
@@ -385,7 +385,7 @@
                                     <div class="icon">
                                         <i class="fas fa-check-circle"></i>
                                     </div>
-                                    <a href="{{ route('dir.demandeAutorisations') }}" class="small-box-footer">
+                                    <a href="{{ route('dir.demandeAutorisations') }}?status_filter=service_approved" class="small-box-footer">
                                         Voir <i class="fas fa-arrow-circle-right"></i>
                                     </a>
                                 </div>
@@ -413,7 +413,9 @@
                                     <div class="icon">
                                         <i class="fas fa-file-contract"></i>
                                     </div>
-                                    <a href="{{ route('dir.demandeAutorisations') }}" class="small-box-footer">
+                                    {{-- Domaine différent (autorisations délivrées, pas les demandes) : on pointe
+                                         vers la vraie liste des autorisations, pas vers celle des demandes. --}}
+                                    <a href="{{ route('autorisations') }}" class="small-box-footer">
                                         Voir <i class="fas fa-arrow-circle-right"></i>
                                     </a>
                                 </div>

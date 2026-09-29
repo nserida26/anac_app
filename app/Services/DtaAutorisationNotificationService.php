@@ -3,10 +3,13 @@
 
 namespace App\Services;
 
+use App\Mail\GenericAutorisationNotification;
 use App\Models\DemandeAutorisation;
 use App\Models\Autorisation;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class DtaAutorisationNotificationService
 {
@@ -18,22 +21,41 @@ class DtaAutorisationNotificationService
     }
 
     /**
+     * Envoie une notification à un utilisateur selon les canaux qu'il a activés
+     * (WhatsApp par défaut ; e-mail en plus s'il l'a choisi dans son profil).
+     * Remplace les appels directs à $this->whatsApp->sendRichMessage($user->whatsapp, ...)
+     * partout où un objet User (et pas seulement un numéro) est disponible.
+     */
+    protected function notify(User $user, string $message, string $subject = 'Notification ANAC'): void
+    {
+        if (($user->notify_whatsapp ?? true) && !empty($user->whatsapp)) {
+            $this->whatsApp->sendRichMessage($user->whatsapp, $message);
+        }
+
+        if (!empty($user->notify_email) && !empty($user->email)) {
+            try {
+                Mail::to($user->email)->queue(new GenericAutorisationNotification($subject, $message));
+            } catch (\Throwable $e) {
+                // Un échec d'envoi e-mail ne doit jamais empêcher la suite du workflow.
+                Log::error("Échec de l'envoi e-mail de notification à {$user->email} : " . $e->getMessage());
+            }
+        }
+    }
+
+    /**
      * Notification quand le demandeur soumet une nouvelle demande
      */
     public function sendNewDemandeNotification(
         DemandeAutorisation $demande,
         User $recipient
-    ): array {
+    ): void {
         $message = $this->buildNewDemandeMessage(
             $demande->type->libelle,
             $demande->code,
-            $demande->user->demandeur->np 
+            $demande->user->demandeur->np
         );
 
-        return $this->whatsApp->sendRichMessage(
-            $recipient->whatsapp,
-            $message
-        );
+        $this->notify($recipient, $message, 'Nouvelle demande - ' . $demande->code);
     }
 
     /**
@@ -42,7 +64,7 @@ class DtaAutorisationNotificationService
     public function sendRectifiedDemandeNotification(
         DemandeAutorisation $demande,
         User $recipient
-    ): array {
+    ): void {
         $message = <<<MSG
         📝 *DEMANDE RECTIFIÉE SOUMISE* 📝
         _Type:_ *{$demande->type->libelle}*
@@ -55,10 +77,7 @@ class DtaAutorisationNotificationService
         {$this->getApplicationLink($demande->code)}
         MSG;
 
-        return $this->whatsApp->sendRichMessage(
-            $recipient->whatsapp,
-            $message
-        );
+        $this->notify($recipient, $message, 'Demande rectifiée - ' . $demande->code);
     }
 
     /**
@@ -67,7 +86,7 @@ class DtaAutorisationNotificationService
     public function sendDGAnnotateToDTANotification(
         DemandeAutorisation $demande,
         User $dta
-    ): array {
+    ): void {
         $message = <<<MSG
         📝 *ANNOTATION DG VERS DTA* 📝
         _Type:_ *{$demande->type->libelle}*
@@ -80,10 +99,7 @@ class DtaAutorisationNotificationService
         {$this->getApplicationLink($demande->code)}
         MSG;
 
-        return $this->whatsApp->sendRichMessage(
-            $dta->whatsapp,
-            $message
-        );
+        $this->notify($dta, $message, 'Annotation DG - ' . $demande->code);
     }
 
     /**
@@ -93,7 +109,9 @@ class DtaAutorisationNotificationService
         DemandeAutorisation $demande,
         User $srta,
         User $dta
-    ): array {
+    ): void {
+        $subject = 'Annotation DG vers SRTA - ' . $demande->code;
+
         // Notification à la SRTA
         $srtaMessage = <<<MSG
         📝 *ANNOTATION DG VERS SRTA* 📝
@@ -107,7 +125,7 @@ class DtaAutorisationNotificationService
         {$this->getApplicationLink($demande->code)}
         MSG;
 
-        $this->whatsApp->sendRichMessage($srta->whatsapp, $srtaMessage);
+        $this->notify($srta, $srtaMessage, $subject);
 
         // Notification à la DTA
         $dtaMessage = <<<MSG
@@ -122,7 +140,7 @@ class DtaAutorisationNotificationService
         {$this->getApplicationLink($demande->code)}
         MSG;
 
-        return $this->whatsApp->sendRichMessage($dta->whatsapp, $dtaMessage);
+        $this->notify($dta, $dtaMessage, $subject);
     }
 
     /**
@@ -133,7 +151,9 @@ class DtaAutorisationNotificationService
         User $dta,
         User $demandeur,
         string $motif
-    ): array {
+    ): void {
+        $subject = 'Demande rejetée par le DG - ' . $demande->code;
+
         // Notification à la DTA
         $dtaMessage = <<<MSG
         ❌ *DEMANDE REJETÉE PAR LE DG* ❌
@@ -148,7 +168,7 @@ class DtaAutorisationNotificationService
         {$this->getApplicationLink($demande->code)}
         MSG;
 
-        $this->whatsApp->sendRichMessage($dta->whatsapp, $dtaMessage);
+        $this->notify($dta, $dtaMessage, $subject);
 
         // Notification au demandeur
         $demandeurMessage = <<<MSG
@@ -163,7 +183,7 @@ class DtaAutorisationNotificationService
         {$this->getApplicationLink($demande->code)}
         MSG;
 
-        return $this->whatsApp->sendRichMessage($demandeur->whatsapp, $demandeurMessage);
+        $this->notify($demandeur, $demandeurMessage, $subject);
     }
 
     /**
@@ -172,7 +192,7 @@ class DtaAutorisationNotificationService
     public function sendDTAAnnotateForDGNotification(
         DemandeAutorisation $demande,
         User $dg
-    ): array {
+    ): void {
         $message = <<<MSG
         📝 *ANNOTATION DTA POUR LE DG* 📝
         _Type:_ *{$demande->type->libelle}*
@@ -185,7 +205,7 @@ class DtaAutorisationNotificationService
         {$this->getApplicationLink($demande->code)}
         MSG;
 
-        return $this->whatsApp->sendRichMessage($dg->whatsapp, $message);
+        $this->notify($dg, $message, 'Annotation DTA pour le DG - ' . $demande->code);
     }
 
     /**
@@ -217,7 +237,7 @@ class DtaAutorisationNotificationService
         DemandeAutorisation $demande,
         User $demandeur,
         string $motif
-    ): array {
+    ): void {
         $message = <<<MSG
         ❌ *DEMANDE REJETÉE PAR LE DTA* ❌
         _Type:_ *{$demande->type->libelle}*
@@ -230,7 +250,7 @@ class DtaAutorisationNotificationService
         {$this->getApplicationLink($demande->code)}
         MSG;
 
-        return $this->whatsApp->sendRichMessage($demandeur->whatsapp, $message);
+        $this->notify($demandeur, $message, 'Demande rejetée par la DTA - ' . $demande->code);
     }
 
     /**
@@ -239,7 +259,7 @@ class DtaAutorisationNotificationService
     public function sendSRTAValidationNotification(
         DemandeAutorisation $demande,
         User $dta
-    ): array {
+    ): void {
         $message = <<<MSG
         ✅ *VALIDATION SRTA* ✅
         _Type:_ *{$demande->type->libelle}*
@@ -252,7 +272,7 @@ class DtaAutorisationNotificationService
         {$this->getApplicationLink($demande->code)}
         MSG;
 
-        return $this->whatsApp->sendRichMessage($dta->whatsapp, $message);
+        $this->notify($dta, $message, 'Validation SRTA - ' . $demande->code);
     }
 
     /**
@@ -262,7 +282,7 @@ class DtaAutorisationNotificationService
         DemandeAutorisation $demande,
         User $srta,
         string $motif
-    ): array {
+    ): void {
         $message = <<<MSG
         🔄 *DEMANDE DE REVÉRIFICATION* 🔄
         _Type:_ *{$demande->type->libelle}*
@@ -276,7 +296,7 @@ class DtaAutorisationNotificationService
         {$this->getApplicationLink($demande->code)}
         MSG;
 
-        return $this->whatsApp->sendRichMessage($srta->whatsapp, $message);
+        $this->notify($srta, $message, 'Demande de revérification - ' . $demande->code);
     }
 
     /**
@@ -285,13 +305,9 @@ class DtaAutorisationNotificationService
     public function sendDTATransmitToDirectionsNotification(
         DemandeAutorisation $demande,
         array $directions
-    ): array {
-        $results = [];
-        
+    ): void {
         foreach ($directions as $direction => $user) {
-            if ($user && !empty($user->whatsapp)) {
-                $directionLabel = $this->getDirectionLabel($direction);
-                
+            if ($user) {
                 $message = <<<MSG
                 📤 *TRANSMISSION POUR AVIS* 📤
                 _Type:_ *{$demande->type->libelle}*
@@ -304,11 +320,9 @@ class DtaAutorisationNotificationService
                 {$this->getApplicationLink($demande->code)}
                 MSG;
 
-                $results[$direction] = $this->whatsApp->sendRichMessage($user->whatsapp, $message);
+                $this->notify($user, $message, 'Transmission pour avis - ' . $demande->code);
             }
         }
-
-        return $results;
     }
 /**
  * Notification quand le DTA retire des directions spécifiques
@@ -318,9 +332,9 @@ public function sendDirectionsRemovedNotification(
     User $dta,
     array $directionsRemoved,
     ?string $motif = null
-): array {
+): void {
     $directionsList = implode(', ', array_map('strtoupper', $directionsRemoved));
-    
+
     $message = <<<MSG
     ↩️ *DIRECTIONS RETIRÉES* ↩️
     _Type:_ *{$demande->type->libelle}*
@@ -329,14 +343,14 @@ public function sendDirectionsRemovedNotification(
 
     📌 *Directions retirées:* {$directionsList}
     MSG;
-    
+
     if ($motif) {
         $message .= "\n📝 *Motif:* {$motif}";
     }
-    
+
     $message .= "\n\n🔗 *Accès direct:*\n{$this->getApplicationLink($demande->code)}";
 
-    return $this->whatsApp->sendRichMessage($dta->whatsapp, $message);
+    $this->notify($dta, $message, 'Directions retirées - ' . $demande->code);
 }
     /**
      * Notification quand le DTA retire la demande aux directions
@@ -345,14 +359,9 @@ public function sendDTARemoveFromDirectionsNotification(
     DemandeAutorisation $demande,
     array $directions,
     ?string $motif = null
-): array {
-    $results = [];
-    $directionsList = implode(', ', array_map(function($dir) {
-        return strtoupper($dir);
-    }, array_keys($directions)));
-    
+): void {
     foreach ($directions as $direction => $user) {
-        if ($user && !empty($user->whatsapp)) {
+        if ($user) {
             $message = <<<MSG
             ↩️ *DEMANDE RETIRÉE* ↩️
             _Type:_ *{$demande->type->libelle}*
@@ -361,18 +370,16 @@ public function sendDTARemoveFromDirectionsNotification(
 
             📌 *Message:* La direction {$direction} a été retirée de cette demande.
             MSG;
-            
+
             if ($motif) {
                 $message .= "\n📝 *Motif:* {$motif}";
             }
-            
+
             $message .= "\n\n🔗 *Accès direct:*\n{$this->getApplicationLink($demande->code)}";
 
-            $results[$direction] = $this->whatsApp->sendRichMessage($user->whatsapp, $message);
+            $this->notify($user, $message, 'Demande retirée - ' . $demande->code);
         }
     }
-
-    return $results;
 }
 
     /**
@@ -382,9 +389,9 @@ public function sendDTARemoveFromDirectionsNotification(
         DemandeAutorisation $demande,
         User $dta,
         string $direction
-    ): array {
+    ): void {
         $directionLabel = $this->getDirectionLabel($direction);
-        
+
         $message = <<<MSG
         ✅ *VALIDATION DIRECTION* ✅
         _Type:_ *{$demande->type->libelle}*
@@ -397,7 +404,7 @@ public function sendDTARemoveFromDirectionsNotification(
         {$this->getApplicationLink($demande->code)}
         MSG;
 
-        return $this->whatsApp->sendRichMessage($dta->whatsapp, $message);
+        $this->notify($dta, $message, 'Validation direction - ' . $demande->code);
     }
 
     /**
@@ -406,7 +413,7 @@ public function sendDTARemoveFromDirectionsNotification(
     public function sendDTAValidationForDGSignatureNotification(
         DemandeAutorisation $demande,
         User $dg
-    ): array {
+    ): void {
         $message = <<<MSG
         ✍️ *DEMANDE VALIDÉE - SIGNATURE REQUISE* ✍️
         _Type:_ *{$demande->type->libelle}*
@@ -419,7 +426,7 @@ public function sendDTARemoveFromDirectionsNotification(
         {$this->getApplicationLink($demande->code)}
         MSG;
 
-        return $this->whatsApp->sendRichMessage($dg->whatsapp, $message);
+        $this->notify($dg, $message, 'Signature requise - ' . $demande->code);
     }
 
     /**
@@ -429,7 +436,7 @@ public function sendDTARemoveFromDirectionsNotification(
         DemandeAutorisation $demande,
         User $dta,
         User $demandeur
-    ): array {
+    ): void {
         // Notification à la DTA
         $dtaMessage = <<<MSG
         ✍️ *AUTORISATION SIGNÉE PAR LE DG* ✍️
@@ -443,7 +450,7 @@ public function sendDTARemoveFromDirectionsNotification(
         {$this->getApplicationLink($demande->code)}
         MSG;
 
-        $this->whatsApp->sendRichMessage($dta->whatsapp, $dtaMessage);
+        $this->notify($dta, $dtaMessage, 'Autorisation signée - ' . $demande->code);
 
         // Notification au demandeur
         $demandeurMessage = <<<MSG
@@ -457,7 +464,7 @@ public function sendDTARemoveFromDirectionsNotification(
         {$this->getApplicationLink($demande->code)}
         MSG;
 
-        return $this->whatsApp->sendRichMessage($demandeur->whatsapp, $demandeurMessage);
+        $this->notify($demandeur, $demandeurMessage, 'Autorisation signée - ' . $demande->code);
     }
 
     /**
@@ -505,24 +512,21 @@ public function sendDTARemoveFromDirectionsNotification(
         User $recipient,
         string $rejecterRole,
         array $reasons,
-    ): array {
+    ): void {
         $message = $this->buildRejectionMessage(
             $demande->code,
             $rejecterRole,
             $reasons,
-            optional($demande->user->demandeur)->np 
+            optional($demande->user->demandeur)->np
         );
 
-        return $this->whatsApp->sendRichMessage(
-            $recipient->whatsapp,
-            $message
-        );
+        $this->notify($recipient, $message, 'Demande rejetée - ' . $demande->code);
     }
 
     public function sendRejectionCancelledNotification(
         DemandeAutorisation $demande,
         User $recipient
-    ): array {
+    ): void {
         $message = <<<MSG
         ✅ *REJET RETIRÉ*
         _Type:_ *{$demande->type->libelle}*
@@ -534,10 +538,7 @@ public function sendDTARemoveFromDirectionsNotification(
         {$this->getApplicationLink($demande->code)}
         MSG;
 
-        return $this->whatsApp->sendRichMessage(
-            $recipient->whatsapp,
-            $message
-        );
+        $this->notify($recipient, $message, 'Rejet retiré - ' . $demande->code);
     }
 
     /**

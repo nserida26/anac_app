@@ -429,26 +429,13 @@
                                                                 </button>
                                                             @endif
 
-                                                            @php
-                                                                $vols = $demande->vols ?? collect();
-                                                                $firstVolId = $vols->first()->id ?? null;
-                                                                $specialVolIds = [3, 4, 6, 7, 9, 10, 11, 12, 13];
-                                                            @endphp
-
-                                                            @if ($typeId === 1 || ($typeId === 2 && $firstVolId && in_array($firstVolId, $specialVolIds)))
-                                                                @if (($etatDemande->dg_valider ?? false) || ($etatDemande->dta_dg_valider ?? false))
-                                                                    <a target="_blank"
-                                                                       href="{{ route('user.print', $demande->autorisation($demande->id)) }}"
-                                                                       class="btn btn-warning btn-sm">@lang('trans.print')</a>
-                                                                @endif
-                                                            @endif
-
-                                                            @if ($typeId === 2)
-                                                                @if ($etatDemande->daf_confirme_pay ?? false)
-                                                                    <a target="_blank"
-                                                                       href="{{ route('user.print', $demande->autorisation($demande->id)) }}"
-                                                                       class="btn btn-warning btn-sm">@lang('trans.print')</a>
-                                                                @endif
+                                                            {{-- Autorisation délivrée : imprimable quel que soit le
+                                                                 type de demande (les conditions précédentes, propres
+                                                                 aux types 1/2, ne couvraient pas les autres). --}}
+                                                            @if ($isIssued)
+                                                                <a target="_blank"
+                                                                   href="{{ route('user.print', $demande->autorisation($demande->id)) }}"
+                                                                   class="btn btn-warning btn-sm">@lang('trans.print')</a>
                                                             @endif
                                                         </div>
                                                     </td>
@@ -586,7 +573,7 @@
                                     <i class="fas fa-info-circle"></i> Pour "TRANSPORT DÉPOUILLE MORTELLE", le type de vol est automatiquement défini sur "VOL CARGO"
                                 </small>
                                 <small id="typeVolMultiInfo" class="form-text text-info" style="display: none;">
-                                    <i class="fas fa-info-circle"></i> Seuls les types de vol "VOL CARGO" et "VOL CHARTER" sont disponibles pour cette demande.
+                                    <i class="fas fa-info-circle"></i> Seuls les types de vol "VOL CARGO", "VOL CHARTER" et "VOL COMMERCIAL" sont disponibles pour cette demande.
                                 </small>
                             </div>
                         </div>
@@ -689,8 +676,8 @@
                         <input type="text" class="form-control" name="nom_entreprise" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">@lang('trans.code') <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="code" required>
+                        <label class="form-label">@lang('trans.code')</label>
+                        <input type="text" class="form-control" name="code">
                     </div>
                     <div class="form-group">
                         <label>@lang('trans.email')</label>
@@ -1032,10 +1019,10 @@ function setupType3MultiSelect(typeVolSelect, typeVolInfo, typeVolMultiInfo) {
     typeVolSelect.attr('multiple', 'multiple');
     typeVolSelect.attr('name', 'type_vol_id[]');
     
-    // Filtrer : uniquement VOL CARGO (id=1) et VOL CHARTER (id=2)
+    // Filtrer : uniquement VOL CARGO (id=1), VOL CHARTER (id=2) et VOL COMMERCIAL (id=14)
     typeVolSelect.find('option').each(function() {
         const val = $(this).val();
-        if (val === '' || ![1, 2].includes(parseInt(val))) {
+        if (val === '' || ![1, 2, 14].includes(parseInt(val))) {
             $(this).prop('disabled', true).hide();
         } else {
             $(this).prop('disabled', false).show();

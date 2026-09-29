@@ -1495,13 +1495,27 @@ $demandeAutorisations = DemandeAutorisation::with(['type', 'user', 'etatDemande'
                         })
                         ->latest()->first();
 
-                    $this->dtaAutorisationNotificationService->sendRejectionNotification(
-                        $demande,
-                        $dta,
-                        $roleName,
-                        [$motif]
-                    );
-                   
+                    // Notifie la DTA (si un compte DTA signé existe)...
+                    if ($dta && !empty($dta->whatsapp)) {
+                        $this->dtaAutorisationNotificationService->sendRejectionNotification(
+                            $demande,
+                            $dta,
+                            $roleName,
+                            [$motif]
+                        );
+                    }
+
+                    // ...et le demandeur, qui n'était auparavant jamais notifié de ce rejet.
+                    $demande->loadMissing('user');
+                    if ($demande->user && !empty($demande->user->whatsapp)) {
+                        $this->dtaAutorisationNotificationService->sendRejectionNotification(
+                            $demande,
+                            $demande->user,
+                            $roleName,
+                            [$motif]
+                        );
+                    }
+
                     return back()->with('success', 'Demande rejetée avec succès.');
                 }
                 # code...

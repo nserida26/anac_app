@@ -175,6 +175,9 @@ Route::get('/rapports/compagnie/{id}', [App\Http\Controllers\DgDsvController::cl
 
                 Route::get('/dashboard/data', [DgDsvController::class, 'getData'])->name('dir.data');
                 Route::post('/delete', [App\Http\Controllers\DgDsvController::class, 'delete'])->name('dir.delete');
+                // Même action que autorisations.retirer-rejet (groupe admin), ouverte ici à la DTA
+                // qui peut elle aussi rejeter une ligne par erreur via handleApproval().
+                Route::post('/autorisations/retirer-rejet', [App\Http\Controllers\AdminController::class, 'retirerRejet'])->name('dir.autorisations.retirer-rejet');
                 Route::get('/demandes/show/{id}', [App\Http\Controllers\DgDsvController::class, 'showDemandeAutorisation'])->name('dg.demandes.show');
                 Route::get('/approbations/show/{id}', [App\Http\Controllers\DgDsvController::class, 'showDemandeApprobation'])->name('dg.approbations.show');
 

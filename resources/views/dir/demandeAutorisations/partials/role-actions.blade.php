@@ -80,6 +80,12 @@
         @endif
     @endif
 
+    @if($hasAutorisation)
+        <a target="_blank" href="{{ route('autorisations.print', $demande->autorisation($demande->id)) }}"
+           class="btn btn-warning btn-sm mb-1">
+            <i class="fas fa-print"></i> @lang('trans.print')
+        </a>
+    @endif
 
 @elseif($role == 'dta')
     {{-- Actions pour DTA --}}
@@ -122,7 +128,11 @@
         </form>
     @endif
 
-    @if($etat->compagnie_cree_demande && ($etat->dg_annoter || $etat->dta_dg_annoter) && $etat->dta_annoter && !$etat->service_valider && !$etat->dta_valider)
+    {{-- Inclut dg_annoter_admin : quand le DG envoie directement à la SRTA (sans passer par
+         la DTA), la DTA doit quand même pouvoir faire avancer le dossier — notamment après
+         une rectification qui remet srta_valider/service_valider à zéro, sans quoi la DTA
+         n'a plus aucune action tant que la SRTA n'a pas revalidé elle-même. --}}
+    @if($etat->compagnie_cree_demande && ($etat->dg_annoter || $etat->dta_dg_annoter || $etat->dg_annoter_admin) && $etat->dta_annoter && !$etat->service_valider && !$etat->dta_valider)
         <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline">
             @csrf
             <input type="hidden" name="action" value="service_valider">
@@ -134,7 +144,7 @@
         </form>
     @endif
 
-    @if($etat->compagnie_cree_demande && ($etat->dg_annoter || $etat->dta_dg_annoter) && !$etat->dta_annoter && !$etat->service_tout_valider)
+    @if($etat->compagnie_cree_demande && ($etat->dg_annoter || $etat->dta_dg_annoter || $etat->dg_annoter_admin) && !$etat->dta_annoter && !$etat->service_tout_valider)
         <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline">
             @csrf
             <input type="hidden" name="action" value="service_tout_valider">

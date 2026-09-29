@@ -129,7 +129,7 @@ class DemandeAutorisationController extends Controller
             if ($typeId === 3) {
                 // Type 3 : multi-select (array)
                 $validationRules['type_vol_id'] = 'required|array|min:1';
-                $validationRules['type_vol_id.*'] = 'in:1,2'; // Seulement VOL CARGO et VOL CHARTER
+                $validationRules['type_vol_id.*'] = 'in:1,2,14'; // VOL CARGO, VOL CHARTER, VOL COMMERCIAL
             } elseif ($typeId === 4) {
                 // Type 4 : automatiquement VOL CARGO (id=1)
                 $validationRules['type_vol_id'] = 'required|in:1';
@@ -151,7 +151,7 @@ class DemandeAutorisationController extends Controller
                 'type_vol_id.required' => 'Veuillez sélectionner un type de vol.',
                 'type_vol_id.array' => 'Format de type de vol invalide.',
                 'type_vol_id.min' => 'Veuillez sélectionner au moins un type de vol.',
-                'type_vol_id.*.in' => 'Seuls les types de vol "VOL CARGO" et "VOL CHARTER" sont autorisés pour ce type de demande.',
+                'type_vol_id.*.in' => 'Seuls les types de vol "VOL CARGO", "VOL CHARTER" et "VOL COMMERCIAL" sont autorisés pour ce type de demande.',
                 'type_vol_id.in' => 'Le type de vol doit être "VOL CARGO" pour le transport de dépouille mortelle.',
                 'type_vol_id.exists' => 'Le type de vol sélectionné est invalide.',
                 'sous_validite.integer' => 'La sous-validité doit être un nombre entier.',
@@ -633,11 +633,12 @@ class DemandeAutorisationController extends Controller
                         return $query->where('user_id', auth()->id());
                     })
                 ],
+                // Facultatif pour le moment : pas indispensable à la saisie d'un opérateur.
                 'code' => [
-                    'required',
+                    'nullable',
                     'string',
                     'max:100',
-                    'unique:compagnies,code', // Le code doit être unique globalement
+                    'unique:compagnies,code', // Le code doit être unique globalement s'il est renseigné
                     'regex:/^[A-Za-z0-9\-]+$/'
                 ],
                 'email' => 'nullable|email|max:100',
@@ -656,8 +657,10 @@ class DemandeAutorisationController extends Controller
                 'telephone.regex' => 'Format de téléphone invalide',
             ]);
 
-            // Normaliser le code en majuscules
-            $validated['code'] = strtoupper($validated['code']);
+            // Normaliser le code en majuscules (si renseigné)
+            if (!empty($validated['code'])) {
+                $validated['code'] = strtoupper($validated['code']);
+            }
 
             // Vérification supplémentaire pour éviter les doublons par nom (insensible à la casse)
             $existingCompagnie = Compagnie::where('user_id', auth()->id())
@@ -1135,25 +1138,25 @@ class DemandeAutorisationController extends Controller
                     // Génération du code autorisation
                     $prefix = strtoupper($request->type_autorisation) === 'SURVOL' ? 'SUR' : 'SAT';
                     $currentYear = now()->format('y');
-                    $lastCode = Autorisation::where('code_autorisation', 'like', "{$prefix}-%{$currentYear}")->latest()->first();
-                    $sequenceNumber = $lastCode && preg_match('/-(\d{4})-/', $lastCode->code_autorisation, $matches) ? (int)$matches[1] + 1 : 1;
-                    do {
-                        $codeAutorisation = "{$prefix}-" . str_pad($sequenceNumber, 4, '0', STR_PAD_LEFT) . "-{$currentYear}";
-                        $sequenceNumber++;
-                    } while (Autorisation::where('code_autorisation', $codeAutorisation)->exists());
 
-                    Autorisation::create([
+                    $this->createAutorisationOrRetry([
                         'demande_id' => $demandeId,
                         'date_delivrance' => $demande->date_debut,
                         'date_expiration' => $demande->date_fin,
-                        'code_autorisation' => $codeAutorisation,
                         'statut' => 'generated',
                         'cachet' => $dg?->cachet->cachet ?? '',
                         'nom_signataire' => $dg?->signature->nom ?? '',
                         'signature_dg' => $dg?->signature->signature ?? '',
                         'signature_dta' => $dta?->signature->signature ?? '',
                         'signature_srta' => $srta?->signature->signature ?? '',
-                    ]);
+                    ], function () use ($prefix, $currentYear) {
+                        $lastCode = Autorisation::where('code_autorisation', 'like', "{$prefix}-%{$currentYear}")->latest()->first();
+                        $sequenceNumber = $lastCode && preg_match('/-(\d{4})-/', $lastCode->code_autorisation, $matches) ? (int) $matches[1] + 1 : 1;
+                        while (Autorisation::where('code_autorisation', "{$prefix}-" . str_pad($sequenceNumber, 4, '0', STR_PAD_LEFT) . "-{$currentYear}")->exists()) {
+                            $sequenceNumber++;
+                        }
+                        return "{$prefix}-" . str_pad($sequenceNumber, 4, '0', STR_PAD_LEFT) . "-{$currentYear}";
+                    });
 
                     // Notifications
                     foreach ([$demande->user, $dta] as $user) {
@@ -1225,83 +1228,58 @@ class DemandeAutorisationController extends Controller
                             default => 'SUR',
                         };
                         $currentYear = now()->format('y');
-                        $lastCode = Autorisation::where('code_autorisation', 'like', "{$prefix}-%{$currentYear}")->latest()->first();
-                        $sequenceNumber = $lastCode && preg_match('/-(\d{4})-/', $lastCode->code_autorisation, $matches) ? (int)$matches[1] + 1 : 1;
-                        do {
-                            $codeAutorisation = "{$prefix}-" . str_pad($sequenceNumber, 4, '0', STR_PAD_LEFT) . "-{$currentYear}";
-                            $sequenceNumber++;
-                        } while (Autorisation::where('code_autorisation', $codeAutorisation)->exists());
 
-                        Autorisation::create([
+                        $this->createAutorisationOrRetry([
                             'demande_id' => $demandeId,
                             'date_delivrance' => $demande->date_debut,
                             'date_expiration' => $demande->date_fin,
-                            'code_autorisation' => $codeAutorisation,
                             'statut' => 'generated',
                             'cachet' => $dg?->cachet->cachet ?? '',
                             'nom_signataire' => $dg?->signature->nom ?? '',
                             'signature_dg' => $dg?->signature->signature ?? '',
                             'signature_dta' => $dta?->signature->signature ?? '',
                             'signature_srta' => $srta?->signature->signature ?? '',
-                        ]);
+                        ], function () use ($prefix, $currentYear) {
+                            $lastCode = Autorisation::where('code_autorisation', 'like', "{$prefix}-%{$currentYear}")->latest()->first();
+                            $sequenceNumber = $lastCode && preg_match('/-(\d{4})-/', $lastCode->code_autorisation, $matches) ? (int) $matches[1] + 1 : 1;
+                            while (Autorisation::where('code_autorisation', "{$prefix}-" . str_pad($sequenceNumber, 4, '0', STR_PAD_LEFT) . "-{$currentYear}")->exists()) {
+                                $sequenceNumber++;
+                            }
+                            return "{$prefix}-" . str_pad($sequenceNumber, 4, '0', STR_PAD_LEFT) . "-{$currentYear}";
+                        });
 
                         $actionType = 'validated';
                     } else if (in_array($demande->type->id, [5, 6, 7])) {
 
                         $currentYear = now()->year;
 
-                        $countThisYear = Autorisation::whereYear('created_at', $currentYear)->count();
-                        $sequenceNumber = $countThisYear + 1;
-                        $formattedSequence = str_pad($sequenceNumber, 4, '0', STR_PAD_LEFT);
-                        $code = "{$formattedSequence}/{$currentYear}";
-
-                        $codeExists = Autorisation::where('code_autorisation', $code)->exists();
-
-                        if ($codeExists) {
-                            // En cas de conflit (très improbable), trouver le prochain numéro disponible
-                            $existingCodes = Autorisation::where('code_autorisation', 'like', "%/{$currentYear}")
-                                ->pluck('code_autorisation')
-                                ->toArray();
-
-                            // Extraire les numéros de séquence existants
-                            $existingSequences = [];
-                            foreach ($existingCodes as $existingCode) {
-                                preg_match('/^(\d{4})\/\d{4}$/', $existingCode, $matches);
-                                if (isset($matches[1])) {
-                                    $existingSequences[] = (int)$matches[1];
-                                }
-                            }
-
-                            // Trouver le premier numéro disponible
-                            $nextAvailable = 1;
-                            while (in_array($nextAvailable, $existingSequences)) {
-                                $nextAvailable++;
-                            }
-
-                            // Vérifier que nous ne dépassons pas 9999
-                            if ($nextAvailable > 9999) {
-                                // Si nous dépassons 9999, nous pourrions utiliser une autre stratégie
-                                // Par exemple, réinitialiser à 0001 ou utiliser plus de chiffres
-                                // Pour l'instant, on lève une exception
-                                //throw new \Exception("Nombre maximum de demandes atteint pour l'année {$currentYear}");
-                            }
-
-                            $formattedSequence = str_pad($nextAvailable, 4, '0', STR_PAD_LEFT);
-                            $code = "{$formattedSequence}/{$currentYear}";
-                        }
-
-                        Autorisation::create([
+                        $this->createAutorisationOrRetry([
                             'demande_id' => $demandeId,
                             'date_delivrance' => $demande->date_debut,
                             'date_expiration' => $demande->date_fin,
-                            'code_autorisation' => $code,
                             'statut' => 'generated',
                             'cachet' => $dg?->cachet->cachet ?? '',
                             'nom_signataire' => $dg?->signature->nom ?? '',
                             'signature_dg' => $dg?->signature->signature ?? '',
                             'signature_dta' => $dta?->signature->signature ?? '',
                             'signature_srta' => $srta?->signature->signature ?? '',
-                        ]);
+                        ], function () use ($currentYear) {
+                            // Numéros de séquence déjà utilisés cette année (format NNNN/AAAA)
+                            $existingSequences = [];
+                            foreach (Autorisation::where('code_autorisation', 'like', "%/{$currentYear}")->pluck('code_autorisation') as $existingCode) {
+                                if (preg_match('/^(\d{4})\/\d{4}$/', $existingCode, $matches)) {
+                                    $existingSequences[] = (int) $matches[1];
+                                }
+                            }
+
+                            $nextAvailable = 1;
+                            while (in_array($nextAvailable, $existingSequences, true)) {
+                                $nextAvailable++;
+                            }
+
+                            return str_pad($nextAvailable, 4, '0', STR_PAD_LEFT) . "/{$currentYear}";
+                        });
+
                         $actionType = 'validated';
                     }
 
@@ -1557,6 +1535,38 @@ class DemandeAutorisationController extends Controller
                 "Une autorisation (n° {$existante->code_autorisation}) existe déjà pour cette demande. "
                 . "Impossible d'en générer une nouvelle."
             );
+        }
+    }
+
+    /**
+     * Crée une Autorisation en générant son code_autorisation via $generateCode (rappelé à
+     * chaque tentative, donc doit relire l'état courant de la table à chaque appel).
+     *
+     * La génération du code (lire le dernier numéro puis l'incrémenter) n'est pas atomique :
+     * deux validations proches dans le temps (double-clic, deux onglets...) peuvent lire le
+     * même "dernier numéro" avant que l'une des deux n'ait inséré, provoquant une violation
+     * de la contrainte unique `code_autorisation` (SQLSTATE 23000 / erreur MySQL 1062). Plutôt
+     * que de laisser planter la requête, on intercepte ce cas précis et on réessaie avec un
+     * nouveau code — la table `autorisations` étant en MyISAM (pas de transactions/verrous de
+     * ligne, voir la note db-legacy-myisam-tables), c'est la seule protection fiable possible.
+     */
+    private function createAutorisationOrRetry(array $data, callable $generateCode, int $maxAttempts = 5): Autorisation
+    {
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            $data['code_autorisation'] = $generateCode();
+
+            try {
+                return Autorisation::create($data);
+            } catch (\Illuminate\Database\QueryException $e) {
+                $isDuplicateCode = (int) ($e->errorInfo[1] ?? 0) === 1062
+                    && str_contains($e->getMessage(), 'code_autorisation');
+
+                if (!$isDuplicateCode || $attempt === $maxAttempts) {
+                    throw $e;
+                }
+
+                Log::warning("Code d'autorisation '{$data['code_autorisation']}' déjà pris (tentative {$attempt}/{$maxAttempts}), nouvelle génération.");
+            }
         }
     }
 

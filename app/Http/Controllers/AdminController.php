@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 use App\Models\Activity;
 use App\Models\Approbation;
 use App\Models\Autorisation;
@@ -1373,22 +1374,45 @@ class AdminController extends Controller
         return redirect()->back()->with('success', 'Information rejetée avec succès.');
     }
 
+    /**
+     * Tables de lignes pouvant être rejetées/dé-rejetées pour une demande d'autorisation.
+     * Liste blanche volontairement fermée (plutôt que "toute table possédant les
+     * colonnes valider/motif") pour ne pas permettre de cibler une table arbitraire.
+     */
+    private const REJECTABLE_AUTORISATION_TABLES = [
+        'avions', 'vols', 'equipe_vols', 'fret_vols',
+        'personne_deces', 'mdns', 'receiving_parties', 'document_autorisations',
+    ];
+
+    /**
+     * Annule un rejet fait par erreur sur une ligne (avion, vol, document...) d'une
+     * demande d'autorisation : redonne la main à l'ANAC sur le dossier (au lieu d'obliger
+     * le demandeur à "rectifier" une demande qui n'avait rien à corriger) et le notifie
+     * que le rejet précédent était une erreur.
+     */
     public function retirerRejet(Request $request)
     {
+        // Route ouverte à deux groupes de rôles (admin/dsv/dg via 'autorisations.retirer-rejet',
+        // dta via 'dir.autorisations.retirer-rejet') : seuls DTA et admin (SRTA) sont réellement
+        // habilités à rejeter une ligne (handleApproval), donc à annuler ce rejet.
+        if (!auth()->user()?->hasAnyRole(['dta', 'admin'])) {
+            abort(403, 'Action non autorisée.');
+        }
+
         $validated = $request->validate([
-            'table' => 'required|string',
+            'table' => ['required', 'string', Rule::in(self::REJECTABLE_AUTORISATION_TABLES)],
             'id' => 'required|integer',
             'demande_id' => 'required|integer|exists:demande_autorisations,id',
         ]);
 
-        if (!DB::getSchemaBuilder()->hasTable($validated['table'])) {
-            return redirect()->back()->with('error', 'Table non trouvée.');
-        }
+        // La ligne doit bien appartenir à la demande indiquée.
+        $row = DB::table($validated['table'])
+            ->where('id', $validated['id'])
+            ->where('demande_autorisation_id', $validated['demande_id'])
+            ->first();
 
-        foreach (['valider', 'motif'] as $column) {
-            if (!DB::getSchemaBuilder()->hasColumn($validated['table'], $column)) {
-                return redirect()->back()->with('error', 'Colonne non trouvée dans la table.');
-            }
+        if (!$row) {
+            return redirect()->back()->with('error', "Cette ligne n'appartient pas à la demande indiquée.");
         }
 
         DB::table($validated['table'])
@@ -1401,6 +1425,19 @@ class AdminController extends Controller
             ]);
 
         $demande = DemandeAutorisation::with('user')->findOrFail($validated['demande_id']);
+
+        // Le rejet (handleApproval) avait "dé-soumis" le dossier (compagnie_cree_demande
+        // = false, date_soumission = null) pour forcer le demandeur à rectifier. Puisque
+        // le rejet était une erreur, on redonne directement la main à l'ANAC sans passer
+        // par cette étape — sinon le dossier resterait invisible pour la DTA/DG/SRTA
+        // ($canView exige compagnie_cree_demande) alors même que la ligne n'est plus rejetée.
+        if ($demande->etatDemande) {
+            $demande->etatDemande->update(['compagnie_cree_demande' => true]);
+        }
+        if (empty($demande->date_soumission)) {
+            $demande->update(['date_soumission' => now()]);
+        }
+
         Activity::log("rejet_retire: {$validated['table']}#{$validated['id']}", $demande->id);
 
         if ($demande->user && !empty($demande->user->whatsapp)) {
@@ -2253,12 +2290,31 @@ class AdminController extends Controller
             Activity::log('rejected', $demande->id);
             $recipientUser = $demande->user;
 
+            // Le libellé envoyé au demandeur doit refléter qui a réellement rejeté
+            // (DTA ou SRTA/ADMIN), pas être figé sur "DTA".
             $this->dtaAutorisationNotificationService->sendRejectionNotification(
                 $demande,
                 $recipientUser,
-                'DTA',
+                $actorRole,
                 [$motif]
             );
+
+            // Si c'est la SRTA (admin) qui rejette, la DTA doit également être notifiée.
+            if ($actorRole === 'ADMIN') {
+                $dta = User::role('dta')
+                    ->whereHas('signature', fn($q) => $q->whereNotNull('signature'))
+                    ->latest()->first();
+
+                if ($dta && !empty($dta->whatsapp)) {
+                    $this->dtaAutorisationNotificationService->sendRejectionNotification(
+                        $demande,
+                        $dta,
+                        $actorRole,
+                        [$motif]
+                    );
+                }
+            }
+
             return response()->json(['success' => true]);
         }
     }

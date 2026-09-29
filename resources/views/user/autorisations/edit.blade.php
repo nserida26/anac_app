@@ -415,17 +415,17 @@
 
                             <div class="row">
                                 <!-- Numéro de vol -->
-                                @if (!in_array($demandeAutorisation->type->id, [3]))
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-group">
-                                            <label for="numero_vol" class="form-label">@lang('trans.flight_number')</label>
-                                            <input type="text" class="form-control" id="numero_vol"
-                                                name="numero_vol">
-                                            <div class="invalid-feedback" id="numero_vol_error"></div>
-                                        </div>
+                                {{-- Toujours affiché, y compris pour Block Permit (type 3) où c'est le numéro de vol
+                                     qui doit figurer, pas le nombre de passagers. --}}
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-group">
+                                        <label for="numero_vol" class="form-label">@lang('trans.flight_number')</label>
+                                        <input type="text" class="form-control" id="numero_vol"
+                                            name="numero_vol">
+                                        <div class="invalid-feedback" id="numero_vol_error"></div>
                                     </div>
-                                @endif
-                                @if (in_array($demandeAutorisation->type->id, [2, 3, 4, 5, 7]))
+                                </div>
+                                @if (in_array($demandeAutorisation->type->id, [2, 4, 5, 7]))
                                     <!-- Nombre de passagers -->
                                     <div class="col-md-6 mb-3">
                                         <div class="form-group">
@@ -1924,9 +1924,8 @@
                                 required>
                         </div>
                         <div class="mb-3">
-                            <label for="code" class="form-label">@lang('trans.code') <span
-                                    class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="code" name="code" required>
+                            <label for="code" class="form-label">@lang('trans.code')</label>
+                            <input type="text" class="form-control" id="code" name="code">
                         </div>
                         <div class="form-group">
                             <label for="email">@lang('trans.email')</label>

@@ -1427,4 +1427,6 @@ return [
     'reverif_pending_srta' => 'Re-verification requested from the SRTA',
     'dta_reverif_requested' => 'The DTA requests a re-verification of this file.',
     'confirm_srta_validation' => 'Confirm the SRTA validation of this file? All lines have already been validated.',
+    'retirer_rejet' => 'Withdraw rejection',
+    'confirm_retirer_rejet' => 'Confirm withdrawing this rejection? The applicant will be notified it was a mistake.',
 ];

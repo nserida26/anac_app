@@ -25,6 +25,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'status',
         'user_type',
         'password',
+        'notify_whatsapp',
+        'notify_email',
     ];
 
     protected $hidden = [
@@ -35,6 +37,8 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
         'user_type'         => 'string',
+        'notify_whatsapp'   => 'boolean',
+        'notify_email'      => 'boolean',
     ];
 
     // ── Relationships ──
