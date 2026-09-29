@@ -169,7 +169,7 @@ Route::get('/rapports/compagnie/{id}', [App\Http\Controllers\DgDsvController::cl
                 Route::patch('/valider/{facture}', [App\Http\Controllers\DafController::class, 'valider'])->name('daf.valider');
                 Route::patch('/valider_paiement/{paiement}', [App\Http\Controllers\DafController::class, 'validerPaiement'])->name('daf.valider_paiement');
             });
-        Route::middleware(['auth:web', 'verified', 'role:dg|dsv|dta|dsad|dsna|daf'])
+        Route::middleware(['auth:web', 'verified', 'role:dg|dsv|dta|dsad|dsna|daf|dsv_verificateur'])
             ->prefix('dir')
             ->group(function () {
 
@@ -703,6 +703,9 @@ Route::middleware(['auth:web', 'verified', 'role:admin'])->prefix('admin')->name
     Route::resource('centres-expertise-medicale', App\Http\Controllers\Admin\CentreExpertiseMedicaleController::class)
         ->only(['index', 'store', 'destroy'])
         ->parameters(['centres-expertise-medicale' => 'centreMedical']);
+    // Liste noire d'immatriculations (bloque la création d'un aéronef correspondant)
+    Route::resource('immatriculation-blacklists', App\Http\Controllers\Admin\ImmatriculationBlacklistController::class)
+        ->only(['index', 'store', 'destroy']);
 });
 
 // Compte d'un centre d'expertise médicale (ex. CEMPA)

@@ -548,6 +548,7 @@ public function sendDTARemoveFromDirectionsNotification(
     {
         return match ($direction) {
             'dsv' => 'DSV',
+            'dsv_verificateur' => 'Vérificateur DSV',
             'dsna' => 'DSNA',
             'dsad' => 'DSAD',
             'dsf' => 'DSF',

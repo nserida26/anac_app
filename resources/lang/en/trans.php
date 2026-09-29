@@ -1429,4 +1429,18 @@ return [
     'confirm_srta_validation' => 'Confirm the SRTA validation of this file? All lines have already been validated.',
     'retirer_rejet' => 'Withdraw rejection',
     'confirm_retirer_rejet' => 'Confirm withdrawing this rejection? The applicant will be notified it was a mistake.',
+
+    // Immatriculation blacklist
+    'immatriculation_blacklists' => 'Registration blacklist',
+    'add_blacklist_entry' => 'Block a registration',
+    'immatriculation_pattern' => 'Prefix or registration',
+    'immatriculation_pattern_help' => 'E.g. "4X" blocks all registrations starting with 4X, or enter an exact registration.',
+    'blacklisted_entries' => 'Blocked registrations',
+    'added_by' => 'Added by',
+    'no_blacklist_entries' => 'No blocked registrations.',
+    'immatriculation_blacklisted' => 'This registration is blocked and cannot be saved.',
+
+    // Applicant profile: e-mail notifications (additional channel alongside WhatsApp)
+    'notify_whatsapp' => 'Receive WhatsApp notifications',
+    'notify_email' => 'Receive e-mail notifications',
 ];

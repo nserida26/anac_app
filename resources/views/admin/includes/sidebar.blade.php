@@ -183,6 +183,12 @@
                                     <p>@lang('trans.medical_expertise_centres')</p>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.immatriculation-blacklists.index') }}" class="nav-link ">
+                                    <i class="fas fa-ban nav-icon"></i>
+                                    <p>@lang('trans.immatriculation_blacklists')</p>
+                                </a>
+                            </li>
                             @endrole
                                 </ul>
                             </li>

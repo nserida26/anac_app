@@ -232,18 +232,24 @@
         </form>
     @endif
 
-@elseif(in_array($role, ['dsv', 'dsna', 'dsad', 'dsf']))
-    {{-- Actions pour les directions --}}
+@elseif(in_array($role, ['dsv', 'dsna', 'dsad', 'dsf', 'dsv_verificateur']))
+    {{-- Actions pour les directions. Le profil "dsv_verificateur" pré-vérifie les
+         dossiers annotés 'dsv' avant que la DSV elle-même ne les voie : il utilise
+         donc la même annotation ('dsv') mais sa propre validation
+         (dsv_verificateur_valider), et la DSV n'a son bouton qu'une fois cette
+         pré-vérification faite. --}}
     @php
         $validationAction = $role . '_valider';
+        $annotationKey = $role === 'dsv_verificateur' ? 'dsv' : $role;
     @endphp
-    
-    @if($etat->compagnie_cree_demande && 
-        ($etat->dg_annoter || $etat->dta_dg_annoter || $etat->dg_annoter_admin) && 
-        $etat->service_annoter && 
-        !$etat->{$validationAction} && 
-        $demande->isAnnotedTo($role))
-        
+
+    @if($etat->compagnie_cree_demande &&
+        ($etat->dg_annoter || $etat->dta_dg_annoter || $etat->dg_annoter_admin) &&
+        $etat->service_annoter &&
+        !$etat->{$validationAction} &&
+        $demande->isAnnotedTo($annotationKey) &&
+        ($role !== 'dsv' || $etat->dsv_verificateur_valider))
+
         <form action="{{ route('update-state', $demande->id) }}" method="POST" class="d-inline">
             @csrf
             <input type="hidden" name="action" value="{{ $validationAction }}">

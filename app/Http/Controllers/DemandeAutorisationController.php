@@ -725,7 +725,7 @@ class DemandeAutorisationController extends Controller
 
             // Validation de base
             $validated = $request->validate([
-                'action' => 'required|string|in:compagnie_cree_demande,compagnie_rectifie_demande,dg_annoter,dg_annoter_admin,dg_rejeter,dta_dg_annoter,dta_annoter,dta_annoter_admin,dta_rejeter,dta_notifier,service_annoter,service_raturer,dsv_valider,dsna_valider,dsad_valider,dsf_valider,service_valider,srta_valider,dta_demande_reverif,service_tout_valider,dta_valider,dg_valider,dta_dg_valider,compagnie_payer,daf_confirme_pay,service_envoyer,reset_to_dta_stage,reset_to_admin_stage',
+                'action' => 'required|string|in:compagnie_cree_demande,compagnie_rectifie_demande,dg_annoter,dg_annoter_admin,dg_rejeter,dta_dg_annoter,dta_annoter,dta_annoter_admin,dta_rejeter,dta_notifier,service_annoter,service_raturer,dsv_valider,dsv_verificateur_valider,dsna_valider,dsad_valider,dsf_valider,service_valider,srta_valider,dta_demande_reverif,service_tout_valider,dta_valider,dg_valider,dta_dg_valider,compagnie_payer,daf_confirme_pay,service_envoyer,reset_to_dta_stage,reset_to_admin_stage',
                 'is_approved' => 'sometimes|boolean',
                 'is_rejected' => 'sometimes|boolean',
                 'motif' => 'required_if:action,dg_rejeter,dta_rejeter,dta_demande_reverif|nullable|string',
@@ -1042,6 +1042,7 @@ class DemandeAutorisationController extends Controller
                     break;
 
                 case 'dsv_valider':
+                case 'dsv_verificateur_valider':
                 case 'dsad_valider':
                 case 'dsna_valider':
                 case 'dsf_valider':
@@ -1508,6 +1509,7 @@ class DemandeAutorisationController extends Controller
             'reset_to_admin_stage'  => ['admin'],
 
             'dsv_valider'           => ['dsv'],
+            'dsv_verificateur_valider' => ['dsv_verificateur'],
             'dsna_valider'          => ['dsna'],
             'dsad_valider'          => ['dsad'],
             'dsf_valider'           => ['dsf'],

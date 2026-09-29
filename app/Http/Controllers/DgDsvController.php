@@ -101,6 +101,10 @@ class DgDsvController extends Controller
                 'compagnies' => $compagnies,
                 'role' => 'dsv'
             ]));
+        } elseif ($role === 'dsv_verificateur') {
+            // Profil uniquement dédié à la pré-vérification des demandes d'autorisation :
+            // pas de tableau de bord, accès direct à la liste des demandes.
+            return redirect()->route('dir.demandeAutorisations');
         }
 
         return view('dir.index', $data);
@@ -1467,6 +1471,16 @@ $demandeAutorisations = DemandeAutorisation::with(['type', 'user', 'etatDemande'
                             ]
                         );
                         $activity = Activity::log('dsv_achieve',$demande->id);
+                    } else if (Auth::user()->hasRole('dsv_verificateur')) {
+                        // Rejet au stade de pré-vérification, avant que la DSV elle-même
+                        // n'ait vu le dossier : même motif que la DSV (dsv_motif), pas de
+                        // champ dédié.
+                        $demande->update(
+                            [
+                                'dsv_motif' => $motif,
+                            ]
+                        );
+                        $activity = Activity::log('dsv_verificateur_achieve',$demande->id);
                     } else if (Auth::user()->hasRole('dsna')) {
                         $demande->update(
                             [

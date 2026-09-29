@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class DemandeurController extends Controller
 {
@@ -53,6 +54,8 @@ class DemandeurController extends Controller
     }
     public function update(Request $request)
     {
+        $user = auth()->user();
+
         $request->validate([
             'np' => 'required|string|max:255',
             //'date_naissance' => 'required|date',
@@ -61,6 +64,17 @@ class DemandeurController extends Controller
             'nationalite' => 'required|string|max:255',
             'compagnie_id' => 'nullable|exists:compagnies,id',
             //'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
+            'whatsapp' => ['required', 'string', 'regex:/^[0-9]{8}$/'],
+            'notify_whatsapp' => 'sometimes|boolean',
+            'notify_email' => 'sometimes|boolean',
+        ]);
+
+        $user->update([
+            'email' => $request->email,
+            'whatsapp' => $request->whatsapp,
+            'notify_whatsapp' => $request->boolean('notify_whatsapp'),
+            'notify_email' => $request->boolean('notify_email'),
         ]);
 
         // Trouver le demandeur associé à l'utilisateur connecté

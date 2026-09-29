@@ -7,6 +7,7 @@ use App\Models\Avion;
 use App\Models\TypeAvion;
 use App\Models\Proprietaire;
 use App\Models\Compagnie;
+use App\Rules\NotBlacklistedImmatriculation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -35,7 +36,7 @@ class AvionController extends Controller
                 return $this->storeMultiple($request);
             }
         $validator = Validator::make($request->all(), [
-            'immatriculation' => 'required|string|max:50',
+            'immatriculation' => ['required', 'string', 'max:50', new NotBlacklistedImmatriculation()],
             'type_avion_id' => 'required|exists:type_avions,id',
             //'proprietaire_id' => 'required|exists:proprietaires,id',
             'compagnie_aerienne_id' => 'required|exists:compagnies,id',
@@ -78,7 +79,8 @@ public function storeMultiple(Request $request)
         'immatriculations.*' => [
             'required',
             'string',
-            'max:50'
+            'max:50',
+            new NotBlacklistedImmatriculation()
         ],
         'type_avion_id' => 'required|exists:type_avions,id',
         'compagnie_aerienne_id' => 'required|exists:compagnies,id',
@@ -179,7 +181,7 @@ public function storeMultiple(Request $request)
         }
 
         $validator = Validator::make($request->all(), [
-            'immatriculation' => 'required|string|max:50',
+            'immatriculation' => ['required', 'string', 'max:50', new NotBlacklistedImmatriculation()],
             'type_avion_id' => 'required|exists:type_avions,id',
             //'proprietaire_id' => 'required|exists:proprietaires,id',
             'compagnie_aerienne_id' => 'required|exists:compagnies,id',

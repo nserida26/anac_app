@@ -53,6 +53,14 @@
                                                 @endif</th>
                                             <td>{{ $demandeur->np ?? '-' }}</td>
                                         </tr>
+                                        <tr>
+                                            <th>@lang('trans.email')</th>
+                                            <td>{{ Auth::user()->email ?? '-' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>@lang('trans.phone')</th>
+                                            <td>{{ Auth::user()->whatsapp ?? '-' }}</td>
+                                        </tr>
                                         @if (Auth::user()->user_type === 'licence')
                                             <tr>
                                                 <th>@lang('trans.date_naissance')</th>
@@ -129,6 +137,22 @@
                                                     class="small text-danger">*</span></label>
                                             <input type="text" id="edit_np" class="form-control" name="np"
                                                 value="{{ $demandeur->np ?? '' }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group focused">
+                                            <label class="form-control-label" for="edit_email">
+                                                @lang('trans.email') <span class="small text-danger">*</span></label>
+                                            <input type="email" id="edit_email" class="form-control" name="email"
+                                                value="{{ Auth::user()->email ?? '' }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group focused">
+                                            <label class="form-control-label" for="edit_whatsapp">
+                                                @lang('trans.phone') <span class="small text-danger">*</span></label>
+                                            <input type="text" id="edit_whatsapp" class="form-control" name="whatsapp"
+                                                maxlength="8" value="{{ Auth::user()->whatsapp ?? '' }}">
                                         </div>
                                     </div>
                                     @if (Auth::user()->user_type === 'licence')
@@ -391,6 +415,28 @@
                                                 <option value="zimbabwean">Zimbabwean</option>
 
                                             </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-check">
+                                            <input type="hidden" name="notify_whatsapp" value="0">
+                                            <input type="checkbox" class="form-check-input" id="edit_notify_whatsapp"
+                                                name="notify_whatsapp" value="1"
+                                                {{ (Auth::user()->notify_whatsapp ?? true) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="edit_notify_whatsapp">
+                                                @lang('trans.notify_whatsapp')</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-check">
+                                            <input type="hidden" name="notify_email" value="0">
+                                            <input type="checkbox" class="form-check-input" id="edit_notify_email"
+                                                name="notify_email" value="1"
+                                                {{ (Auth::user()->notify_email ?? false) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="edit_notify_email">
+                                                @lang('trans.notify_email')</label>
                                         </div>
                                     </div>
                                 </div>
@@ -750,7 +796,17 @@
                         imageDimensions: [413, 531] // Width x Height
                     },
                     np: "required",
-                    lieu_naissance: "required"
+                    lieu_naissance: "required",
+                    email: {
+                        required: true,
+                        email: true
+                    },
+                    whatsapp: {
+                        required: true,
+                        digits: true,
+                        minlength: 8,
+                        maxlength: 8
+                    }
                 },
                 messages: {
                     photo: {
@@ -759,7 +815,9 @@
                         imageDimensions: "L'image doit être exactement de 413x531 pixels."
                     },
                     np: "Veuillez entrer votre nom et prénom",
-                    lieu_naissance: "Veuillez entrer votre lieu de naissance"
+                    lieu_naissance: "Veuillez entrer votre lieu de naissance",
+                    email: "Veuillez entrer une adresse e-mail valide",
+                    whatsapp: "Veuillez entrer un numéro à 8 chiffres"
                 },
                 errorElement: 'span',
                 errorPlacement: function(error, element) {

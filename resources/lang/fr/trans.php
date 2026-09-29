@@ -1755,4 +1755,18 @@ return [
     'confirm_srta_validation' => "Confirmer la validation SRTA de ce dossier ? Toutes les lignes ont déjà été validées.",
     'retirer_rejet' => 'Retirer le rejet',
     'confirm_retirer_rejet' => "Confirmer le retrait de ce rejet ? Le demandeur sera notifié que c'était une erreur.",
+
+    // Liste noire d'immatriculations
+    'immatriculation_blacklists' => "Liste noire d'immatriculations",
+    'add_blacklist_entry' => 'Bloquer une immatriculation',
+    'immatriculation_pattern' => 'Préfixe ou immatriculation',
+    'immatriculation_pattern_help' => 'Ex. "4X" bloque toutes les immatriculations commençant par 4X, ou saisissez une immatriculation exacte.',
+    'blacklisted_entries' => 'Immatriculations bloquées',
+    'added_by' => 'Ajouté par',
+    'no_blacklist_entries' => 'Aucune immatriculation bloquée.',
+    'immatriculation_blacklisted' => "Cette immatriculation est bloquée et ne peut pas être enregistrée.",
+
+    // Profil demandeur : notifications par e-mail (canal additionnel au WhatsApp)
+    'notify_whatsapp' => 'Recevoir les notifications par WhatsApp',
+    'notify_email' => 'Recevoir les notifications par e-mail',
 ];

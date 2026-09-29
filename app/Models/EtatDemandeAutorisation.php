@@ -22,6 +22,7 @@ class EtatDemandeAutorisation extends Model
         'service_annoter',
         'service_raturer',
         'dsv_valider',
+        'dsv_verificateur_valider',
         'dsna_valider',
         'dsad_valider',
         'service_valider',
@@ -53,6 +54,7 @@ class EtatDemandeAutorisation extends Model
         'service_annoter'        => 'boolean',
         'service_raturer'        => 'boolean',
         'dsv_valider'            => 'boolean',
+        'dsv_verificateur_valider' => 'boolean',
         'dsna_valider'           => 'boolean',
         'dsad_valider'           => 'boolean',
         'service_valider'        => 'boolean',
@@ -215,6 +217,7 @@ class EtatDemandeAutorisation extends Model
             'dg_valider'             => false,
             'dta_dg_valider'         => false,
             'dsv_valider'            => false,
+            'dsv_verificateur_valider' => false,
             'dsad_valider'           => false,
             'dsna_valider'           => false,
             'dsf_valider'            => false, // Nouveau
