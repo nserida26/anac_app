@@ -19,11 +19,13 @@ class ImmatriculationBlacklistController extends Controller
     {
         $validated = $request->validate([
             'pattern' => 'required|string|max:20|regex:/^[A-Za-z0-9-]+$/',
+            'match_type' => 'required|in:prefix,exact',
             'motif' => 'nullable|string|max:255',
         ]);
 
         ImmatriculationBlacklist::create([
             'pattern' => strtoupper($validated['pattern']),
+            'match_type' => $validated['match_type'],
             'motif' => $validated['motif'] ?? null,
             'created_by' => auth()->id(),
         ]);

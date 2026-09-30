@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
  */
 class ImmatriculationBlacklist extends Model
 {
-    protected $fillable = ['pattern', 'motif', 'created_by'];
+    protected $fillable = ['pattern', 'match_type', 'motif', 'created_by'];
 
     public function creePar()
     {
@@ -19,8 +19,8 @@ class ImmatriculationBlacklist extends Model
     }
 
     /**
-     * Vrai si l'immatriculation correspond à un motif de blocage (préfixe ou exacte),
-     * insensible à la casse.
+     * Vrai si l'immatriculation correspond à un motif de blocage, insensible à la casse :
+     * comparaison stricte pour les motifs "exact", par préfixe pour les motifs "prefix".
      */
     public static function isBlacklisted(string $immatriculation): bool
     {
@@ -31,7 +31,13 @@ class ImmatriculationBlacklist extends Model
         }
 
         return static::query()
-            ->get(['pattern'])
-            ->contains(fn (self $entry) => Str::startsWith($normalized, strtoupper($entry->pattern)));
+            ->get(['pattern', 'match_type'])
+            ->contains(function (self $entry) use ($normalized) {
+                $pattern = strtoupper($entry->pattern);
+
+                return $entry->match_type === 'exact'
+                    ? $normalized === $pattern
+                    : Str::startsWith($normalized, $pattern);
+            });
     }
 }

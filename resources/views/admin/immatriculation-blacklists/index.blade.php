@@ -20,16 +20,29 @@
                 <form action="{{ route('admin.immatriculation-blacklists.store') }}" method="POST">
                     @csrf
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4">
+        <div class="row">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="pattern">@lang('trans.immatriculation_pattern') <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control text-uppercase" id="pattern" name="pattern"
                                            placeholder="4X" maxlength="20" required value="{{ old('pattern') }}">
-                                    <small class="form-text text-muted">@lang('trans.immatriculation_pattern_help')</small>
                                 </div>
                             </div>
-                            <div class="col-md-8">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="match_type">@lang('trans.blacklist_match_type')</label>
+                                    <select class="form-control" id="match_type" name="match_type">
+                                        <option value="prefix" {{ old('match_type', 'prefix') == 'prefix' ? 'selected' : '' }}>
+                                            @lang('trans.blacklist_match_prefix')
+                                        </option>
+                                        <option value="exact" {{ old('match_type') == 'exact' ? 'selected' : '' }}>
+                                            @lang('trans.blacklist_match_exact')
+                                        </option>
+                                    </select>
+                                    <small class="form-text text-muted" id="match_type_help">@lang('trans.immatriculation_pattern_help')</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="motif">@lang('trans.motif')</label>
                                     <input type="text" class="form-control" id="motif" name="motif" maxlength="255" value="{{ old('motif') }}">
@@ -65,6 +78,7 @@
                         <thead>
                             <tr>
                                 <th>@lang('trans.immatriculation_pattern')</th>
+                                <th>@lang('trans.blacklist_match_type')</th>
                                 <th>@lang('trans.motif')</th>
                                 <th>@lang('trans.added_by')</th>
                                 <th>@lang('trans.actions')</th>
@@ -74,6 +88,7 @@
                             @forelse($entries as $entry)
                             <tr>
                                 <td><span class="badge badge-danger">{{ $entry->pattern }}</span></td>
+                                <td>{{ $entry->match_type === 'exact' ? __('trans.blacklist_match_exact') : __('trans.blacklist_match_prefix') }}</td>
                                 <td>{{ $entry->motif ?: '—' }}</td>
                                 <td>{{ optional($entry->creePar)->email ?: '—' }}</td>
                                 <td>
@@ -89,7 +104,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="4" class="text-center text-muted p-3">@lang('trans.no_blacklist_entries')</td>
+                                <td colspan="5" class="text-center text-muted p-3">@lang('trans.no_blacklist_entries')</td>
                             </tr>
                             @endforelse
                         </tbody>
