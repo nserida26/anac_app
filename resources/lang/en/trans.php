@@ -1314,6 +1314,8 @@ return [
     'annotate_to_evaluator' => 'Assign to an evaluator',
     'accepted_format' => 'Accepted format',
     'all_rights_reserved' => 'All rights reserved.',
+    'back_to_top' => 'Back to top',
+    'ready_to_leave' => 'Ready to Leave?',
     'copyright' => 'Copyright',
     'home' => 'Home',
     'licence_information' => 'License information',

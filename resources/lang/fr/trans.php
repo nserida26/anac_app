@@ -1167,6 +1167,8 @@ return [
     'annotate_to_evaluator' => 'Annoter vers un évaluateur',
     'accepted_format' => 'Format accepté',
     'all_rights_reserved' => 'Tous droits réservés.',
+    'back_to_top' => 'Retour en haut',
+    'ready_to_leave' => 'Prêt à quitter ?',
     'copyright' => 'Copyright',
     'home' => 'Accueil',
     'licence_information' => 'Informations de licence',

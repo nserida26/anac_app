@@ -1,21 +1,4 @@
-@extends('user.layouts.app')
-
-@section('title')
-    @lang('trans.autorization_applications')
-@endsection
-
-@section('contentheader')
-    @lang('trans.autorization_applications')
-@endsection
-
-@section('contentheaderlink')
-    <a href="">
-        @lang('trans.autorization_applications') </a>
-@endsection
-
-@section('contentheaderactive')
-    @lang('trans.autorization_applications')
-@endsection
+<x-app-user-layout title="@lang('trans.autorization_applications')">
 
 @push('css')
     <link rel="stylesheet" href="{{ asset('assets/admin/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
@@ -104,9 +87,7 @@
     </style>
 @endpush
 
-@section('content')
-    <div class="container-fluid">
-        @if (Auth::user()->user_type === 'autorisation')
+@if (Auth::user()->user_type === 'autorisation')
             <div class="row">
                 <div class="col-md-12">
                     <div class="card">
@@ -123,7 +104,7 @@
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-bordered table-striped" id="autorization_applications">
+                                <table class="table" id="autorization_applications">
                                     <thead>
                                         <tr>
                                             <th>@lang('trans.creation_date')</th>
@@ -289,7 +270,7 @@
                             <div class="card-header">@lang('trans.autorization_paiements')</div>
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-striped" id="paiements">
+                                    <table class="table" id="paiements">
                                         <thead>
                                             <tr>
                                                 <th>@lang('trans.ref')</th>
@@ -339,9 +320,8 @@
                 </div>
             @endif
         @endif
-    </div>
 
-    {{-- MODAL APPLICATION --}}
+{{-- MODAL APPLICATION --}}
     <!-- Modal -->
 <div class="modal fade" id="applicationModal" tabindex="-1" role="dialog" aria-labelledby="applicationModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
@@ -519,7 +499,6 @@
         </div>
     </div>
 </div>
-@endsection
 
 @push('script')
     <script src="{{ asset('assets/admin/plugins/datatables/jquery.dataTables.min.js') }}"></script>
@@ -1211,3 +1190,5 @@ $('#saveCompanyBtnApplication').on('click', function() {
 });
 </script>
 @endpush
+
+</x-app-user-layout>

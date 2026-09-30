@@ -1,0 +1,554 @@
+/* ================================================================
+   ANAC User App — Layout shared styles
+   Minimalist design matching the auth pages (public/css/auth.css)
+   ================================================================ */
+
+:root {
+    --anac-primary: #0d2137;
+    --anac-primary-light: #1a3a5c;
+    --anac-accent: #c8a951;
+    --anac-accent-hover: #b8993d;
+    --anac-white: #ffffff;
+    --anac-gray-50: #f8f9fa;
+    --anac-gray-100: #f1f3f5;
+    --anac-gray-200: #e9ecef;
+    --anac-gray-400: #ced4da;
+    --anac-gray-600: #6c757d;
+    --anac-gray-800: #343a40;
+    --anac-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --anac-shadow-md: 0 4px 20px rgba(0, 0, 0, 0.12);
+    --anac-shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.16);
+    --anac-radius: 12px;
+    --anac-radius-sm: 8px;
+    --anac-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --anac-topbar-height: 60px;
+    --anac-font: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ── Base ── */
+body.anac-app {
+    font-family: var(--anac-font);
+    color: var(--anac-gray-800);
+    background: var(--anac-gray-50);
+}
+
+/* ── Topbar (navy, like the auth brand panel) ── */
+.anac-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    height: var(--anac-topbar-height);
+    padding: 0 1.5rem;
+    background: linear-gradient(135deg, var(--anac-primary) 0%, var(--anac-primary-light) 100%);
+    box-shadow: var(--anac-shadow-md);
+}
+
+.anac-topbar__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: var(--anac-white);
+    font-weight: 600;
+    font-size: 1.05rem;
+    letter-spacing: 0.3px;
+    transition: var(--anac-transition);
+}
+
+.anac-topbar__brand:hover {
+    color: var(--anac-accent);
+    text-decoration: none;
+}
+
+.anac-topbar__brand img {
+    height: 32px;
+    width: auto;
+}
+
+.anac-topbar__title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.95rem;
+    font-weight: 400;
+}
+
+.anac-topbar__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-left: auto;
+}
+
+/* Nav links (examinateur / instructeur) */
+.anac-topbar__link {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.4rem 0.85rem;
+    border-radius: var(--anac-radius-sm);
+    transition: var(--anac-transition);
+    white-space: nowrap;
+}
+
+.anac-topbar__link:hover,
+.anac-topbar__link.is-active {
+    color: var(--anac-white);
+    background: rgba(255, 255, 255, 0.12);
+    text-decoration: none;
+}
+
+/* ── Language switcher (pastille, modèle auth) ── */
+.anac-lang {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-right: 0.5rem;
+    padding: 3px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+}
+
+.anac-lang .lang-btn {
+    padding: 4px 12px;
+    border: none;
+    border-radius: 16px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: var(--anac-transition);
+}
+
+.anac-lang .lang-btn:hover {
+    color: var(--anac-white);
+    text-decoration: none;
+}
+
+.anac-lang .lang-btn.active {
+    background: var(--anac-white);
+    color: var(--anac-primary);
+}
+
+/* ── User dropdown ── */
+.anac-user-menu .dropdown-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--anac-white);
+    background: transparent;
+    border: none;
+    padding: 0.3rem;
+    border-radius: 50%;
+    transition: var(--anac-transition);
+}
+
+.anac-user-menu .dropdown-toggle:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.anac-user-menu .dropdown-toggle::after {
+    display: none;
+}
+
+.anac-user-menu img {
+    width: 34px;
+    height: 34px;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+}
+
+.anac-user-menu .dropdown-menu {
+    border: none;
+    border-radius: var(--anac-radius-sm);
+    box-shadow: var(--anac-shadow-md);
+    padding: 0.4rem;
+    min-width: 220px;
+    font-family: var(--anac-font);
+}
+
+.anac-user-menu .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: var(--anac-gray-800);
+    transition: var(--anac-transition);
+}
+
+.anac-user-menu .dropdown-item:hover {
+    background: var(--anac-gray-100);
+    color: var(--anac-primary);
+}
+
+.anac-user-menu .dropdown-item i {
+    width: 18px;
+    text-align: center;
+    color: var(--anac-gray-600);
+}
+
+.anac-user-menu .dropdown-divider {
+    margin: 0.4rem 0;
+}
+
+.anac-user-menu .dropdown-item.text-danger:hover {
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+.anac-user-menu .dropdown-item.text-danger i {
+    color: #dc3545;
+}
+
+/* ── Main content ── */
+.anac-main {
+    padding: 1.75rem 1.5rem 3rem;
+    width: 100%;
+}
+
+.anac-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.anac-page-header h1 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--anac-primary);
+    margin: 0;
+}
+
+.anac-page-header .anac-page-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* ── Cards ── */
+.anac-app .card {
+    border: none;
+    border-radius: var(--anac-radius);
+    box-shadow: var(--anac-shadow-sm);
+    margin-bottom: 1.5rem;
+}
+
+.anac-app .card .card-header {
+    background: var(--anac-white);
+    border-bottom: 1px solid var(--anac-gray-200);
+    border-radius: var(--anac-radius) var(--anac-radius) 0 0;
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--anac-primary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.anac-app .card .card-header .card-tools {
+    float: none;
+    margin-right: 0;
+}
+
+.anac-app .card .card-body {
+    padding: 1.25rem;
+}
+
+/* ── Tables (design aligné sur les pages d'authentification) ── */
+.anac-app .table {
+    width: 100%;
+    margin-bottom: 0;
+    background: var(--anac-white);
+    border-collapse: separate;
+    border-spacing: 0;
+    color: var(--anac-gray-800);
+}
+
+.anac-app .table thead th {
+    background: var(--anac-gray-100);
+    border: none;
+    border-bottom: 1px solid var(--anac-gray-200);
+    color: var(--anac-gray-600);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    padding: 0.85rem 1rem;
+}
+
+.anac-app .table tbody td {
+    border: none;
+    border-bottom: 1px solid var(--anac-gray-200);
+    vertical-align: middle;
+    padding: 0.85rem 1rem;
+    background: transparent;
+}
+
+/* Neutralise bordures et zébrage Bootstrap pour un rendu épuré (auth) */
+.anac-app .table.table-bordered {
+    border: none;
+}
+
+.anac-app .table.table-bordered th,
+.anac-app .table.table-bordered td {
+    border: none;
+    border-bottom: 1px solid var(--anac-gray-200);
+}
+
+.anac-app .table.table-striped tbody tr:nth-of-type(odd) {
+    background: transparent;
+}
+
+.anac-app .table tbody tr {
+    transition: var(--anac-transition);
+}
+
+.anac-app .table tbody tr:hover td {
+    background: var(--anac-gray-50);
+}
+
+.anac-app .table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.anac-app .table .btn-group .btn {
+    margin-bottom: 0.25rem;
+}
+
+/* ── Contrôles DataTables (recherche, pagination) ── */
+.anac-app .dataTables_wrapper .dataTables_filter input,
+.anac-app .dataTables_wrapper .dataTables_length select {
+    border: 1.5px solid var(--anac-gray-200);
+    border-radius: var(--anac-radius-sm);
+    padding: 6px 12px;
+    font-family: var(--anac-font);
+    color: var(--anac-gray-800);
+    transition: var(--anac-transition);
+    outline: none;
+}
+
+.anac-app .dataTables_wrapper .dataTables_filter input:focus,
+.anac-app .dataTables_wrapper .dataTables_length select:focus {
+    border-color: var(--anac-primary);
+    box-shadow: 0 0 0 3px rgba(13, 33, 55, 0.1);
+}
+
+.anac-app .dataTables_wrapper .dataTables_info,
+.anac-app .dataTables_wrapper .dataTables_length,
+.anac-app .dataTables_wrapper .dataTables_filter {
+    color: var(--anac-gray-600);
+    font-size: 0.9rem;
+}
+
+.anac-app .dataTables_wrapper .pagination {
+    margin-bottom: 0;
+}
+
+.anac-app .dataTables_wrapper .pagination .page-link {
+    color: var(--anac-primary);
+    border: none;
+    border-radius: var(--anac-radius-sm);
+    margin: 0 2px;
+    transition: var(--anac-transition);
+}
+
+.anac-app .dataTables_wrapper .pagination .page-link:hover {
+    background: var(--anac-gray-100);
+    color: var(--anac-primary);
+}
+
+.anac-app .dataTables_wrapper .pagination .page-item.active .page-link {
+    background: var(--anac-primary);
+    border-color: var(--anac-primary);
+    color: var(--anac-white);
+}
+
+.anac-app .dataTables_wrapper .pagination .page-item.disabled .page-link {
+    color: var(--anac-gray-400);
+    background: transparent;
+}
+
+/* ── Badges (status pills) ── */
+.anac-app .badge {
+    border-radius: 20px;
+    padding: 0.35em 0.8em;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+/* ── Modals ── */
+.anac-app .modal-content {
+    border: none;
+    border-radius: var(--anac-radius);
+    box-shadow: var(--anac-shadow-lg);
+    overflow: hidden;
+}
+
+.anac-app .modal-header {
+    border-bottom: 1px solid var(--anac-gray-200);
+}
+
+.anac-app .modal-footer {
+    border-top: 1px solid var(--anac-gray-200);
+}
+
+/* ── Buttons polish ── */
+.anac-app .btn {
+    border-radius: var(--anac-radius-sm);
+    font-weight: 600;
+    font-family: var(--anac-font);
+}
+
+.anac-app .btn-primary {
+    background-color: var(--anac-primary);
+    border-color: var(--anac-primary);
+}
+
+.anac-app .btn-primary:hover {
+    background-color: var(--anac-primary-light);
+    border-color: var(--anac-primary-light);
+}
+
+.anac-app .btn-success {
+    background-color: #16a34a;
+    border-color: #16a34a;
+}
+
+.anac-app .btn-warning {
+    color: var(--anac-white);
+    background-color: var(--anac-accent);
+    border-color: var(--anac-accent);
+}
+
+.anac-app .btn-warning:hover {
+    color: var(--anac-white);
+    background-color: var(--anac-accent-hover);
+    border-color: var(--anac-accent-hover);
+}
+
+/* ── Forms ── */
+.anac-app .form-control:focus {
+    border-color: var(--anac-primary);
+    box-shadow: 0 0 0 3px rgba(13, 33, 55, 0.1);
+}
+
+.anac-app .form-control,
+.anac-app .custom-select {
+    border-radius: var(--anac-radius-sm);
+}
+
+.anac-app .select2-container .select2-selection--single,
+.anac-app .select2-container--default .select2-selection--multiple {
+    border-radius: var(--anac-radius-sm);
+    height: auto;
+    padding: 8px 12px;
+}
+
+.anac-app .select2-container--default .select2-selection--single {
+    border: 1.5px solid var(--anac-gray-200);
+}
+
+/* ── Scroll to top ── */
+#scrollTopBtn {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    border: none;
+    outline: none;
+    background-color: var(--anac-primary);
+    color: var(--anac-white);
+    cursor: pointer;
+    padding: 10px 15px;
+    border-radius: 50%;
+    font-size: 18px;
+    box-shadow: var(--anac-shadow-md);
+    transition: var(--anac-transition);
+}
+
+#scrollTopBtn:hover {
+    background-color: var(--anac-primary-light);
+}
+
+/* ── Footer ── */
+.anac-footer {
+    text-align: center;
+    padding: 1.25rem 1.5rem;
+    font-size: 0.85rem;
+    color: var(--anac-gray-600);
+}
+
+.anac-footer a {
+    color: var(--anac-primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.anac-footer a:hover {
+    color: var(--anac-accent);
+}
+
+/* ── Responsive ── */
+@media (max-width: 767.98px) {
+    .anac-topbar {
+        padding: 0 1rem;
+        gap: 0.5rem;
+    }
+
+    .anac-topbar__title {
+        display: none;
+    }
+
+    .anac-topbar__link {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.82rem;
+    }
+
+    .anac-lang {
+        margin-right: 0.25rem;
+    }
+
+    .anac-lang .lang-btn {
+        padding: 3px 8px;
+        font-size: 0.7rem;
+    }
+
+    .anac-main {
+        padding: 1.25rem 1rem 2.5rem;
+    }
+
+    .anac-page-header h1 {
+        font-size: 1.15rem;
+    }
+}
+
+/* ── Accessibility ── */
+@media (prefers-reduced-motion: reduce) {
+    .anac-topbar,
+    .anac-topbar__link,
+    .anac-user-menu .dropdown-toggle,
+    .anac-user-menu .dropdown-item,
+    .anac-lang .lang-btn,
+    #scrollTopBtn {
+        transition: none;
+    }
+}
