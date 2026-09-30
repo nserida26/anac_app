@@ -32,6 +32,18 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Installation de Composer (copie depuis l'image officielle)
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Installation de Node.js + npm (copie depuis l'image officielle Node 20 LTS)
+COPY --from=node:20-slim /usr/local/bin/node /usr/local/bin/node
+COPY --from=node:20-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && ln -s /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
+
+# Vérification des versions installées
+RUN composer --version && node --version && npm --version
+
 # Copie la config PHP custom
 COPY php.ini /usr/local/etc/php/conf.d/custom.ini
 
