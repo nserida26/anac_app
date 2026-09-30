@@ -1,17 +1,22 @@
 @extends('user.layouts.app')
+
 @section('title')
-    @lang('trans.dashboard')
+    @lang('trans.autorization_applications')
 @endsection
+
 @section('contentheader')
-    @lang('trans.dashboard')
+    @lang('trans.autorization_applications')
 @endsection
+
 @section('contentheaderlink')
     <a href="">
-        @lang('trans.dashboard') </a>
+        @lang('trans.autorization_applications') </a>
 @endsection
+
 @section('contentheaderactive')
-    @lang('trans.dashboard')
+    @lang('trans.autorization_applications')
 @endsection
+
 @push('css')
     <link rel="stylesheet" href="{{ asset('assets/admin/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/admin/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
@@ -98,195 +103,9 @@
         }
     </style>
 @endpush
+
 @section('content')
     <div class="container-fluid">
-        @if (Auth::user()->user_type === 'licence')
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">@lang('trans.license_applications')</div>
-                        <div class="card-body">
-                            @isset(Auth::user()->demandeur)
-                                <a href="{{ url('user/create') }}" class="btn btn-success btn-sm">
-                                    <i class="fa fa-plus" aria-hidden="true"></i> @lang('trans.add')
-                                </a>
-                            @endisset
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped" id="license_applications">
-                                    <thead>
-                                        <tr>
-                                            <th>@lang('trans.id')</th>
-                                            <th>@lang('trans.applicant')</th>
-                                            <th>@lang('trans.type_application')</th>
-                                            <th>@lang('trans.type_license')</th>
-                                            <th>@lang('trans.status')</th>
-                                            <th>@lang('trans.actions')</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($demandes as $demande)
-                                         @php
-                                            $etatDemande = $demande->etat_workflow;
-                                            @endphp
-                                            <tr>
-                                                <td>{{ $demande->code }}</td>
-                                                <td>{{ $demande->demandeur->np }}</td>
-                                                <td>{{ LaravelLocalization::getCurrentLocale() == 'fr' ? optional($demande->typeDemande)->nom_fr : optional($demande->typeDemande)->nom_en }}
-                                                </td>
-                                                <td>{{ $demande->typeLicence->nom }}</td>
-                                                <td>
-                                            @php
-                                                $badgeClass = match($etatDemande) {
-                                                    'submitted' => 'badge-submitted',
-                                                    'under_review' => 'badge-under_review',
-                                                    'service_approved' => 'badge-service_approved',
-                                                    'paid' => 'badge-paid',
-                                                    'payment_confirmed' => 'badge-payment_confirmed',
-                                                     'printed' => 'badge-printed',
-                                                    'rejected' => 'badge-rejected',
-                                                    default => 'badge-secondary'
-                                                };
-                                            @endphp
-                                            <span class="badge {{ $badgeClass }}">
-                                                {{ $etatDemande }}
-                                            </span>
-                                            </td>
-                                                <td>
-                                                    @if (!$demande->etatDemande->demandeur_cree_demande)
-                                                        <a href="{{ route('user.licences.edit', $demande->id) }}"
-                                                            class="btn btn-warning btn-sm">@lang('trans.edit')</a>
-
-                                                        @php
-                                                            $isValid = true;
-                                                        @endphp
-
-                                                        @if ($isValid)
-                                                            <form action="{{ route('update-state-licence', $demande->id) }}" method="POST" class="d-inline">
-                                                                @csrf
-                                                                <input type="hidden" name="action" value="demandeur_cree_demande">
-                                                                <input type="hidden" name="is_approved" value="1">
-                                                                <button type="submit" class="btn btn-success btn-sm mb-1"
-                                                                    onclick="return confirm('Confirmer la validation de la demande ?')">
-                                                                    <i class="fas fa-check-circle"></i> @lang('trans.validate')
-                                                                </button>
-                                                            </form>
-                                                        @else
-                                                            <div class="alert alert-danger">
-                                                                @lang('trans.missing_requirements')
-                                                            </div>
-                                                        @endif
-
-                                                        <form action="{{ route('user.licences.destroy', $demande->id) }}"
-                                                            method="POST" class="d-inline">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-danger btn-sm"
-                                                                onclick="return confirm('Confirmer la suppression ?')">@lang('trans.destroy')</button>
-                                                        </form>
-                                                    @endif
-                                                    @if (!empty($demande->paiement) && !$demande->etatDemande->demandeur_payer && !$demande->etatDemande->compagnie_payer)
-                                                        <a href="{{ route('user.licences.pay', $demande->paiement->id) }}"
-                                                            class="btn btn-primary  btn-sm">Payer</a>
-                                                    @endif
-                                                    @if (!empty($demande->facture) && !$demande->etatDemande->demandeur_payer && !$demande->etatDemande->compagnie_payer)
-                                                        <button class="btn btn-warning btn-sm"
-                                                            onclick="openPdfModal('{{ asset('/uploads/' . $demande->facture->facture) }}')">
-                                                            Facture</button>
-                                                    @endif
-                                                    @if ($demande->authentificationDisponible())
-                                                        <a href="{{ route('user.imprimer', $demande->id) }}"
-                                                            class="btn btn-primary btn-sm"
-                                                            target="_blank">@lang('trans.print_authentication')</a>
-                                                    @endif
-
-                                                    @if (in_array($demande->typeDemande->id, [7]) && !empty($demande->validation) && isset($demande->validation))
-                                                        <a href="{{ route('user.validation', $demande->validation) }}"
-                                                            class="btn btn-primary btn-sm" target="_blank">
-                                                            @lang('trans.print_validation')</a>
-                                                    @endif
-                                                    @if ($demande->has_issues && $demande->etatDemande->demandeur_cree_demande && !$demande->etatDemande->pel_valider)
-                                                        <button class="btn btn-info btn-sm" data-toggle="modal"
-                                                            data-target="#issuesModal-{{ $demande->id }}"
-                                                            title="@lang('trans.view_issues')">
-                                                            <i class="fas fa-info-circle"></i>
-                                                        </button>
-
-                                                        <div class="modal fade" id="issuesModal-{{ $demande->id }}"
-                                                            tabindex="-1">
-                                                            <div class="modal-dialog modal-lg">
-                                                                <div class="modal-content">
-                                                                    <div class="modal-header bg-dark text-white">
-                                                                        <h5 class="modal-title">
-                                                                            @lang('trans.issues_for')
-                                                                            {{ $demande->typeDemande->nom_fr ?? '' }}
-                                                                        </h5>
-                                                                        <button type="button" class="close text-white"
-                                                                            data-dismiss="modal">
-                                                                            <span>&times;</span>
-                                                                        </button>
-                                                                    </div>
-                                                                    <div class="modal-body">
-                                                                        @if (count($demande->invalid_reasons) > 0)
-                                                                            <div class="alert alert-warning">
-                                                                                <h6><i class="fas fa-exclamation-triangle"></i>
-                                                                                    @lang('trans.invalid_components')</h6>
-                                                                                <ul>
-                                                                                    @foreach ($demande->invalid_reasons as $component)
-                                                                                        <li>
-                                                                                            <strong>{{ ucfirst(str_replace('_', ' ', $component['type'])) }}:</strong>
-                                                                                            {{ $component['identifier'] }}
-                                                                                            @if (!empty($component['motif']))
-                                                                                                -
-                                                                                                <em>{{ $component['motif'] }}</em>
-                                                                                            @endif
-                                                                                        </li>
-                                                                                    @endforeach
-                                                                                </ul>
-                                                                            </div>
-                                                                        @endif
-
-                                                                        @if (count($demande->rejection_reasons_list) > 0)
-                                                                            <div class="alert alert-danger">
-                                                                                <h6><i class="fas fa-ban"></i>
-                                                                                    @lang('trans.rejection_reasons')</h6>
-                                                                                <ul>
-                                                                                    @foreach ($demande->rejection_reasons_list as $reason)
-                                                                                        <li>{{ $reason }}</li>
-                                                                                    @endforeach
-                                                                                </ul>
-                                                                            </div>
-                                                                        @endif
-                                                                    </div>
-                                                                    <div class="modal-footer">
-                                                                        <button type="button" class="btn btn-secondary"
-                                                                            data-dismiss="modal">
-                                                                            @lang('trans.close')
-                                                                        </button>
-                                                                        @if (auth()->user()->can('edit-demandes'))
-                                                                            <a href="{{ route('demandes.edit', $demande->id) }}"
-                                                                                class="btn btn-primary">
-                                                                                <i class="fas fa-edit"></i>
-                                                                                @lang('trans.correct_issues')
-                                                                            </a>
-                                                                        @endif
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    @endif
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endif
-        
-        {{-- SECTION AUTORISATIONS --}}
         @if (Auth::user()->user_type === 'autorisation')
             <div class="row">
                 <div class="col-md-12">
@@ -410,7 +229,7 @@
                                                                     @csrf
                                                                     <input type="hidden" name="action" value="compagnie_cree_demande">
                                                                     <input type="hidden" name="is_approved" value="1">
-                                                                    <button type="submit" class="btn btn-success btn-sm" 
+                                                                    <button type="submit" class="btn btn-success btn-sm"
                                                                             onclick="return confirm('@lang('trans.confirm_submission')')">
                                                                         <i class="fas fa-paper-plane"></i> @lang('trans.send')
                                                                         <span class="badge badge-light">{{ $documentCount }}</span>
@@ -538,7 +357,7 @@
                 @csrf
                 <input type="hidden" id="edit_mode" name="edit_mode" value="0">
                 <input type="hidden" id="demande_id" name="demande_id" value="">
-                
+
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6">
@@ -555,7 +374,7 @@
                                 </select>
                             </div>
                         </div>
-                        
+
                         <!-- Type de vol -->
                         <div class="col-md-6">
                             <div class="form-group">
@@ -577,7 +396,7 @@
                                 </small>
                             </div>
                         </div>
-                        
+
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label for="date_debut">Date de début <span class="text-danger">*</span></label>
@@ -596,13 +415,13 @@
                             <div class="form-group">
                                 <label for="sous_validite">Sous-validite (H)</label>
                                 <input type="number" min="12" max="72" step="12"
-                                    class="form-control" name="sous_validite" id="sous_validite" 
+                                    class="form-control" name="sous_validite" id="sous_validite"
                                     placeholder="Laisser vide si non applicable">
                                 <div class="invalid-feedback" id="sous_validite_error"></div>
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Opérateur représenté -->
                     <div class="row">
                         <div class="col-md-12 mb-3">
@@ -710,7 +529,7 @@
     <script src="{{ asset('assets/admin/plugins/toastr/toastr.min.js') }}"></script>
     <script src="{{ asset('assets/admin/plugins/select2/js/select2.full.min.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/fr.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/fr.js"></script>
 @endpush
 
 @push('custom')
@@ -722,7 +541,7 @@ $(document).ready(function() {
             if (!date || date === 'N/A' || date === '') {
                 return 0;
             }
-            
+
             // Essayer plusieurs formats de date courants
             var formats = [
                 'DD/MM/YYYY',
@@ -731,14 +550,14 @@ $(document).ready(function() {
                 'DD/MM/YYYY HH:mm:ss',
                 'YYYY-MM-DD HH:mm:ss'
             ];
-            
+
             for (var i = 0; i < formats.length; i++) {
                 var momentDate = moment(date, formats[i], true);
                 if (momentDate.isValid()) {
                     return momentDate.unix();
                 }
             }
-            
+
             // Si aucun format ne correspond, retourner 0
             return 0;
         },
@@ -795,32 +614,16 @@ $(document).ready(function() {
             console.log('Tableau mis à jour');
         }
     });
-    
+
     // Ajouter des classes Bootstrap aux éléments DataTables
     $('.dataTables_length select').addClass('custom-select custom-select-sm form-control form-control-sm');
     $('.dataTables_filter input').addClass('form-control form-control-sm');
-    
+
     // Réinitialiser le tri si nécessaire
     // table.order([0, 'desc']).draw();
 });
 $(document).ready(function() {
     // Initialisation des DataTables
-    $('#license_applications').DataTable({
-        "paging": true,
-        "lengthChange": false,
-        "searching": true,
-        "ordering": true,
-        "info": true,
-        "autoWidth": false,
-        "responsive": true,
-        "columnDefs": [{
-            "targets": 5,
-            "orderable": false
-        }]
-    });
-
-    
-
     $('#paiements').DataTable({
         "paging": true,
         "lengthChange": false,
@@ -854,40 +657,40 @@ $(document).ready(function() {
 
     // Initialisation du select2 pour le type de vol
     initTypeVolSelect2('single');
-    
+
     // Événement changement type de demande
     $('#type_demande_autorisation_id').on('change', function() {
         handleTypeDemandeChange($(this).val());
     });
-    
+
     // Si une valeur initiale est déjà sélectionnée
     const initialTypeId = $('#type_demande_autorisation_id').val();
     if (initialTypeId) {
         handleTypeDemandeChange(initialTypeId);
     }
-    
+
     // Événement d'ouverture du modal
     $('#applicationModal').on('shown.bs.modal', function() {
         // Réinitialiser select2 après l'ouverture du modal
         initTypeVolSelect2('single');
     });
-    
+
     // Événement de fermeture du modal
     $('#applicationModal').on('hidden.bs.modal', function() {
         resetModalForNew();
     });
-    
+
     // Soumission du formulaire
     $('#applicationForm').on('submit', function(e) {
         e.preventDefault();
         submitApplicationForm();
     });
-    
+
     // Validation en temps réel des dates
     $('#date_debut, #date_fin').on('change', function() {
         validateDates();
     });
-    
+
     // Boutons modifier dans le tableau
     $(document).on('click', '.btn-modify', function() {
         loadDemandeForEdit($(this));
@@ -907,14 +710,14 @@ function initTypeVolSelect2(mode) {
     if ($('#type_vol_id').hasClass('select2-hidden-accessible')) {
         $('#type_vol_id').select2('destroy');
     }
-    
+
     const options = {
         dropdownParent: $('#applicationModal'),
         placeholder: "@lang('trans.select_option')",
         allowClear: true,
         width: '100%'
     };
-    
+
     if (mode === 'multiple') {
         options.allowClear = true;
         options.closeOnSelect = false;
@@ -933,7 +736,7 @@ function initTypeVolSelect2(mode) {
             return null;
         };
     }
-    
+
     $('#type_vol_id').select2(options);
 }
 
@@ -945,26 +748,26 @@ function handleTypeDemandeChange(typeDemandeId) {
     const typeVolSelect = $('#type_vol_id');
     const typeVolInfo = $('#typeVolInfo');
     const typeVolMultiInfo = $('#typeVolMultiInfo');
-    
+
     // Nettoyer les messages d'erreur
     clearErrors();
-    
+
     // Réinitialiser le select
     typeVolSelect.prop('disabled', false);
     typeVolSelect.find('option').prop('disabled', false).show();
-    
+
     if (typeDemandeId == 4) {
         // ========================================
         // TYPE 4 : TRANSPORT DÉPOUILLE MORTELLE
         // ========================================
         setupType4DepouilleMortelle(typeVolSelect, typeVolInfo, typeVolMultiInfo);
-        
+
     } else if (typeDemandeId == 3) {
         // ========================================
         // TYPE 3 : MULTIPLE (MULTI-SELECT)
         // ========================================
         setupType3MultiSelect(typeVolSelect, typeVolInfo, typeVolMultiInfo);
-        
+
     } else {
         // ========================================
         // AUTRES TYPES : SELECT SIMPLE NORMAL
@@ -981,7 +784,7 @@ function setupType4DepouilleMortelle(typeVolSelect, typeVolInfo, typeVolMultiInf
     typeVolSelect.prop('disabled', false);
     typeVolSelect.removeAttr('multiple');
     typeVolSelect.attr('name', 'type_vol_id');
-    
+
     // Masquer toutes les options sauf VOL CARGO (id=1)
     typeVolSelect.find('option').each(function() {
         const val = $(this).val();
@@ -993,17 +796,17 @@ function setupType4DepouilleMortelle(typeVolSelect, typeVolInfo, typeVolMultiInf
             $(this).prop('disabled', true).hide();
         }
     });
-    
+
     // Sélectionner automatiquement VOL CARGO
     typeVolSelect.val('1');
-    
+
     // Afficher le message d'information
     typeVolInfo.show();
     typeVolMultiInfo.hide();
-    
+
     // Réinitialiser select2 en mode single
     initTypeVolSelect2('single');
-    
+
     // Empêcher l'ouverture du dropdown (une seule option disponible)
     typeVolSelect.off('select2:opening').on('select2:opening', function(e) {
         e.preventDefault();
@@ -1018,7 +821,7 @@ function setupType3MultiSelect(typeVolSelect, typeVolInfo, typeVolMultiInfo) {
     typeVolSelect.prop('disabled', false);
     typeVolSelect.attr('multiple', 'multiple');
     typeVolSelect.attr('name', 'type_vol_id[]');
-    
+
     // Filtrer : uniquement VOL CARGO (id=1), VOL CHARTER (id=2) et VOL COMMERCIAL (id=14)
     typeVolSelect.find('option').each(function() {
         const val = $(this).val();
@@ -1028,14 +831,14 @@ function setupType3MultiSelect(typeVolSelect, typeVolInfo, typeVolMultiInfo) {
             $(this).prop('disabled', false).show();
         }
     });
-    
+
     // Vider la sélection
     typeVolSelect.val([]);
-    
+
     // Afficher les messages
     typeVolInfo.hide();
     typeVolMultiInfo.show();
-    
+
     // Réinitialiser select2 en mode multiple
     initTypeVolSelect2('multiple');
 }
@@ -1048,20 +851,20 @@ function setupTypeNormal(typeVolSelect, typeVolInfo, typeVolMultiInfo) {
     typeVolSelect.prop('disabled', false);
     typeVolSelect.removeAttr('multiple');
     typeVolSelect.attr('name', 'type_vol_id');
-    
+
     // Réactiver toutes les options
     typeVolSelect.find('option').prop('disabled', false).show();
-    
+
     // Vider la sélection
     typeVolSelect.val('');
-    
+
     // Cacher les messages
     typeVolInfo.hide();
     typeVolMultiInfo.hide();
-    
+
     // Réinitialiser select2 en mode single
     initTypeVolSelect2('single');
-    
+
     // Supprimer l'événement d'ouverture bloquant
     typeVolSelect.off('select2:opening');
 }
@@ -1081,14 +884,14 @@ function loadDemandeForEdit(button) {
         objet: button.data('objet'),
         compagnieId: button.data('compagnie-id')
     };
-    
+
     console.log('Chargement demande pour modification:', demandeId, demandeData);
-    
+
     // Passer en mode édition
     $('#edit_mode').val('1');
     $('#demande_id').val(demandeId);
     $('#applicationModalLabel').text("@lang('trans.modify_application')");
-    
+
     // Remplir les champs
     $('#date_debut').val(demandeData.dateDebut);
     $('#date_fin').val(demandeData.dateFin);
@@ -1098,11 +901,11 @@ function loadDemandeForEdit(button) {
 
     // Déclencher le changement de type (important pour configurer le select type_vol)
     $('#type_demande_autorisation_id').val(demandeData.type).trigger('change');
-    
+
     // Attendre que le DOM soit mis à jour puis définir la valeur du type_vol
     setTimeout(function() {
         const typeVolSelect = $('#type_vol_id');
-        
+
         if (demandeData.type == 3) {
             // Multi-select : convertir en tableau
             let typeVolArray = [];
@@ -1120,7 +923,7 @@ function loadDemandeForEdit(button) {
             typeVolSelect.val(demandeData.typeVol).trigger('change');
         }
     }, 300);
-    
+
     // Mettre à jour l'URL du formulaire pour la modification
     // Note: la route user.autorisations.update est un POST (pas de route PUT dédiée) ;
     // la distinction création/modification se fait via edit_mode + demande_id, pas via le verbe HTTP.
@@ -1139,16 +942,16 @@ function resetModalForNew() {
     $('#edit_mode').val('0');
     $('#demande_id').val('');
     $('#applicationModalLabel').text("@lang('trans.add_application')");
-    
+
     // Réinitialiser le formulaire
     $('#applicationForm')[0].reset();
-    
+
     // Supprimer le champ _method
     $('#applicationForm input[name="_method"]').remove();
-    
+
     // Réinitialiser l'URL
     $('#applicationForm').attr('action', "{{ route('user.autorisations.store') }}");
-    
+
     // Réinitialiser le type de demande
     $('#type_demande_autorisation_id').val('').trigger('change');
 
@@ -1162,17 +965,17 @@ function resetModalForNew() {
     typeVolSelect.prop('disabled', false);
     typeVolSelect.removeAttr('multiple');
     typeVolSelect.attr('name', 'type_vol_id');
-    
+
     // Cacher les messages
     $('#typeVolInfo').hide();
     $('#typeVolMultiInfo').hide();
-    
+
     // Supprimer l'événement d'ouverture bloquant
     typeVolSelect.off('select2:opening');
-    
+
     // Réinitialiser select2
     initTypeVolSelect2('single');
-    
+
     // Nettoyer les erreurs
     clearErrors();
 }
@@ -1185,13 +988,13 @@ function validateDates() {
     let isValid = true;
     const dateDebut = $('#date_debut').val();
     const dateFin = $('#date_fin').val();
-    
+
     // Réinitialiser les erreurs
     $('#date_debut').removeClass('is-invalid');
     $('#date_fin').removeClass('is-invalid');
     $('#date_debut_error').text('');
     $('#date_fin_error').text('');
-    
+
     if (!dateDebut) {
         $('#date_debut').addClass('is-invalid');
         $('#date_debut_error').text('La date de début est obligatoire.');
@@ -1200,14 +1003,14 @@ function validateDates() {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const debutDate = new Date(dateDebut);
-        
+
         if (debutDate < today) {
             $('#date_debut').addClass('is-invalid');
             $('#date_debut_error').text('La date de début ne peut pas être dans le passé.');
             isValid = false;
         }
     }
-    
+
     if (!dateFin) {
         $('#date_fin').addClass('is-invalid');
         $('#date_fin_error').text('La date de fin est obligatoire.');
@@ -1217,7 +1020,7 @@ function validateDates() {
         $('#date_fin_error').text('La date de fin doit être après la date de début.');
         isValid = false;
     }
-    
+
     return isValid;
 }
 
@@ -1237,16 +1040,16 @@ function clearErrors() {
 function displayValidationErrors(errors) {
     // Nettoyer les anciennes erreurs
     clearErrors();
-    
+
     // Parcourir les erreurs
     $.each(errors, function(field, messages) {
         const input = $('[name="' + field + '"]');
         const errorDiv = $('#' + field + '_error');
-        
+
         if (input.length) {
             input.addClass('is-invalid');
         }
-        
+
         if (errorDiv.length && messages[0]) {
             errorDiv.text(messages[0]);
         } else if (messages[0]) {
@@ -1263,41 +1066,41 @@ function submitApplicationForm() {
     const submitBtn = $('#submitBtn');
     submitBtn.prop('disabled', true);
     submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Envoi en cours...');
-    
+
     // S'assurer que pour le type 4, type_vol_id = 1
     const typeDemandeId = $('#type_demande_autorisation_id').val();
     if (typeDemandeId == 4) {
         $('#type_vol_id').val('1');
     }
-    
+
     // Récupérer les données du formulaire
     const formData = $('#applicationForm').serialize();
     const url = $('#applicationForm').attr('action');
     const isEdit = $('#edit_mode').val() === '1';
-    
+
     console.log('Soumission formulaire:', {
         url: url,
         isEdit: isEdit,
         data: formData
     });
-    
+
     $.ajax({
         url: url,
         method: 'POST',
         data: formData,
         success: function(response) {
             console.log('Succès:', response);
-            
+
             // Fermer le modal
             $('#applicationModal').modal('hide');
-            
+
             // Afficher le message de succès
-            const message = isEdit ? 
-                "@lang('trans.updated_successfully')" : 
+            const message = isEdit ?
+                "@lang('trans.updated_successfully')" :
                 "@lang('trans.success')";
-            
+
             toastr.success(message);
-            
+
             // Recharger la page après un court délai
             setTimeout(function() {
                 window.location.reload();
@@ -1305,11 +1108,11 @@ function submitApplicationForm() {
         },
         error: function(xhr) {
             console.error('Erreur:', xhr);
-            
+
             // Réactiver le bouton
             submitBtn.prop('disabled', false);
             submitBtn.html('<i class="fas fa-paper-plane"></i> @lang("trans.send")');
-            
+
             if (xhr.status === 422) {
                 // Erreurs de validation
                 const errors = xhr.responseJSON.errors;
@@ -1334,10 +1137,10 @@ $('#date_debut, #date_fin').on('change', function() {
 $('#sous_validite').on('input', function() {
     const val = parseInt($(this).val());
     const errorDiv = $('#sous_validite_error');
-    
+
     $(this).removeClass('is-invalid');
     errorDiv.text('');
-    
+
     if ($(this).val() && (val < 12 || val > 72)) {
         $(this).addClass('is-invalid');
         errorDiv.text('La sous-validité doit être comprise entre 12 et 72 heures.');

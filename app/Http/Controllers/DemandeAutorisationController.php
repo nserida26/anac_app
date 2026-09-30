@@ -54,6 +54,48 @@ class DemandeAutorisationController extends Controller
     {
         $this->dta = $dta;
     }
+    /**
+     * Tableau de bord des demandes d'AUTORISATIONS de l'utilisateur connecté.
+     * (Les demandes de LICENCES ont leur propre page : user.licences.index)
+     */
+    public function indexUser()
+    {
+        $user = Auth::user();
+
+        $demandeAutorisations = $user->demandeAutorisations->sortByDesc('created_at');
+        $type_vols = TypeVol::all();
+
+        $demandeAutorisations->map(function ($demande) {
+            $demande->created_at_formatted = $demande->created_at
+                ? date('d-m-Y', strtotime($demande->created_at))
+                : 'N/A';
+            $demande->created_at_sort = $demande->created_at
+                ? date('Y-m-d', strtotime($demande->created_at))
+                : '';
+
+            $demande->date_soumission_formatted = $demande->date_soumission
+                ? date('d-m-Y', strtotime($demande->date_soumission))
+                : 'N/A';
+            $demande->date_soumission_sort = $demande->date_soumission
+                ? date('Y-m-d', strtotime($demande->date_soumission))
+                : '';
+
+            return $demande;
+        });
+
+        $type_demande_autorisations = TypeDemandeAutorisation::all();
+        $paiementAutorisations = $user->paiements;
+        $compagnies = Compagnie::all();
+
+        return view('user.autorisations.index', compact(
+            'type_vols',
+            'demandeAutorisations',
+            'type_demande_autorisations',
+            'paiementAutorisations',
+            'compagnies'
+        ));
+    }
+
     public function autorisationPay($id)
     {
         $paiement = PaiementAutorisation::find($id);

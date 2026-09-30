@@ -339,7 +339,14 @@ Route::get('/rapports/compagnie/{id}', [App\Http\Controllers\DgDsvController::cl
                     ->name('user.login.requests');
                 Route::post('/approve-login/{request}', [App\Http\Controllers\DemandeurController::class, 'approveLogin'])
                     ->name('user.approve.login');
-                Route::get('/', [App\Http\Controllers\DemandeController::class, 'index'])->name('user');
+                Route::get('/', function () {
+                    // Redirige vers l'espace correspondant au type de compte.
+                    return auth()->user()->user_type === 'autorisation'
+                        ? redirect()->route('user.autorisations.index')
+                        : redirect()->route('user.licences.index');
+                })->name('user');
+                Route::get('/licences', [App\Http\Controllers\DemandeController::class, 'index'])->name('user.licences.index');
+                Route::get('/autorisations', [App\Http\Controllers\DemandeAutorisationController::class, 'indexUser'])->name('user.autorisations.index');
                 Route::get('/profile', [App\Http\Controllers\DemandeurController::class, 'index'])->name('user.profile');
                 Route::post('/profile/store', [App\Http\Controllers\DemandeurController::class, 'store'])->name('user.profile.store');
                 Route::put('/profile/update', [App\Http\Controllers\DemandeurController::class, 'update'])->name('user.profile.update');

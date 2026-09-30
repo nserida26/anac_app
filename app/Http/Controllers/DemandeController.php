@@ -56,43 +56,16 @@ class DemandeController extends Controller
     ) {
         $this->notificationService = $notificationService;
         $this->dsvNotificationService = $dsvNotificationService;
-    }
-
+    }    /**
+     * Tableau de bord des demandes de LICENCES de l'utilisateur connecté.
+     * (Les demandes d'AUTORISATIONS ont leur propre page : user.autorisations.index)
+     */
     public function index()
     {
         $user = Auth::user();
         $demandes = empty($user->demandeur->demandes) ? [] : $user->demandeur->demandes;
 
-
-        $demandeAutorisations =  $user->demandeAutorisations->sortByDesc('created_at');
-        $type_vols  = TypeVol::all();
-
-        $demandeAutorisations->map(function ($demande) {
-            $demande->created_at_formatted = $demande->created_at
-                ? date('d-m-Y', strtotime($demande->created_at))
-                : 'N/A';
-            $demande->created_at_sort = $demande->created_at
-                ? date('Y-m-d', strtotime($demande->created_at))
-                : '';
-
-            $demande->date_soumission_formatted = $demande->date_soumission
-                ? date('d-m-Y', strtotime($demande->date_soumission))
-                : 'N/A';
-            $demande->date_soumission_sort = $demande->date_soumission
-                ? date('Y-m-d', strtotime($demande->date_soumission))
-                : '';
-
-            return $demande;
-        });
-
-
-
-        $type_demande_autorisations = TypeDemandeAutorisation::all();
-        $paiementAutorisations = $user->paiements;
-        $compagnies = Compagnie::all();
-
-
-        return view('user.index', compact('type_vols', 'demandes', 'demandeAutorisations', 'type_demande_autorisations', 'paiementAutorisations', 'compagnies'));
+        return view('user.licences.index', compact('demandes'));
     }
     public function create()
     {
@@ -138,7 +111,7 @@ class DemandeController extends Controller
             'demande_id' => $demande->id,
             'user_id' => auth()->id(),
         ]);
-        return redirect()->route('user')->with('success', 'Demande créée avec succès.');
+        return redirect()->route('user.licences.index')->with('success', 'Demande créée avec succès.');
     }
 
     public function updateType(UpdateTypeDemandeRequest $request, ModificationDemandeService $modification, $id)
@@ -308,7 +281,7 @@ class DemandeController extends Controller
                 paymentDate: $paiement->date_paiement,
             );
         }
-        return redirect()->route('user')->with('success', 'Paiement mis à jour avec succès.');
+        return redirect()->route('user.licences.index')->with('success', 'Paiement mis à jour avec succès.');
     }
 
     public function validateDemande($id)
