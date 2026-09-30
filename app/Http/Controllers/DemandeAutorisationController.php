@@ -2129,11 +2129,11 @@ class DemandeAutorisationController extends Controller
         $demandeAutorisation = DemandeAutorisation::with('etatDemande')->findOrFail($id);
 
         if ($demandeAutorisation->etatDemande && $demandeAutorisation->etatDemande->compagnie_cree_demande) {
-            return redirect()->back()->with('error', 'Cette demande a déjà été déposée et ne peut plus être supprimée.');
+            return redirect()->back()->with('error', __('trans.demande_delete_closed_error'));
         }
 
         $demandeAutorisation->delete();
-        return redirect()->back()->with('success', 'Demande supprimée avec succès.');
+        return redirect()->back()->with('success', __('trans.deleted_successfully'));
     }
 
     public function sendAuthorizationEmail(Autorisation $autorisation, $recipients)

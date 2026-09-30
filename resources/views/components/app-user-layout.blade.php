@@ -96,16 +96,16 @@
 
         {{-- Flash messages --}}
         @if (session('success'))
-            <x-auth-alert type="success" :pre-line="true">{{ session('success') }}</x-auth-alert>
+            <x-auth-alert type="success" :pre-line="true" :closable="true">{{ session('success') }}</x-auth-alert>
         @endif
         @if (session('error'))
-            <x-auth-alert type="error" :pre-line="true">{{ session('error') }}</x-auth-alert>
+            <x-auth-alert type="error" :pre-line="true" :closable="true">{{ session('error') }}</x-auth-alert>
         @endif
         @if (session('warning'))
-            <x-auth-alert type="info" :pre-line="true">{{ session('warning') }}</x-auth-alert>
+            <x-auth-alert type="info" :pre-line="true" :closable="true">{{ session('warning') }}</x-auth-alert>
         @endif
         @if (session('status'))
-            <x-auth-alert type="success">{{ session('status') }}</x-auth-alert>
+            <x-auth-alert type="success" :closable="true">{{ session('status') }}</x-auth-alert>
         @endif
 
         {{ $slot }}

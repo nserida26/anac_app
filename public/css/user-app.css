@@ -241,6 +241,71 @@ body.anac-app {
     gap: 0.5rem;
 }
 
+/* ── Alertes flash (messages de session) ── */
+.anac-app .auth-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 1.25rem;
+    border: 1px solid transparent;
+    border-left-width: 4px;
+    border-radius: var(--anac-radius-sm);
+    font-size: 0.92rem;
+    font-weight: 500;
+    box-shadow: var(--anac-shadow-sm);
+    animation: anac-alert-in 0.25s ease-out;
+}
+
+.anac-app .auth-alert i {
+    margin-top: 0.1rem;
+    font-size: 1.05rem;
+}
+
+.anac-app .auth-alert--success {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    border-left-color: #16a34a;
+    color: #166534;
+}
+
+.anac-app .auth-alert--error {
+    background: #fef2f2;
+    border-color: #fecaca;
+    border-left-color: #dc2626;
+    color: #991b1b;
+}
+
+.anac-app .auth-alert--info {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    border-left-color: #2563a8;
+    color: #1e40af;
+}
+
+.anac-app .auth-alert__close {
+    margin-left: auto;
+    align-self: flex-start;
+    border: none;
+    background: transparent;
+    color: inherit;
+    opacity: 0.6;
+    cursor: pointer;
+    padding: 0 0 0 0.75rem;
+    font-size: 0.95rem;
+    line-height: 1;
+    transition: var(--anac-transition);
+}
+
+.anac-app .auth-alert__close:hover {
+    opacity: 1;
+}
+
+@keyframes anac-alert-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 /* ── Cards ── */
 .anac-app .card {
     border: none;
@@ -333,7 +398,230 @@ body.anac-app {
     margin-bottom: 0.25rem;
 }
 
+/* Groupe de boutons d'action : icônes espacées, coins arrondis conservés */
+.anac-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+/* ── Boutons d'action : palette douce (pastel + texte assorti) ── */
+.anac-app .anac-action {
+    border: none;
+    font-weight: 600;
+    transition: var(--anac-transition);
+}
+
+.anac-app .anac-action:hover {
+    filter: brightness(0.95);
+    transform: translateY(-1px);
+}
+
+.anac-app .anac-action--blue {
+    background-color: #e8f1fb;
+    color: #2563a8;
+}
+
+.anac-app .anac-action--grey {
+    background-color: #eef0f3;
+    color: #5b6670;
+}
+
+.anac-app .anac-action--red {
+    background-color: #fdecec;
+    color: #c0392b;
+}
+
+.anac-app .anac-action--black {
+    background-color: #ececec;
+    color: #1f2328;
+}
+
+.anac-app .anac-action--yellow {
+    background-color: #fdf4dd;
+    color: #9c7c1a;
+}
+
+.anac-app .anac-action--pink {
+    background-color: #fce9f1;
+    color: #b03a72;
+}
+
+/* ── Modale détails (style auth) ── */
+.anac-app .anac-modal .modal-header {
+    border-top: 3px solid var(--anac-accent);
+}
+
+.anac-app .anac-modal .modal-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--anac-primary);
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.anac-app .anac-modal .modal-title i {
+    color: var(--anac-accent);
+}
+
+.anac-app .anac-modal__code {
+    color: var(--anac-accent);
+}
+
+.anac-app .anac-detail-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.anac-app .anac-detail-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--anac-gray-200);
+}
+
+.anac-app .anac-detail-row:last-child {
+    border-bottom: none;
+}
+
+.anac-app .anac-detail-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--anac-gray-600);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.anac-app .anac-detail-label i {
+    width: 16px;
+    text-align: center;
+    color: var(--anac-gray-400);
+}
+
+.anac-app .anac-detail-value {
+    color: var(--anac-primary);
+    font-weight: 600;
+    text-align: right;
+}
+
+/* Alertes adoucies dans les modales */
+.anac-app .anac-modal .alert-danger {
+    background-color: #fdecec;
+    border-color: #f6d5d5;
+    color: #c0392b;
+    border-radius: var(--anac-radius-sm);
+}
+
+.anac-app .anac-modal .alert-warning {
+    background-color: #fdf4dd;
+    border-color: #f3e4b5;
+    color: #9c7c1a;
+    border-radius: var(--anac-radius-sm);
+}
+
+/* Variante « danger » (modale des problèmes) */
+.anac-app .anac-modal--danger .modal-header {
+    border-top-color: #dc3545;
+}
+
+.anac-app .anac-modal--danger .modal-title i {
+    color: #dc3545;
+}
+
+.anac-app .anac-modal--danger .anac-modal__code {
+    color: var(--anac-primary);
+}
+
+/* ── Stepper « Parcours de la demande » ── */
+.anac-app .autorisation-stepper {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+}
+
+.anac-app .autorisation-stepper li {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    padding-top: 2.4rem;
+    font-size: 0.8rem;
+    color: var(--anac-gray-600);
+}
+
+.anac-app .autorisation-stepper li::before {
+    content: '';
+    position: absolute;
+    top: 1rem;
+    left: -50%;
+    width: 100%;
+    height: 3px;
+    background-color: var(--anac-gray-200);
+    z-index: 0;
+}
+
+.anac-app .autorisation-stepper li:first-child::before {
+    display: none;
+}
+
+.anac-app .autorisation-stepper li::after {
+    content: '\2713';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background-color: var(--anac-gray-200);
+    color: var(--anac-gray-600);
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.anac-app .autorisation-stepper li.completed {
+    color: #1e7a47;
+}
+
+.anac-app .autorisation-stepper li.completed::before,
+.anac-app .autorisation-stepper li.current::before {
+    background-color: #a9d9bd;
+}
+
+.anac-app .autorisation-stepper li.completed::after {
+    background-color: #e7f6ed;
+    color: #1e7a47;
+}
+
+.anac-app .autorisation-stepper li.current {
+    color: #2563a8;
+    font-weight: 700;
+}
+
+.anac-app .autorisation-stepper li.current::after {
+    background-color: #e8f1fb;
+    color: #2563a8;
+    content: attr(data-step);
+}
+
+.anac-app .autorisation-stepper li.pending::after {
+    content: attr(data-step);
+}
+
 /* ── Contrôles DataTables (recherche, pagination) ── */
+.anac-app .dataTables_wrapper table.dataTable {
+    width: 100% !important;
+}
+
 .anac-app .dataTables_wrapper .dataTables_filter input,
 .anac-app .dataTables_wrapper .dataTables_length select {
     border: 1.5px solid var(--anac-gray-200);
@@ -386,13 +674,25 @@ body.anac-app {
     background: transparent;
 }
 
-/* ── Badges (status pills) ── */
+/* ── Badges de statut : palette douce et lisible ── */
 .anac-app .badge {
-    border-radius: 20px;
-    padding: 0.35em 0.8em;
-    font-weight: 600;
-    letter-spacing: 0.3px;
+    border-radius: 999px;
+    padding: 0.4em 0.85em;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.2px;
 }
+
+.anac-app .badge-draft             { background-color: #eef0f3; color: #5b6670; }
+.anac-app .badge-submitted         { background-color: #e8f1fb; color: #2563a8; }
+.anac-app .badge-under_review      { background-color: #fdf4dd; color: #9c7c1a; }
+.anac-app .badge-service_approved  { background-color: #e7f6ed; color: #1e7a47; }
+.anac-app .badge-paid              { background-color: #e9edfb; color: #3b4fa8; }
+.anac-app .badge-payment_confirmed { background-color: #e3f6f3; color: #1a7f72; }
+.anac-app .badge-issued            { background-color: #f0eafb; color: #6b3fa0; }
+.anac-app .badge-printed           { background-color: #e6eaf0; color: #1a3a5c; }
+.anac-app .badge-rejected          { background-color: #fdecec; color: #c0392b; }
 
 /* ── Modals ── */
 .anac-app .modal-content {
@@ -455,15 +755,103 @@ body.anac-app {
     border-radius: var(--anac-radius-sm);
 }
 
-.anac-app .select2-container .select2-selection--single,
+/* ── Select2 (aligné sur les champs de l'auth) ── */
+.anac-app .select2-container--default .select2-selection--single,
 .anac-app .select2-container--default .select2-selection--multiple {
+    border: 1.5px solid var(--anac-gray-200);
     border-radius: var(--anac-radius-sm);
-    height: auto;
-    padding: 8px 12px;
+    background-color: var(--anac-white);
+    min-height: 42px;
+    padding: 6px 12px;
+    font-family: var(--anac-font);
+    transition: var(--anac-transition);
 }
 
 .anac-app .select2-container--default .select2-selection--single {
+    display: flex;
+    align-items: center;
+}
+
+.anac-app .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: var(--anac-gray-800);
+    padding: 0;
+    line-height: 1.5;
+}
+
+.anac-app .select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: var(--anac-gray-400);
+}
+
+.anac-app .select2-container--default .select2-selection--single .select2-selection__arrow {
+    top: 0;
+    right: 8px;
+    height: 100%;
+}
+
+.anac-app .select2-container--default.select2-container--focus .select2-selection--single,
+.anac-app .select2-container--default.select2-container--focus .select2-selection--multiple,
+.anac-app .select2-container--default.select2-container--open .select2-selection--single,
+.anac-app .select2-container--default.select2-container--open .select2-selection--multiple {
+    border-color: var(--anac-primary);
+    box-shadow: 0 0 0 3px rgba(13, 33, 55, 0.1);
+}
+
+/* Tags (multi-selection) */
+.anac-app .select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: var(--anac-gray-100);
+    border: 1px solid var(--anac-gray-200);
+    border-radius: 6px;
+    color: var(--anac-gray-800);
+    padding: 2px 8px;
+    margin: 2px 4px 2px 0;
+    font-size: 0.85rem;
+}
+
+.anac-app .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: var(--anac-gray-600);
+    margin-right: 4px;
+}
+
+.anac-app .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    color: #c0392b;
+}
+
+.anac-app .select2-container--default .select2-selection--multiple .select2-search--inline .select2-search__field {
+    font-family: var(--anac-font);
+    color: var(--anac-gray-800);
+    margin-top: 4px;
+}
+
+/* Liste deroulante */
+.anac-app .select2-container--default .select2-dropdown {
+    border: none;
+    border-radius: var(--anac-radius-sm);
+    box-shadow: var(--anac-shadow-md);
+    overflow: hidden;
+    font-family: var(--anac-font);
+}
+
+.anac-app .select2-container--default .select2-results__option {
+    padding: 8px 12px;
+    font-size: 0.92rem;
+    color: var(--anac-gray-800);
+}
+
+.anac-app .select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: var(--anac-primary);
+    color: var(--anac-white);
+}
+
+.anac-app .select2-container--default .select2-results__option[aria-selected="true"] {
+    background-color: var(--anac-gray-100);
+    color: var(--anac-primary);
+}
+
+.anac-app .select2-search--dropdown .select2-search__field {
     border: 1.5px solid var(--anac-gray-200);
+    border-radius: var(--anac-radius-sm);
+    padding: 6px 10px;
+    font-family: var(--anac-font);
 }
 
 /* ── Scroll to top ── */
@@ -550,5 +938,9 @@ body.anac-app {
     .anac-lang .lang-btn,
     #scrollTopBtn {
         transition: none;
+    }
+
+    .anac-app .auth-alert {
+        animation: none;
     }
 }

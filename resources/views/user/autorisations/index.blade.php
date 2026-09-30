@@ -1,4 +1,4 @@
-<x-app-user-layout title="@lang('trans.autorization_applications')">
+<x-app-user-layout :title="__('trans.autorization_applications')">
 
 @push('css')
     <link rel="stylesheet" href="{{ asset('assets/admin/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
@@ -7,64 +7,8 @@
     <link rel="stylesheet" href="{{ asset('assets/admin/plugins/select2/css/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/admin/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
     <style>
-        .badge-draft { background-color: #6c757d; color: white; }
-        .badge-submitted { background-color: #17a2b8; color: white; }
-        .badge-under_review { background-color: #ffc107; color: black; }
-        .badge-service_approved { background-color: #28a745; color: white; }
-        .badge-paid { background-color: #007bff; color: white; }
-        .badge-payment_confirmed { background-color: #20c997; color: white; }
-        .badge-issued { background-color: #6f42c1; color: white; }
-        .badge-printed{background-color: navy; color: white;}
-        .badge-rejected { background-color: #dc3545; color: white; }
-
-        .autorisation-stepper {
-            display: flex;
-            list-style: none;
-            padding: 0;
-            margin: 1rem 0;
-        }
-        .autorisation-stepper li {
-            flex: 1;
-            text-align: center;
-            position: relative;
-            padding-top: 2.25rem;
-            font-size: 0.8rem;
-            color: #adb5bd;
-        }
-        .autorisation-stepper li::before {
-            content: '';
-            position: absolute;
-            top: 1rem;
-            left: -50%;
-            width: 100%;
-            height: 3px;
-            background-color: #e9ecef;
-            z-index: 0;
-        }
-        .autorisation-stepper li:first-child::before { display: none; }
-        .autorisation-stepper li::after {
-            content: '\2713';
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 2rem;
-            height: 2rem;
-            border-radius: 50%;
-            background-color: #e9ecef;
-            color: #fff;
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1;
-            font-size: 0.9rem;
-        }
-        .autorisation-stepper li.completed { color: #28a745; }
-        .autorisation-stepper li.completed::before { background-color: #28a745; }
-        .autorisation-stepper li.completed::after { background-color: #28a745; }
-        .autorisation-stepper li.current { color: #007bff; font-weight: bold; }
-        .autorisation-stepper li.current::after { background-color: #007bff; content: attr(data-step); }
-        .autorisation-stepper li.pending::after { content: attr(data-step); }
+        /* Couleurs des badges de statut : définies dans public/css/user-app.css */
+        /* Styles du parcours (stepper) : définis dans public/css/user-app.css */
 
         .table-danger {
             background-color: rgba(220, 53, 69, 0.1) !important;
@@ -107,13 +51,10 @@
                                 <table class="table" id="autorization_applications">
                                     <thead>
                                         <tr>
-                                            <th>@lang('trans.creation_date')</th>
-                                            <th>@lang('trans.submission_date')</th>
                                             <th>@lang('trans.code')</th>
+                                            <th>@lang('trans.operator')</th>
                                             <th>@lang('trans.type_application')</th>
                                             <th>@lang('trans.type_flight')</th>
-                                            <th>@lang('trans.start_date')</th>
-                                            <th>@lang('trans.end_date')</th>
                                             <th>@lang('trans.status')</th>
                                             <th>@lang('trans.actions')</th>
                                         </tr>
@@ -147,25 +88,22 @@
                                                         default => 'badge-secondary',
                                                     };
                                                     $statusLabel = match ($workflowState) {
-                                                        'draft' => 'Brouillon',
-                                                        'submitted' => 'Déposé',
-                                                        'under_review' => "À l'étude",
-                                                        'service_approved' => 'Validé par les services',
-                                                        'paid' => 'Payé',
-                                                        'payment_confirmed' => 'Paiement confirmé',
-                                                        'issued' => 'Autorisation délivrée',
-                                                        'rejected' => 'Refusé',
+                                                        'draft' => __('trans.workflow_status_draft'),
+                                                        'submitted' => __('trans.workflow_status_submitted'),
+                                                        'under_review' => __('trans.workflow_status_under_review'),
+                                                        'service_approved' => __('trans.workflow_status_service_approved'),
+                                                        'paid' => __('trans.workflow_status_paid'),
+                                                        'payment_confirmed' => __('trans.workflow_status_payment_confirmed'),
+                                                        'issued' => __('trans.workflow_status_issued'),
+                                                        'rejected' => __('trans.workflow_status_rejected'),
                                                         default => $workflowState,
                                                     };
                                                 @endphp
                                                 <tr>
-                                                    <td>{{ $demande->created_at->format('d/m/Y') ?? 'N/A' }}</td>
-                                                    <td>{{ $demande->date_soumission_formatted ?? 'N/A' }}</td>
                                                     <td>{{ $demande->code ?? 'N/A' }}</td>
+                                                    <td>{{ optional($demande->compagnie)->nom_entreprise ?? 'N/A' }}</td>
                                                     <td>{{ $demande->type->libelle ?? 'N/A' }}</td>
                                                     <td>{{ $demande->typeVol->nom ?? 'N/A' }}</td>
-                                                    <td>{{ $dateDebut ?? 'N/A' }}</td>
-                                                    <td>{{ $dateFin ?? 'N/A' }}</td>
                                                     <td>
                                                         <button type="button" class="badge {{ $statusBadgeClass }}"
                                                                 style="border: none; cursor: pointer;"
@@ -174,11 +112,21 @@
                                                         </button>
                                                     </td>
                                                     <td>
-                                                        <div class="btn-group">
+                                                        <div class="anac-actions">
+                                                            {{-- Détails de la demande --}}
+                                                            <button type="button" class="btn btn-sm anac-action anac-action--blue"
+                                                                    data-toggle="modal" data-target="#detailsModal-{{ $demande->id }}"
+                                                                    title="@lang('trans.action_details_title')" aria-label="@lang('trans.action_details_title')">
+                                                                <i class="fas fa-info-circle"></i>
+                                                            </button>
+
                                                             @if ($canEdit)
                                                                 <a href="{{ route('user.autorisations.edit', $demande->id) }}"
-                                                                   class="btn btn-warning btn-sm">@lang('trans.edit')</a>
-                                                                <button class="btn btn-info btn-sm btn-modify"
+                                                                   class="btn btn-sm anac-action anac-action--grey"
+                                                                   title="@lang('trans.action_edit_title')" aria-label="@lang('trans.action_edit_title')">
+                                                                    <i class="fas fa-pencil-alt"></i>
+                                                                </a>
+                                                                <button class="btn btn-sm btn-modify anac-action anac-action--grey"
                                                                     data-id="{{ $demande->id }}"
                                                                     data-type="{{ $typeId }}"
                                                                     data-type-vol="{{ $typeVolId }}"
@@ -187,21 +135,20 @@
                                                                     data-sous-validite="{{ $sousValidite }}"
                                                                     data-objet="{{ $objet }}"
                                                                     data-compagnie-id="{{ $demande->compagnie_id }}"
-                                                                    title="@lang('trans.modify')">
+                                                                    title="@lang('trans.action_modify_title')" aria-label="@lang('trans.action_modify_title')">
                                                                     <i class="fas fa-edit"></i>
                                                                 </button>
-                                                                <form action="{{ route('user.autorisations.destroy', $demande->id) }}" method="POST" class="d-inline">
-                                                                    @csrf @method('DELETE')
-                                                                    <button type="submit" class="btn btn-danger btn-sm"
-                                                                            onclick="return confirm('@lang('trans.confirm_delete')')">
-                                                                        <i class="fas fa-trash"></i>
-                                                                    </button>
-                                                                </form>
+                                                                <button type="button" class="btn btn-sm anac-action anac-action--red"
+                                                                        data-toggle="modal" data-target="#deleteModal-{{ $demande->id }}"
+                                                                        title="@lang('trans.action_delete_title')" aria-label="@lang('trans.action_delete_title')">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
                                                             @else
                                                                 {{-- Demande déjà soumise : consultation en lecture seule uniquement --}}
                                                                 <a href="{{ route('user.autorisations.edit', $demande->id) }}"
-                                                                   class="btn btn-secondary btn-sm">
-                                                                    <i class="fas fa-eye"></i> @lang('trans.view')
+                                                                   class="btn btn-sm anac-action anac-action--black"
+                                                                   title="@lang('trans.action_view_title')" aria-label="@lang('trans.action_view_title')">
+                                                                    <i class="fas fa-eye"></i>
                                                                 </a>
                                                             @endif
 
@@ -211,20 +158,24 @@
                                                                     <input type="hidden" name="action" value="compagnie_cree_demande">
                                                                     <input type="hidden" name="is_approved" value="1">
                                                                     <button type="submit" class="btn btn-success btn-sm"
+                                                                            title="@lang('trans.action_send_title')" aria-label="@lang('trans.action_send_title')"
                                                                             onclick="return confirm('@lang('trans.confirm_submission')')">
-                                                                        <i class="fas fa-paper-plane"></i> @lang('trans.send')
+                                                                        <i class="fas fa-paper-plane"></i>
                                                                         <span class="badge badge-light">{{ $documentCount }}</span>
                                                                     </button>
                                                                 </form>
                                                             @elseif ($canEdit)
-                                                                <button class="btn btn-secondary btn-sm" disabled title="@lang('trans.add_docs_first')">
-                                                                    <i class="fas fa-paper-plane"></i> @lang('trans.send')
+                                                                <button class="btn btn-secondary btn-sm" disabled
+                                                                        title="@lang('trans.action_add_docs_title')"
+                                                                        aria-label="@lang('trans.action_add_docs_title')">
+                                                                    <i class="fas fa-paper-plane"></i>
                                                                 </button>
                                                             @endif
 
                                                             @if ($hasIssues)
-                                                                <button class="btn btn-warning btn-sm" data-toggle="modal"
-                                                                        data-target="#issuesModal-{{ $demande->id }}">
+                                                                <button class="btn btn-sm anac-action anac-action--pink" data-toggle="modal"
+                                                                        data-target="#issuesModal-{{ $demande->id }}"
+                                                                        title="@lang('trans.action_issues_title')" aria-label="@lang('trans.action_issues_title')">
                                                                     <i class="fas fa-exclamation-circle"></i>
                                                                 </button>
                                                             @endif
@@ -235,7 +186,10 @@
                                                             @if ($isIssued)
                                                                 <a target="_blank"
                                                                    href="{{ route('user.print', $demande->autorisation($demande->id)) }}"
-                                                                   class="btn btn-warning btn-sm">@lang('trans.print')</a>
+                                                                   class="btn btn-sm anac-action anac-action--yellow"
+                                                                   title="@lang('trans.action_print_title')" aria-label="@lang('trans.action_print_title')">
+                                                                    <i class="fas fa-print"></i>
+                                                                </a>
                                                             @endif
                                                         </div>
                                                     </td>
@@ -248,10 +202,16 @@
 
                                                 {{-- Modal du parcours de la demande --}}
                                                 @include('user.partials.autorisation-status-timeline', ['demande' => $demande])
+
+                                                {{-- Modal des détails de la demande --}}
+                                                @include('user.partials.autorisation-details-modal', ['demande' => $demande])
+
+                                                {{-- Modal de suppression de la demande --}}
+                                                @include('user.partials.autorisation-delete-modal', ['demande' => $demande])
                                             @endforeach
                                         @else
                                             <tr>
-                                                <td colspan="9" class="text-center">@lang('trans.no_data')</td>
+                                                <td colspan="6" class="text-center">@lang('trans.no_data')</td>
                                             </tr>
                                         @endif
                                     </tbody>
@@ -324,11 +284,14 @@
 {{-- MODAL APPLICATION --}}
     <!-- Modal -->
 <div class="modal fade" id="applicationModal" tabindex="-1" role="dialog" aria-labelledby="applicationModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="applicationModalLabel">@lang('trans.add_application')</h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content anac-modal">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-file-signature"></i>
+                    <span id="applicationModalLabel">@lang('trans.add_application')</span>
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="@lang('trans.close')">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -358,7 +321,7 @@
                         <!-- Type de vol -->
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="type_vol_id">Type de vol <span class="text-danger">*</span></label>
+                                <label for="type_vol_id">@lang('trans.type_flight') <span class="text-danger">*</span></label>
                                 <select class="form-control select2" id="type_vol_id" name="type_vol_id">
                                     <option value="">@lang('trans.select_option')</option>
                                     @foreach ($type_vols as $type)
@@ -369,34 +332,34 @@
                                 </select>
                                 <div class="invalid-feedback" id="type_vol_id_error"></div>
                                 <small id="typeVolInfo" class="form-text text-muted" style="display: none;">
-                                    <i class="fas fa-info-circle"></i> Pour "TRANSPORT DÉPOUILLE MORTELLE", le type de vol est automatiquement défini sur "VOL CARGO"
+                                    <i class="fas fa-info-circle"></i> @lang('trans.type_vol_depouille_hint')
                                 </small>
                                 <small id="typeVolMultiInfo" class="form-text text-info" style="display: none;">
-                                    <i class="fas fa-info-circle"></i> Seuls les types de vol "VOL CARGO", "VOL CHARTER" et "VOL COMMERCIAL" sont disponibles pour cette demande.
+                                    <i class="fas fa-info-circle"></i> @lang('trans.type_vol_multi_hint')
                                 </small>
                             </div>
                         </div>
 
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label for="date_debut">Date de début <span class="text-danger">*</span></label>
+                                <label for="date_debut">@lang('trans.start_date') <span class="text-danger">*</span></label>
                                 <input type="date" class="form-control" id="date_debut" name="date_debut" required>
                                 <div class="invalid-feedback" id="date_debut_error"></div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label for="date_fin">Date de fin <span class="text-danger">*</span></label>
+                                <label for="date_fin">@lang('trans.end_date') <span class="text-danger">*</span></label>
                                 <input type="date" class="form-control" id="date_fin" name="date_fin" required>
                                 <div class="invalid-feedback" id="date_fin_error"></div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label for="sous_validite">Sous-validite (H)</label>
+                                <label for="sous_validite">@lang('trans.sub_validity_label')</label>
                                 <input type="number" min="12" max="72" step="12"
                                     class="form-control" name="sous_validite" id="sous_validite"
-                                    placeholder="Laisser vide si non applicable">
+                                    placeholder="@lang('trans.leave_empty_if_not_applicable')">
                                 <div class="invalid-feedback" id="sous_validite_error"></div>
                             </div>
                         </div>
@@ -436,9 +399,9 @@
                     <div class="row">
                         <div class="col-md-12 mb-3">
                             <div class="form-group">
-                                <label for="objet" class="form-label">Objet</label>
+                                <label for="objet" class="form-label">@lang('trans.object')</label>
                                 <textarea class="form-control" id="objet" name="objet" rows="2"
-                                    placeholder="Décrivez l'objet du vol..."></textarea>
+                                    placeholder="@lang('trans.describe_flight_purpose')"></textarea>
                                 <div class="invalid-feedback" id="objet_error"></div>
                             </div>
                         </div>
@@ -448,7 +411,7 @@
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        <i class="fas fa-times"></i> Fermer
+                        <i class="fas fa-times"></i> @lang('trans.close')
                     </button>
                     <button type="submit" class="btn btn-success" id="submitBtn">
                         <i class="fas fa-paper-plane"></i> @lang('trans.send')
@@ -461,11 +424,15 @@
 
 <!-- Modal pour ajouter un opérateur (utilisé par le sélecteur "Opérateur" ci-dessus) -->
 <div class="modal fade" id="companyModalApplication" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content anac-modal">
             <div class="modal-header">
-                <h5 class="modal-title">@lang('trans.new_operator')</h5>
-                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">
+                    <i class="fas fa-building"></i> @lang('trans.new_operator')
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="@lang('trans.close')">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
                 <form id="companyFormApplication">
@@ -513,82 +480,45 @@
 
 @push('custom')
 <script>
+// Libellés DataTables communs (i18n) réutilisés par les deux tableaux
+var anacDataTablesLang = {
+    "processing": "@lang('trans.dt_processing')",
+    "search": "@lang('trans.dt_search')",
+    "lengthMenu": "@lang('trans.dt_length_menu')",
+    "info": "@lang('trans.dt_info')",
+    "infoEmpty": "@lang('trans.dt_info_empty')",
+    "infoFiltered": "@lang('trans.dt_info_filtered')",
+    "infoPostFix": "",
+    "loadingRecords": "@lang('trans.dt_loading_records')",
+    "zeroRecords": "@lang('trans.dt_zero_records')",
+    "emptyTable": "@lang('trans.dt_empty_table')",
+    "paginate": {
+        "first": "@lang('trans.dt_first')",
+        "previous": "@lang('trans.dt_previous')",
+        "next": "@lang('trans.dt_next')",
+        "last": "@lang('trans.dt_last')"
+    },
+    "aria": {
+        "sortAscending": "@lang('trans.dt_sort_ascending')",
+        "sortDescending": "@lang('trans.dt_sort_descending')"
+    }
+};
+
 $(document).ready(function() {
-    // Plugin de tri de dates utilisant Moment.js
-    jQuery.extend(jQuery.fn.dataTableExt.oSort, {
-        "datetime-moment-pre": function(date) {
-            if (!date || date === 'N/A' || date === '') {
-                return 0;
-            }
-
-            // Essayer plusieurs formats de date courants
-            var formats = [
-                'DD/MM/YYYY',
-                'DD-MM-YYYY',
-                'YYYY-MM-DD',
-                'DD/MM/YYYY HH:mm:ss',
-                'YYYY-MM-DD HH:mm:ss'
-            ];
-
-            for (var i = 0; i < formats.length; i++) {
-                var momentDate = moment(date, formats[i], true);
-                if (momentDate.isValid()) {
-                    return momentDate.unix();
-                }
-            }
-
-            // Si aucun format ne correspond, retourner 0
-            return 0;
-        },
-
-        "datetime-moment-asc": function(a, b) {
-            return a - b;
-        },
-
-        "datetime-moment-desc": function(a, b) {
-            return b - a;
-        }
-    });
-
     // Initialisation du DataTable
     var table = $('#autorization_applications').DataTable({
-        "order": [[0, "desc"]], // Tri décroissant sur la première colonne
+        "order": [], // Conserve l'ordre renvoyé par le serveur
         "columnDefs": [
             {
-                "targets": [0, 1], // Colonnes de dates
-                "type": "datetime-moment",
-                "orderDataType": "dom-data-order"
-            },
-            {
-                "targets": 8, // Colonne actions
+                "targets": 5, // Colonne actions
                 "orderable": false,
                 "searchable": false
             }
         ],
         "pageLength": 25,
+        "autoWidth": false, // La table s'adapte à la largeur du conteneur
         "responsive": true,
-        "language": {
-            "processing": "Traitement en cours...",
-            "search": "Rechercher&nbsp;:",
-            "lengthMenu": "Afficher _MENU_ &eacute;l&eacute;ments",
-            "info": "Affichage de _START_ &agrave; _END_ sur _TOTAL_ &eacute;l&eacute;ments",
-            "infoEmpty": "Affichage de 0 &agrave; 0 sur 0 &eacute;l&eacute;ment",
-            "infoFiltered": "(filtr&eacute; de _MAX_ &eacute;l&eacute;ments au total)",
-            "infoPostFix": "",
-            "loadingRecords": "Chargement en cours...",
-            "zeroRecords": "Aucun &eacute;l&eacute;ment &agrave; afficher",
-            "emptyTable": "Aucune donn&eacute;e disponible dans le tableau",
-            "paginate": {
-                "first": "Premier",
-                "previous": "Pr&eacute;c&eacute;dent",
-                "next": "Suivant",
-                "last": "Dernier"
-            },
-            "aria": {
-                "sortAscending": ": activer pour trier la colonne par ordre croissant",
-                "sortDescending": ": activer pour trier la colonne par ordre d&eacute;croissant"
-            }
-        },
+        "language": anacDataTablesLang,
         "drawCallback": function(settings) {
             console.log('Tableau mis à jour');
         }
@@ -611,7 +541,8 @@ $(document).ready(function() {
         "info": true,
         "autoWidth": false,
         "responsive": true,
-        "order": [[1, "desc"]]
+        "order": [[1, "desc"]],
+        "language": anacDataTablesLang
     });
 });
 // ============================================
@@ -976,7 +907,7 @@ function validateDates() {
 
     if (!dateDebut) {
         $('#date_debut').addClass('is-invalid');
-        $('#date_debut_error').text('La date de début est obligatoire.');
+        $('#date_debut_error').text("@lang('trans.start_date_required')");
         isValid = false;
     } else {
         const today = new Date();
@@ -985,18 +916,18 @@ function validateDates() {
 
         if (debutDate < today) {
             $('#date_debut').addClass('is-invalid');
-            $('#date_debut_error').text('La date de début ne peut pas être dans le passé.');
+            $('#date_debut_error').text("@lang('trans.start_date_past')");
             isValid = false;
         }
     }
 
     if (!dateFin) {
         $('#date_fin').addClass('is-invalid');
-        $('#date_fin_error').text('La date de fin est obligatoire.');
+        $('#date_fin_error').text("@lang('trans.end_date_required')");
         isValid = false;
     } else if (dateDebut && dateFin < dateDebut) {
         $('#date_fin').addClass('is-invalid');
-        $('#date_fin_error').text('La date de fin doit être après la date de début.');
+        $('#date_fin_error').text("@lang('trans.end_date_after_start')");
         isValid = false;
     }
 
@@ -1044,7 +975,7 @@ function submitApplicationForm() {
     // Désactiver le bouton pour éviter double soumission
     const submitBtn = $('#submitBtn');
     submitBtn.prop('disabled', true);
-    submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Envoi en cours...');
+    submitBtn.html('<i class="fas fa-spinner fa-spin"></i> @lang("trans.sending")');
 
     // S'assurer que pour le type 4, type_vol_id = 1
     const typeDemandeId = $('#type_demande_autorisation_id').val();
@@ -1097,7 +1028,7 @@ function submitApplicationForm() {
                 const errors = xhr.responseJSON.errors;
                 displayValidationErrors(errors);
             } else if (xhr.status === 500) {
-                toastr.error('Erreur serveur. Veuillez réessayer plus tard.');
+                toastr.error("@lang('trans.server_error_retry')");
             } else {
                 toastr.error("@lang('trans.error_occurred')");
             }
@@ -1122,10 +1053,10 @@ $('#sous_validite').on('input', function() {
 
     if ($(this).val() && (val < 12 || val > 72)) {
         $(this).addClass('is-invalid');
-        errorDiv.text('La sous-validité doit être comprise entre 12 et 72 heures.');
+        errorDiv.text("@lang('trans.sub_validity_range')");
     } else if ($(this).val() && val % 12 !== 0) {
         $(this).addClass('is-invalid');
-        errorDiv.text('La sous-validité doit être un multiple de 12.');
+        errorDiv.text("@lang('trans.sub_validity_multiple')");
     }
 });
 
@@ -1139,7 +1070,7 @@ $('#objet').on('input', function() {
 
     if (currentLength > maxLength) {
         $(this).addClass('is-invalid');
-        errorDiv.text('L\'objet ne doit pas dépasser ' + maxLength + ' caractères.');
+        errorDiv.text("@lang('trans.object_max_length')".replace(':max', maxLength));
     }
 });
 

@@ -1,20 +1,11 @@
-<x-app-user-layout title="@lang('trans.license_applications')">
+<x-app-user-layout :title="__('trans.license_applications')">
 
     @push('css')
         <link rel="stylesheet" href="{{ asset('assets/admin/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
         <link rel="stylesheet" href="{{ asset('assets/admin/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
         <link rel="stylesheet" href="{{ asset('assets/admin/plugins/toastr/toastr.min.css') }}">
         <style>
-            .badge-draft { background-color: #6c757d; color: white; }
-            .badge-submitted { background-color: #17a2b8; color: white; }
-            .badge-under_review { background-color: #ffc107; color: black; }
-            .badge-service_approved { background-color: #28a745; color: white; }
-            .badge-paid { background-color: #007bff; color: white; }
-            .badge-payment_confirmed { background-color: #20c997; color: white; }
-            .badge-issued { background-color: #6f42c1; color: white; }
-            .badge-printed{background-color: navy; color: white;}
-            .badge-rejected { background-color: #dc3545; color: white; }
-
+            /* Couleurs des badges de statut : définies dans public/css/user-app.css */
             .table-danger {
                 background-color: rgba(220, 53, 69, 0.1) !important;
             }

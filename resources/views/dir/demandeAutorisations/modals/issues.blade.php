@@ -1,12 +1,12 @@
 {{-- resources/views/dir/demandeAutorisations/modals/issues.blade.php --}}
 <div class="modal fade" id="issuesModal-{{ $demande->id }}" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content anac-modal anac-modal--danger">
+            <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-bug"></i> @lang('trans.issues_for') : {{ $demande->code }}
+                    <i class="fas fa-bug"></i> @lang('trans.issues_for') : <span class="anac-modal__code">{{ $demande->code }}</span>
                 </h5>
-                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="@lang('trans.close')"><span>&times;</span></button>
             </div>
             <div class="modal-body">
                 {{-- Rejeté par (DTA/DG), d'après etatDemande->dta_rejeter / dg_rejeter --}}

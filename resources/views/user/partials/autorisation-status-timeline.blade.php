@@ -6,16 +6,16 @@
     $isRejected = ($demande->etat_workflow ?? 'draft') === 'rejected';
 
     $timelineSteps = [
-        'draft' => 'Brouillon',
-        'submitted' => 'Déposé',
-        'under_review' => "À l'étude",
-        'service_approved' => 'Validé par les services',
+        'draft' => __('trans.workflow_status_draft'),
+        'submitted' => __('trans.workflow_status_submitted'),
+        'under_review' => __('trans.workflow_status_under_review'),
+        'service_approved' => __('trans.workflow_status_service_approved'),
     ];
     if ($isPayable) {
-        $timelineSteps['paid'] = 'Payé';
-        $timelineSteps['payment_confirmed'] = 'Paiement confirmé';
+        $timelineSteps['paid'] = __('trans.workflow_status_paid');
+        $timelineSteps['payment_confirmed'] = __('trans.workflow_status_payment_confirmed');
     }
-    $timelineSteps['issued'] = 'Autorisation délivrée';
+    $timelineSteps['issued'] = __('trans.workflow_status_issued');
 
     $timelineKeys = array_keys($timelineSteps);
     $currentKey = $isIssued ? 'issued' : ($demande->etat_workflow ?? 'draft');
@@ -25,11 +25,12 @@
     }
 @endphp
 <div class="modal fade" id="statusModal-{{ $demande->id }}" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content anac-modal">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-route"></i> Parcours de la demande : {{ $demande->code }}
+                    <i class="fas fa-route"></i>
+                    @lang('trans.statut_circuit') : <span class="anac-modal__code">{{ $demande->code }}</span>
                 </h5>
                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
@@ -37,7 +38,7 @@
                 @if ($isRejected)
                     @include('dir.demandeAutorisations.partials.rejected-by', ['demande' => $demande])
                     <p class="text-muted mb-0">
-                        Si la DTA a rouvert le dossier, vous pouvez le corriger et le redéposer depuis votre tableau de bord ; le parcours reprendra alors depuis le début.
+                        @lang('trans.timeline_reopened_hint')
                     </p>
                 @else
                     <ul class="autorisation-stepper">
