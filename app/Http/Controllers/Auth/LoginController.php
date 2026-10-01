@@ -19,6 +19,7 @@ class LoginController extends Controller
         'user'        => '/user',
         'dg'          => '/dir/dg',
         'dsv'         => '/dir/dsv',
+        'dsv_verificateur' => '/dir/demandeAutorisations',
         'dta'         => '/dir/dta',
         'dsad'        => '/dir/dsad',
         'dsna'        => '/dir/dsna',
