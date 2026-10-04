@@ -53,7 +53,7 @@
                                 <label for="validite_evaluateur">@lang('trans.validity_evaluator') <span class="text-danger">*</span></label>
                                 <input type="number" min="1" max="{{ (int) $examen->validite }}" name="validite_evaluateur" id="validite_evaluateur"
                                     class="form-control" required
-                                    value="{{ old('validite_evaluateur', $examen->validite_evaluateur ?? $examen->validite) }}">
+                                    value="{{ old('validite_evaluateur', $examen->validite_evaluateur ?: $examen->validite) }}">
                                 <small class="form-text text-muted">
                                     @lang('trans.validite_reduction_seulement', ['max' => (int) $examen->validite])
                                 </small>

@@ -7,6 +7,7 @@ use App\Models\CentreMedical;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Spatie\Permission\Models\Role;
 
 /**
  * Rattachement par l'ANAC d'un compte (rôle centre_medical) à un centre de la
@@ -15,6 +16,9 @@ use Illuminate\Validation\Rule;
  */
 class CentreExpertiseMedicaleController extends Controller
 {
+    /** Rôle des comptes « centre d'expertise médicale » (créé par la migration 2026_09_27_100300). */
+    private const ROLE = 'centre_medical';
+
     public function index()
     {
         $centres = CentreMedical::with('user')->whereNotNull('user_id')
@@ -25,9 +29,14 @@ class CentreExpertiseMedicaleController extends Controller
             ->orderBy('libelle')->get();
 
         $centresDisponibles = CentreMedical::whereNull('user_id')->orderBy('libelle')->get();
-        $comptesDisponibles = User::role('centre_medical')->whereDoesntHave('centreMedical')->orderBy('email')->get();
 
-        return view('admin.centres-expertise-medicale.index', compact('centres', 'centresDisponibles', 'comptesDisponibles'));
+        // User::role() lève une exception si le rôle n'existe pas encore (migration non lancée) :
+        // on passe par la relation roles, qui renvoie simplement une liste vide.
+        $roleExiste = Role::where('name', self::ROLE)->where('guard_name', 'web')->exists();
+        $comptesDisponibles = User::whereHas('roles', fn ($q) => $q->where('name', self::ROLE))
+            ->whereDoesntHave('centreMedical')->orderBy('email')->get();
+
+        return view('admin.centres-expertise-medicale.index', compact('centres', 'centresDisponibles', 'comptesDisponibles', 'roleExiste'));
     }
 
     public function store(Request $request)
@@ -38,7 +47,7 @@ class CentreExpertiseMedicaleController extends Controller
         ]);
 
         $compte = User::findOrFail($request->user_id);
-        if (!$compte->hasRole('centre_medical')) {
+        if (!$compte->hasRole(self::ROLE)) {
             return back()->with('error', __('trans.compte_sans_role_centre_medical'));
         }
 

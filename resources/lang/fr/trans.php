@@ -1090,6 +1090,7 @@ return [
     'centres_avec_compte' => 'Centres disposant d\'un compte',
     'confirmer_detacher_compte' => 'Détacher ce compte du centre ? Les médecins et examinateurs déclarés sont conservés.',
     'aucun_centre_medical_avec_compte' => 'Aucun centre d\'expertise médicale ne dispose encore d\'un compte.',
+    'role_centre_medical_absent' => 'Le rôle « centre_medical » n\'existe pas encore sur ce serveur : lancez la migration 2026_09_27_100300_create_centre_medical_role_and_cempa (avec --path), puis « php artisan permission:cache-reset ».',
     // Rapports médicaux (examinateur, centre, évaluateur, SMA)
     'rapports_medicaux' => 'Rapports médicaux',
     'nouveau_rapport_medical' => 'Nouveau rapport médical',
@@ -1124,6 +1125,20 @@ return [
     'validite_reduite' => 'Validité réduite',
     'validite_reduction_seulement' => 'La validité peut seulement être réduite (maximum : :max mois).',
     'confirmer_validation_sma' => 'Valider ce rapport médical (SMA) ?',
+    // Tableau confidentiel de l'évaluateur médical
+    'formulaire_confidentiel_evaluateur' => 'Ce formulaire est confidentiel et strictement réservé au médecin évaluateur de l\'ANAC',
+    'a_traiter' => 'À traiter',
+    'traites' => 'Traités',
+    'licence' => 'Licence',
+    'contacts' => 'Contacts',
+    'employeur' => 'Employeur',
+    'attestation_medicale' => 'Attestation médicale',
+    'rapport_medical' => 'Rapport médical',
+    'avis_enregistre' => 'Avis enregistré.',
+    'avis_detaille' => 'Avis détaillé (réduire la validité, joindre un rapport)',
+    'transmettre_sma' => 'Valider et transmettre à la SMA',
+    'confirmer_transmission_sma' => 'Valider cet avis et transmettre le rapport à la SMA ?',
+    'fiche_evaluateur_absente' => 'Votre compte n\'a pas de fiche évaluateur : contactez l\'administrateur.',
     'relance_envoyee' => 'Relance envoyée à :nombre évaluateur(s).',
     'relance_aucun_evaluateur_joignable' => 'Aucun évaluateur n\'a de numéro WhatsApp : la relance n\'a pu être envoyée.',
     // Examinateur désigné par l'ANAC et examens pratiques

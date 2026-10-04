@@ -11,6 +11,12 @@
 
 @section('content')
 <div class="container-fluid">
+    @unless ($roleExiste)
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle mr-1"></i> @lang('trans.role_centre_medical_absent')
+        </div>
+    @endunless
+
     {{-- Rattacher un compte à un centre --}}
     <div class="row">
         <div class="col-md-12">

@@ -1237,6 +1237,7 @@ return [
     'centres_avec_compte' => 'Centres with an account',
     'confirmer_detacher_compte' => 'Unlink this account from the centre? Declared doctors and examiners are kept.',
     'aucun_centre_medical_avec_compte' => 'No medical expertise centre has an account yet.',
+    'role_centre_medical_absent' => 'The "centre_medical" role does not exist yet on this server: run migration 2026_09_27_100300_create_centre_medical_role_and_cempa (with --path), then "php artisan permission:cache-reset".',
     // Medical reports (examiner, centre, evaluator, SMA)
     'rapports_medicaux' => 'Medical reports',
     'nouveau_rapport_medical' => 'New medical report',
@@ -1271,6 +1272,20 @@ return [
     'validite_reduite' => 'Reduced validity',
     'validite_reduction_seulement' => 'Validity can only be reduced (maximum: :max months).',
     'confirmer_validation_sma' => 'Validate this medical report (SMA)?',
+    // Medical evaluator's confidential table
+    'formulaire_confidentiel_evaluateur' => 'This form is confidential and strictly reserved for the ANAC medical evaluator',
+    'a_traiter' => 'To process',
+    'traites' => 'Processed',
+    'licence' => 'License',
+    'contacts' => 'Contacts',
+    'employeur' => 'Employer',
+    'attestation_medicale' => 'Medical certificate',
+    'rapport_medical' => 'Medical report',
+    'avis_enregistre' => 'Opinion saved.',
+    'avis_detaille' => 'Detailed opinion (reduce validity, attach a report)',
+    'transmettre_sma' => 'Validate and send to the SMA',
+    'confirmer_transmission_sma' => 'Validate this opinion and send the report to the SMA?',
+    'fiche_evaluateur_absente' => 'Your account has no evaluator record: contact the administrator.',
     'relance_envoyee' => 'Reminder sent to :nombre evaluator(s).',
     'relance_aucun_evaluateur_joignable' => 'No evaluator has a WhatsApp number: the reminder could not be sent.',
     // ANAC-designated examiner and practical exams

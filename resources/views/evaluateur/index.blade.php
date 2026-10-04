@@ -98,102 +98,11 @@
                 </div>
             </div>
         </div>
-        @if ($examens->isNotEmpty())
-            <div class="row">
-
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">@lang('trans.exams')</div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped" id="demandes">
-                                    <thead>
-                                        <tr>
-                                            <th>@lang('trans.id')</th>
-                                            <th>@lang('trans.applicant')</th>
-
-                                            <th>@lang('trans.exam_date')</th>
-                                            <th>@lang('trans.validite_mois')</th>
-                                            <th>@lang('trans.validity_evaluator')</th>
-                                            <th>@lang('trans.medical_fitness')</th>
-                                            <th>@lang('trans.avis')</th>
-                                            <th>@lang('trans.period_for_execution')</th>
-
-                                            <th>@lang('trans.actions')</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @inject('carbon', 'Carbon\Carbon')
-
-                                        @foreach ($examens as $examen)
-                                            @php
-                                                $today = $carbon::today();
-                                                $dateExamen = $carbon::parse($examen->date_examen);
-                                                $expiryDate = $dateExamen->copy()->addDays(15);
-                                                $daysRemaining = $today->diffInDays($expiryDate, false);
-                                            @endphp
-                                            <tr>
-                                                <td>{{ $examen->id }}</td>
-                                                <td>{{ $examen->demandeur->np }}</td>
-
-                                                <td>{{ $examen->date_examen }}</td>
-                                                <td>{{ $examen->validite }}</td>
-                                                <td>{{ $examen->validite_evaluateur }}</td>
-                                                <td>{{ $examen->aptitude }}</td>
-                                                <td>@include('examens_medicaux.partials.badge-avis', ['examen' => $examen])</td>
-                                                <td>
-                                                    @if ($examen->valider_examinateur && !$examen->valider_evaluateur)
-                                                        @if ($daysRemaining > 0)
-                                                            <span class="badge bg-info">
-                                                                @lang('trans.expires_in') {{ $daysRemaining }} @lang('trans.days')
-                                                                ({{ $expiryDate->format('d-M-Y') }})
-                                                            </span>
-                                                        @elseif ($daysRemaining == 0)
-                                                            <span class="badge bg-warning">@lang('trans.expires_today')</span>
-                                                        @else
-                                                            <span class="badge bg-danger">
-                                                                @lang('trans.expired') {{ abs($daysRemaining) }}
-                                                                @lang('trans.days_ago')
-                                                                ({{ $expiryDate->format('d-M-Y') }})
-                                                            </span>
-                                                        @endif
-                                                    @endif
-                                                </td>
-
-
-                                                <td>
-
-                                                    <a href="{{ route('evaluateur.show', $examen) }}"
-                                                        class="btn btn-info btn-sm">@lang('trans.view')</a>
-                                                    @if ($examen->valider_examinateur && !$examen->valider_evaluateur)
-                                                        <a href="{{ route('evaluateur.edit', $examen) }}"
-                                                            class="btn btn-primary btn-sm">@lang('trans.donner_avis')</a>
-                                                    @endif
-                                                    @if ($examen->valider_examinateur && !$examen->valider_evaluateur && $examen->avis_evaluateur)
-                                                        <form
-                                                            action="{{ route('evaluateur.valider', ['table' => 'examens_medicaux', 'id' => $examen->id]) }}"
-                                                            method="POST" class="d-inline">
-                                                            @csrf
-                                                            @method('PATCH')
-                                                            <button type="submit" class="btn btn-warning btn-sm"
-                                                                onclick="return confirm('Confirmer la validation ?')">@lang('trans.validate')</button>
-                                                        </form>
-                                                    @endif
-
-
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
+        <div class="row">
+            <div class="col-md-12">
+                @include('evaluateur.partials.rapports-confidentiels')
             </div>
-        @endif
+        </div>
 
     </div>
 @endsection

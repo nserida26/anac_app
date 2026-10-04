@@ -81,6 +81,19 @@ class Demandeur extends Model
         return $this->licences()->where('type_licence', $typeLicence)->exists();
     }
 
+    /** Employeurs déclarés dans ses demandes de licence. */
+    public function employeursDeclares()
+    {
+        return $this->hasManyThrough(EmployeurDemandeur::class, Demande::class, 'demandeur_id', 'demande_id');
+    }
+
+    /** Employeur : l'opérateur rattaché ; à défaut, l'employeur déclaré dans sa dernière demande. */
+    public function getEmployeurAttribute(): ?string
+    {
+        return optional($this->compagnie)->nom_entreprise
+            ?? optional($this->employeursDeclares()->latest('employeur_demandeurs.id')->first())->employeur;
+    }
+
     /** Au moins une licence validée, non bloquée et non expirée. */
     public function detientLicenceValide(): bool
     {

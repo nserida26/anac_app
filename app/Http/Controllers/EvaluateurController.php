@@ -36,9 +36,30 @@ class EvaluateurController extends Controller
             ->where('demandes.evaluateur_id', $userId)
             ->select('centre_medicals.libelle as centre_medical', 'medical_examinations.*')
             ->get();
-        // Seuls les rapports transmis par leur auteur arrivent chez l'évaluateur.
-        $examens = ExamenMedical::transmis()->with(['demandeur', 'examinateur', 'centreMedical'])->latest()->get();
-        return view('evaluateur.index', compact('examens', 'medical_examinations'));
+        // Tableau confidentiel : seuls les rapports transmis par leur auteur arrivent chez l'évaluateur.
+        $examens = ExamenMedical::transmis()
+            ->with(['demandeur.user', 'demandeur.licences', 'demandeur.compagnie', 'examinateur', 'centreMedical'])
+            ->latest()->get();
+        [$traites, $aTraiter] = $examens->partition(fn ($examen) => $examen->valider_evaluateur);
+
+        return view('evaluateur.index', compact('examens', 'aTraiter', 'traites', 'medical_examinations'));
+    }
+
+    /** Avis et observations saisis directement dans le tableau confidentiel. */
+    public function enregistrerAvis(Request $request, ExamenMedical $examen)
+    {
+        $this->authorize('evaluer', $examen);
+        $request->validate($this->reglesAvis());
+
+        $this->appliquerAvis($examen, [
+            'avis_evaluateur' => $request->avis_evaluateur,
+            'observations_evaluateur' => $request->observations_evaluateur,
+            // Validité inchangée tant que l'évaluateur ne la réduit pas (formulaire complet).
+            // La colonne vaut 0 par défaut (et non NULL) : 0 signifie « pas encore fixée ».
+            'validite_evaluateur' => $examen->validite_evaluateur ?: $examen->validite,
+        ]);
+
+        return redirect()->route('evaluateur')->with('success', __('trans.avis_enregistre'));
     }
 
     // Afficher un examen
@@ -64,12 +85,8 @@ class EvaluateurController extends Controller
     public function update(Request $request, ExamenMedical $examen, RapportMedicalService $rapports)
     {
         $this->authorize('evaluer', $examen);
-        $evaluateur = Auth::user()->evaluateur;
-        abort_unless($evaluateur, 403);
 
-        $request->validate([
-            'avis_evaluateur' => 'required|in:' . implode(',', ExamenMedical::AVIS),
-            'observations_evaluateur' => 'required_unless:avis_evaluateur,valide|nullable|string|max:5000',
+        $request->validate($this->reglesAvis() + [
             'validite_evaluateur' => 'required|integer|min:1|max:' . (int) $examen->validite,
             'rapport_evaluateur' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ]);
@@ -80,15 +97,32 @@ class EvaluateurController extends Controller
             $rapportPath = $rapports->stocker($request->file('rapport_evaluateur'), 'evaluateur');
         }
 
-        $examen->update([
+        $this->appliquerAvis($examen, [
             'avis_evaluateur' => $request->avis_evaluateur,
             'observations_evaluateur' => $request->observations_evaluateur,
             'validite_evaluateur' => $request->validite_evaluateur,
             'rapport_evaluateur' => $rapportPath,
-            'evaluateur_id' =>  $evaluateur->id
         ]);
 
         return redirect()->route('evaluateur')->with('success', 'Examen médical mis à jour.');
+    }
+
+    /** Règles communes de l'avis : observations obligatoires en cas de réserve ou de suggestion. */
+    private function reglesAvis(): array
+    {
+        return [
+            'avis_evaluateur' => 'required|in:' . implode(',', ExamenMedical::AVIS),
+            'observations_evaluateur' => 'required_unless:avis_evaluateur,valide|nullable|string|max:5000',
+        ];
+    }
+
+    /** Enregistre l'avis au nom de l'évaluateur connecté (qui doit avoir une fiche évaluateur). */
+    private function appliquerAvis(ExamenMedical $examen, array $donnees): void
+    {
+        $evaluateur = Auth::user()->evaluateur;
+        abort_unless($evaluateur, 403, __('trans.fiche_evaluateur_absente'));
+
+        $examen->update($donnees + ['evaluateur_id' => $evaluateur->id]);
     }
 
 

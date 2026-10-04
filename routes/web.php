@@ -308,6 +308,7 @@ Route::get('/rapports/compagnie/{id}', [App\Http\Controllers\DgDsvController::cl
                 Route::get('/edit/{examen}', [App\Http\Controllers\EvaluateurController::class, 'edit'])->name('evaluateur.edit');
                 Route::get('/show/{examen}', [App\Http\Controllers\EvaluateurController::class, 'show'])->name('evaluateur.show');
                 Route::post('/update/{examen}', [App\Http\Controllers\EvaluateurController::class, 'update'])->name('evaluateur.update');
+                Route::post('/avis/{examen}', [App\Http\Controllers\EvaluateurController::class, 'enregistrerAvis'])->name('evaluateur.avis');
                 Route::patch('/valider/{table}/{id}', [App\Http\Controllers\EvaluateurController::class, 'valider'])->name('evaluateur.valider');
             });
 
