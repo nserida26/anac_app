@@ -1844,4 +1844,20 @@ return [
     'action_issues_title' => 'Voir les problèmes signalés',
     'action_print_title' => "Imprimer l'autorisation",
     'demande_delete_closed_error' => 'Cette demande a déjà été déposée et ne peut plus être supprimée.',
+
+    // ── Messages d'interface (page edit des autorisations) ──
+    'confirm_delete_title' => 'Confirmer la suppression',
+    'confirm_delete_text' => 'Êtes-vous sûr de vouloir supprimer cet élément ? Cette action est irréversible.',
+    'confirm_delete_yes' => 'Oui, supprimer !',
+    'deleted_success' => 'Supprimé avec succès',
+    'saved_success' => 'Enregistré avec succès',
+    'added_success' => 'Ajouté avec succès',
+    'updated_success' => 'Mis à jour avec succès',
+    'delete_error' => 'Erreur lors de la suppression',
+    'select_airport' => 'Sélectionnez un aéroport',
+    'select_pdf_document' => 'Veuillez sélectionner un document (PDF)',
+    'fix_form_errors' => 'Veuillez corriger les erreurs dans le formulaire',
+    'registration_placeholder' => 'Tapez une immatriculation et appuyez sur Entrée',
+    'seats' => 'places',
+    'unit_kg' => 'kg',
 ];

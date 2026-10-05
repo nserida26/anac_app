@@ -1,11 +1,14 @@
     <!-- Add Aeroport Modal -->
-    <div class="modal fade" id="addAeroportModal" tabindex="-1" role="dialog" aria-labelledby="addAeroportModalLabel"
+    <div class="modal fade anac-modal" id="addAeroportModal" tabindex="-1" role="dialog"
+        aria-labelledby="addAeroportModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addAeroportModalLabel">@lang('trans.add_new_airport')</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <h5 class="modal-title" id="addAeroportModalLabel">
+                        <i class="fas fa-plane-arrival"></i> @lang('trans.add_new_airport')
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="@lang('trans.close')">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -76,9 +79,11 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary"
+                        <button type="button" class="btn anac-action anac-action--grey"
                             data-dismiss="modal">@lang('trans.cancel')</button>
-                        <button type="submit" class="btn btn-primary">@lang('trans.save_airport')</button>
+                        <button type="submit" class="btn anac-action anac-action--blue">
+                            <i class="fas fa-save"></i> @lang('trans.save_airport')
+                        </button>
                     </div>
                 </form>
             </div>
@@ -86,12 +91,14 @@
     </div>
 
     <!-- Modal pour ajouter une compagnie -->
-    <div class="modal fade" id="companyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade anac-modal" id="companyModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@lang('trans.new_operator')</h5>
-                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title"><i class="fas fa-building"></i> @lang('trans.new_operator')</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="@lang('trans.close')">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <form id="companyForm">
@@ -121,19 +128,24 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('trans.close')</button>
-                    <button type="button" class="btn btn-primary" id="saveCompanyBtn">@lang('trans.save')</button>
+                    <button type="button" class="btn anac-action anac-action--grey"
+                        data-dismiss="modal">@lang('trans.close')</button>
+                    <button type="button" class="btn anac-action anac-action--blue" id="saveCompanyBtn">
+                        <i class="fas fa-save"></i> @lang('trans.save')
+                    </button>
                 </div>
             </div>
         </div>
     </div>
     <!-- Modal pour ajouter un type d'avion -->
-    <div class="modal fade" id="typeAvionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade anac-modal" id="typeAvionModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@lang('trans.new_aircraft_type')</h5>
-                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title"><i class="fas fa-fighter-jet"></i> @lang('trans.new_aircraft_type')</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="@lang('trans.close')">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <form id="typeAvionForm">
@@ -156,8 +168,11 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('trans.close')</button>
-                    <button type="button" class="btn btn-primary" id="saveTypeAvionBtn">@lang('trans.save')</button>
+                    <button type="button" class="btn anac-action anac-action--grey"
+                        data-dismiss="modal">@lang('trans.close')</button>
+                    <button type="button" class="btn anac-action anac-action--blue" id="saveTypeAvionBtn">
+                        <i class="fas fa-save"></i> @lang('trans.save')
+                    </button>
                 </div>
             </div>
         </div>
@@ -271,7 +286,7 @@
                         $('#type_avion_id').append($('<option>', {
                             value: response.id,
                             text: response.code + ' (' + (response.data.capacite ||
-                                0) + ' places)',
+                                0) + ' ' + @json(__('trans.seats')) + ')',
                             selected: true,
                             'data-code': response.code,
                             'data-capacite': response.data.capacite || 0
@@ -285,8 +300,8 @@
 
                         Swal.fire({
                             icon: 'success',
-                            title: 'Succès',
-                            text: 'Type d\'avion ajouté avec succès',
+                            title: @json(__('trans.success')),
+                            text: @json(__('trans.aircraft_type_added_success')),
                             timer: 2000,
                             showConfirmButton: false
                         });
@@ -301,7 +316,7 @@
 
                         Swal.fire({
                             icon: 'error',
-                            title: 'Erreur',
+                            title: @json(__('trans.error')),
                             html: errorMsg
                         });
                     }
@@ -344,8 +359,8 @@
 
                         Swal.fire({
                             icon: 'success',
-                            title: 'Succès',
-                            text: 'Opérateur ajoutée avec succès',
+                            title: @json(__('trans.success')),
+                            text: @json(__('trans.operator_added_success')),
                             timer: 2000,
                             showConfirmButton: false
                         });
@@ -360,7 +375,7 @@
 
                         Swal.fire({
                             icon: 'error',
-                            title: 'Erreur',
+                            title: @json(__('trans.error')),
                             html: errorMsg
                         });
                     }

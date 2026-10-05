@@ -40,7 +40,7 @@
             // Initialiser Select2 pour les tags (immatriculations multiples)
             $('#immatriculations_select').select2({
                 theme: 'bootstrap4',
-                placeholder: "Tapez une immatriculation et appuyez sur Entrée",
+                placeholder: @json(__('trans.registration_placeholder')),
                 tags: true,
                 tokenSeparators: [',', ' ', '\n'],
                 allowClear: true,
@@ -102,7 +102,8 @@
                 if (immatriculations.length > 0 && typeId && operatorId) {
                     // Afficher le type sélectionné
                     const typeOption = $('#type_avion_id option:selected');
-                    const typeText = typeOption.data('code') + ' (' + typeOption.data('capacite') + ' places)';
+                    const typeText = typeOption.data('code') + ' (' + typeOption.data('capacite') + ' ' +
+                        @json(__('trans.seats')) + ')';
                     $('#selectedTypeDisplay').text(typeText);
 
                     // Afficher l'opérateur sélectionné
@@ -132,7 +133,7 @@
                 $('#immatriculations_select').empty().trigger('change');
                 $('#type_avion_id').val('').trigger('change');
                 $('#compagnie_aerienne_id').val('').trigger('change');
-                $('#formActionText').text(@json(__('trans.send')));
+                $('#formActionText').text(@json(__('trans.save')));
 
                 $('#previewSection').fadeOut(300);
 

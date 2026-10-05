@@ -1,8 +1,6 @@
                 @if ($isDepouilleMortelle)
-                    <div class="card card-primary">
-                        <div class="card-header bg-primary text-white">
-                            <h3 class="card-title">@lang('trans.operator_represented')</h3>
-                        </div>
+                    <div class="card">
+                        <x-anac-card-header icon="fas fa-building" :title="__('trans.operator_represented')" />
                         <div class="card-body">
                             <p class="text-muted small">@lang('trans.operator_represented_hint')</p>
                             <div class="row align-items-end">
@@ -12,7 +10,7 @@
                                             <label for="demande_compagnie_id" class="form-label">
                                                 @lang('trans.operator') <span class="text-danger">*</span>
                                             </label>
-                                            <button type="button" class="btn btn-sm btn-success" id="addCompanyBtnDemande">
+                                            <button type="button" class="btn btn-sm anac-action anac-action--blue" id="addCompanyBtnDemande">
                                                 <i class="fas fa-plus"></i> @lang('trans.add_action')
                                             </button>
                                         </div>
@@ -33,11 +31,11 @@
                                     </div>
                                 </div>
                                 <div class="col-md-4">
-                                    <button type="button" id="saveOperateurBtn" class="btn btn-primary">
+                                    <button type="button" id="saveOperateurBtn" class="anac-btn anac-btn--primary">
                                         <i class="fas fa-save"></i> @lang('trans.save')
                                     </button>
                                     @if ($demandeAutorisation->compagnie_id)
-                                        <span class="badge badge-success ml-2" id="operateurSavedBadge">
+                                        <span class="badge badge--success ml-2" id="operateurSavedBadge">
                                             <i class="fas fa-check"></i> @lang('trans.saved')
                                         </span>
                                     @endif
@@ -77,14 +75,14 @@
                         toastr.success(response.message);
                         if ($('#operateurSavedBadge').length === 0) {
                             $btn.after(
-                                '<span class="badge badge-success ml-2" id="operateurSavedBadge">' +
+                                '<span class="badge badge--success ml-2" id="operateurSavedBadge">' +
                                 '<i class="fas fa-check"></i> @lang('trans.saved')' +
                                 '</span>'
                             );
                         }
                     },
                     error: function(xhr) {
-                        toastr.error(xhr.responseJSON?.message || "Une erreur s'est produite.");
+                        toastr.error(xhr.responseJSON?.message || @json(__('trans.error_occurred')));
                     },
                     complete: function() {
                         $btn.prop('disabled', false);

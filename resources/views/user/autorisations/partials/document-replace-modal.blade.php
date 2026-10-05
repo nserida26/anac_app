@@ -7,7 +7,7 @@
                 <h5 class="modal-title" id="docModalTitle">
                     <i class="fas fa-file-upload"></i> <span>@lang('trans.upload')</span>
                 </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="@lang('trans.cancel')">
+                <button type="button" class="close" data-dismiss="modal" aria-label="@lang('trans.close')">
                     <span>&times;</span>
                 </button>
             </div>

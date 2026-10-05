@@ -1,19 +1,70 @@
 @push('css')
     <style>
-        #volForm>.row:nth-of-type(2),
-        #volForm>.row:nth-of-type(3) {
-            padding: 15px;
-            margin-right: 0;
-            margin-left: 0;
-            margin-bottom: 15px;
-            border: 1px solid #e9ecef;
-            border-left: 4px solid #007bff;
-            border-radius: 4px;
-            background: #fbfcfe;
+        /* Formulaire vol : blocs Départ / Arrivée adoucis */
+        #volForm .vol-block {
+            padding: 1rem;
+            margin: 0 0 1rem;
+            border: 1px solid var(--anac-gray-200);
+            border-left: 4px solid var(--anac-accent);
+            border-radius: var(--anac-radius-sm);
+            background: var(--anac-gray-50);
         }
 
-        #volForm>.row:nth-of-type(3) {
-            border-left-color: #28a745;
+        #volForm .vol-block--arrivee {
+            border-left-color: var(--anac-primary-light);
+        }
+
+        /* Sous-bloc « Aéroports intermédiaires » */
+        #volForm .vol-subcard {
+            border: 1px solid var(--anac-gray-200);
+            border-radius: var(--anac-radius-sm);
+            overflow: hidden;
+        }
+
+        #volForm .vol-subcard__head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            padding: 0.85rem 1rem;
+            background: var(--anac-white);
+            border-bottom: 1px solid var(--anac-gray-200);
+        }
+
+        #volForm .vol-subcard__title {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--anac-primary);
+        }
+
+        #volForm .vol-subcard__title i {
+            color: var(--anac-accent);
+        }
+
+        #volForm .vol-subcard__body {
+            padding: 1rem;
+            background: var(--anac-gray-50);
+        }
+
+        #escalesContainer hr {
+            margin: 0.75rem 0;
+            border-top: 1px solid var(--anac-gray-200);
+        }
+
+        #escalesContainer hr:last-child {
+            display: none;
+        }
+
+        /* Barre d'actions du formulaire */
+        #volForm .vol-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
         }
 
         #aeroport_depart_id+.select2-container,
@@ -21,302 +72,314 @@
             width: 100% !important;
             min-width: 100%;
         }
+
+        @media (max-width: 575.98px) {
+            #volForm .vol-actions {
+                flex-direction: column-reverse;
+            }
+
+            #volForm .vol-actions .anac-btn {
+                width: 100%;
+            }
+        }
     </style>
 @endpush
 
-                <!-- Information sur le vol -->
-                <div class="card card-primary">
-                    <div class="card-header bg-primary text-white">
-                        <h3 class="card-title">@lang('trans.flight_info')</h3>
-                        <button type="button" class="btn btn-sm btn-light float-right" id="showVolFormBtn">
-                            <i class="fas fa-plus"></i> @lang('trans.add_flight')
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <!-- Formulaire (caché par défaut) -->
-                        <form method="POST" id="volForm" style="display: none;">
-                            @csrf
-                            <input type="hidden" name="vol_id" id="vol_id" value="">
-                            <input type="hidden" name="demande_autorisation_id" id="demande_autorisation_id"
-                                value="{{ $demandeAutorisation->id }}">
+<!-- Information sur le vol -->
+<div class="card">
+    <x-anac-card-header icon="fas fa-plane" :title="__('trans.flight_info')"
+        :count="isset($vols) && $vols->isNotEmpty() ? $vols->count() : null" count-icon="fas fa-plane-departure">
+        <x-slot name="actions">
+            <button type="button" class="anac-btn anac-btn--primary" id="showVolFormBtn">
+                <i class="fas fa-plus"></i> @lang('trans.add_flight')
+            </button>
+        </x-slot>
+    </x-anac-card-header>
 
-                            <div class="alert alert-info d-flex justify-content-between align-items-center flex-wrap">
-                                <span><i class="fas fa-info-circle"></i> @lang('trans.airport_not_listed_hint')</span>
-                                <button type="button" class="btn btn-sm btn-success" id="addAeroportBtn">
-                                    <i class="fas fa-plus"></i> @lang('trans.add_action')
-                                </button>
-                            </div>
+    <div class="card-body">
+        <!-- Formulaire (caché par défaut) -->
+        <form method="POST" id="volForm" style="display: none;">
+            @csrf
+            <input type="hidden" name="vol_id" id="vol_id" value="">
+            <input type="hidden" name="demande_autorisation_id" id="demande_autorisation_id"
+                value="{{ $demandeAutorisation->id }}">
 
-                            <div class="row">
-                                <!-- Numéro de vol -->
-                                {{-- Toujours affiché, y compris pour Block Permit (type 3) où c'est le numéro de vol
-                                     qui doit figurer, pas le nombre de passagers. --}}
-                                <div class="col-md-6 mb-3">
-                                    <div class="form-group">
-                                        <label for="numero_vol" class="form-label">@lang('trans.flight_number')</label>
-                                        <input type="text" class="form-control" id="numero_vol"
-                                            name="numero_vol">
-                                        <div class="invalid-feedback" id="numero_vol_error"></div>
-                                    </div>
-                                </div>
-                                @if (in_array($demandeAutorisation->type->id, [2, 4, 5, 7]))
-                                    <!-- Nombre de passagers -->
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-group">
-                                            <label for="nbr_passagers" id = "nbr_passagers_label"
-                                                class="form-label">Nombre de passagers</label>
-                                            <input type="number" class="form-control" id="nbr_passagers"
-                                                name="nbr_passagers" min="0">
-                                            <div class="invalid-feedback" id="nbr_passagers_error"></div>
-                                        </div>
-                                    </div>
-                                @endif
-                            </div>
+            <div class="auth-alert auth-alert--info align-items-center mb-3">
+                <i class="fas fa-info-circle"></i>
+                <span class="flex-grow-1">@lang('trans.airport_not_listed_hint')</span>
+                <button type="button" class="btn btn-sm anac-action anac-action--blue" id="addAeroportBtn">
+                    <i class="fas fa-plus"></i> @lang('trans.add_action')
+                </button>
+            </div>
 
-                            <div class="row">
-                                <!-- Aéroport de départ -->
-                                <div class="col-lg-6 col-md-5 mb-3">
-                                    <div class="form-group">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <label class="form-label mb-0">@lang('trans.start_aeroport') <span
-                                                    class="text-danger">*</span></label>
-                                            <div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input lieu-type-radio" type="radio"
-                                                        name="type_lieu_depart" id="type_lieu_depart_aeroport"
-                                                        value="aeroport" data-field="depart" checked>
-                                                    <label class="form-check-label"
-                                                        for="type_lieu_depart_aeroport">@lang('trans.airport')</label>
-                                                </div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input lieu-type-radio" type="radio"
-                                                        name="type_lieu_depart" id="type_lieu_depart_piste"
-                                                        value="piste" data-field="depart">
-                                                    <label class="form-check-label"
-                                                        for="type_lieu_depart_piste">@lang('trans.runway')</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div id="aeroport_depart_wrapper">
-                                            <select class="form-control select2_aeroports" id="aeroport_depart_id"
-                                                name="aeroport_depart_id" required>
-                                                @foreach ($aeroports as $aeroport)
-                                                    <option value="{{ $aeroport->id }}">{{ $aeroport->codeICAO }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                            <div class="invalid-feedback" id="aeroport_depart_id_error"></div>
-                                        </div>
-                                        <div id="piste_depart_wrapper" style="display:none;">
-                                            <input type="text" class="form-control" id="nom_piste_depart"
-                                                name="nom_piste_depart" maxlength="255"
-                                                placeholder="{{ __('trans.runway_name') }}">
-                                            <div class="invalid-feedback" id="nom_piste_depart_error"></div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Heure de départ -->
-                                <div class="col-lg-6 col-md-3 mb-3">
-                                    <div class="form-group">
-                                        <label for="date_depart" class="form-label">@lang('trans.departure_time') <span
-                                                class="text-danger">*</span></label>
-                                        <input type="time" class="form-control" id="date_depart" name="date_depart"
-                                            required>
-                                        <div class="invalid-feedback" id="date_depart_error"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <!-- Aéroport d'arrivée -->
-                                <div class="col-lg-6 col-md-5 mb-3">
-                                    <div class="form-group">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <label class="form-label mb-0">@lang('trans.end_aeroport')<span
-                                                    class="text-danger">*</span></label>
-                                            <div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input lieu-type-radio" type="radio"
-                                                        name="type_lieu_arrivee" id="type_lieu_arrivee_aeroport"
-                                                        value="aeroport" data-field="arrivee" checked>
-                                                    <label class="form-check-label"
-                                                        for="type_lieu_arrivee_aeroport">@lang('trans.airport')</label>
-                                                </div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input lieu-type-radio" type="radio"
-                                                        name="type_lieu_arrivee" id="type_lieu_arrivee_piste"
-                                                        value="piste" data-field="arrivee">
-                                                    <label class="form-check-label"
-                                                        for="type_lieu_arrivee_piste">@lang('trans.runway')</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div id="aeroport_arrivee_wrapper">
-                                            <select class="form-control select2_aeroports" id="aeroport_arrivee_id"
-                                                name="aeroport_arrivee_id" required>
-                                                @foreach ($aeroports as $aeroport)
-                                                    <option value="{{ $aeroport->id }}">{{ $aeroport->codeICAO }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                            <div class="invalid-feedback" id="aeroport_arrivee_id_error"></div>
-                                        </div>
-                                        <div id="piste_arrivee_wrapper" style="display:none;">
-                                            <input type="text" class="form-control" id="nom_piste_arrivee"
-                                                name="nom_piste_arrivee" maxlength="255"
-                                                placeholder="{{ __('trans.runway_name') }}">
-                                            <div class="invalid-feedback" id="nom_piste_arrivee_error"></div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Heure d'arrivée -->
-                                <div class="col-lg-6 col-md-4 mb-3">
-                                    <div class="form-group">
-                                        <label for="date_arrivee" class="form-label">@lang('trans.arrival_time') <span
-                                                class="text-danger">*</span></label>
-                                        <input type="time" class="form-control" id="date_arrivee" name="date_arrivee"
-                                            required>
-                                        <div class="invalid-feedback" id="date_arrivee_error"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Section pour les escales intermédiaires -->
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="card card-secondary">
-                                        <div class="card-header">
-                                            <h3 class="card-title">@lang('trans.intermediate_airports')</h3>
-                                            <button type="button" class="btn btn-sm btn-success float-right"
-                                                id="addEscaleBtn">
-                                                <i class="fas fa-plus"></i> @lang('trans.add_intermediate_airport')
-                                            </button>
-                                        </div>
-                                        <div class="card-body" id="escalesContainer">
-                                            <!-- Les escales seront ajoutées dynamiquement ici -->
-                                            <div class="alert alert-info" id="noEscalesAlert">
-                                                @lang('trans.no_intermediate_airports')
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-
-
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <button type="submit" class="btn btn-success float-right" id="submitVolBtn">
-                                        <i class="fas fa-save"></i> <span id="volFormAction">@lang('trans.send')</span>
-                                    </button>
-                                    <button type="button" class="btn btn-secondary float-right mr-2"
-                                        id="cancelVolFormBtn">
-                                        <i class="fas fa-times"></i> @lang('trans.cancel')
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-
-                        <!-- Tableau des vols existants -->
-                        @if (isset($vols) && $vols->isNotEmpty())
-                            <div class="row mt-4" id="volsTableContainer">
-                                <div class="col-lg-12">
-                                    <div class="table-responsive">
-                                        <table class="table table-striped table-bordered" id="volsTable">
-                                            <thead>
-                                                <tr>
-                                                    <th>@lang('trans.flight_number')</th>
-
-                                                    <th>@lang('trans.start_aeroport')</th>
-                                                    <th>@lang('trans.end_aeroport')</th>
-                                                    <th>@lang('trans.departure_time')</th>
-                                                    <th>@lang('trans.arrival_time')</th>
-                                                    <th>@lang('trans.nb_passagers')</th>
-                                                    <th>@lang('trans.itinerary') </th>
-                                                    <th>@lang('trans.actions')</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($vols as $volItem)
-                                                    @php
-                                                        // Récupérer les escales pour ce vol
-                                                        $escales = $volItem->escales()->orderBy('ordre')->get();
-                                                        $routeString =
-                                                            optional($volItem->aeroportDepart)->codeICAO ??
-                                                            ($volItem->nom_piste_depart ?? 'N/A');
-                                                        if ($escales->isNotEmpty()) {
-                                                            foreach ($escales as $escale) {
-                                                                $routeString .= ' → ' . $escale->aeroport->codeICAO;
-                                                            }
-                                                        }
-                                                        $routeString .=
-                                                            ' → ' .
-                                                            (optional($volItem->aeroportArrivee)->codeICAO ??
-                                                                ($volItem->nom_piste_arrivee ?? 'N/A'));
-                                                    @endphp
-                                                    <tr id="vol-{{ $volItem->id }}">
-                                                        <td>{{ $volItem->numero_vol }}</td>
-
-                                                        <td>{{ optional($volItem->aeroportDepart)->codeICAO ?? ($volItem->nom_piste_depart ?? 'N/A') }}
-                                                        </td>
-                                                        <td>{{ optional($volItem->aeroportArrivee)->codeICAO ?? ($volItem->nom_piste_arrivee ?? 'N/A') }}
-                                                        </td>
-                                                        <td>{{ date('H:i', strtotime($volItem->date_depart)) }}</td>
-                                                        <td>{{ date('H:i', strtotime($volItem->date_arrivee)) }}</td>
-                                                        <td>{{ $volItem->nbr_passagers }}</td>
-                                                        <td>
-                                                            <small class="text-muted">{{ $routeString }}</small><br>
-                                                            <small>
-                                                                @if ($escales->isNotEmpty())
-                                                                    @foreach ($escales as $escale)
-                                                                        {{ date('H:i', strtotime($escale->date_arrivee)) }}
-                                                                        {{ $escale->aeroport->codeICAO }}
-                                                                        {{ date('H:i', strtotime($escale->date_depart)) }}
-                                                                        @if (!$loop->last)
-                                                                            →
-                                                                        @endif
-                                                                    @endforeach
-                                                                @else
-                                                                    @lang('trans.no_intermediate_airports')
-                                                                @endif
-                                                            </small>
-                                                        </td>
-                                                        <td>
-                                                            <button class="btn btn-warning btn-sm edit-vol"
-                                                                data-id="{{ $volItem->id }}"
-                                                                data-numero_vol="{{ $volItem->numero_vol }}"
-                                                                data-aeroport_depart_id="{{ $volItem->aeroport_depart_id }}"
-                                                                data-aeroport_arrivee_id="{{ $volItem->aeroport_arrivee_id }}"
-                                                                data-nom_piste_depart="{{ $volItem->nom_piste_depart }}"
-                                                                data-nom_piste_arrivee="{{ $volItem->nom_piste_arrivee }}"
-                                                                data-date_depart="{{ $volItem->date_depart }}"
-                                                                data-date_arrivee="{{ $volItem->date_arrivee }}"
-                                                                data-nbr_passagers="{{ $volItem->nbr_passagers }}"
-                                                                data-objet="{{ $volItem->objet_vol }}"
-                                                                data-escales="{{ json_encode($volItem->escales) }}">
-                                                                <i class="fas fa-edit"></i> @lang('trans.edit')
-                                                            </button>
-                                                            <button class="btn btn-danger btn-sm delete-vol"
-                                                                data-id="{{ $volItem->id }}">
-                                                                <i class="fas fa-trash"></i> @lang('trans.delete')
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        @else
-                            <div class="alert alert-info" id="noVolsAlert">
-                                @lang('trans.no_flights_registered')
-                            </div>
-                        @endif
+            <div class="row">
+                <!-- Numéro de vol -->
+                {{-- Toujours affiché, y compris pour Block Permit (type 3) où c'est le numéro de vol
+                     qui doit figurer, pas le nombre de passagers. --}}
+                <div class="col-md-6 mb-3">
+                    <div class="form-group">
+                        <label for="numero_vol" class="form-label">@lang('trans.flight_number')</label>
+                        <input type="text" class="form-control" id="numero_vol" name="numero_vol">
+                        <div class="invalid-feedback" id="numero_vol_error"></div>
                     </div>
                 </div>
+                @if (in_array($demandeAutorisation->type->id, [2, 4, 5, 7]))
+                    <!-- Nombre de passagers -->
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            <label for="nbr_passagers" id="nbr_passagers_label"
+                                class="form-label">@lang('trans.nb_passagers')</label>
+                            <input type="number" class="form-control" id="nbr_passagers" name="nbr_passagers"
+                                min="0">
+                            <div class="invalid-feedback" id="nbr_passagers_error"></div>
+                        </div>
+                    </div>
+                @endif
+            </div>
+
+            <div class="row vol-block">
+                <!-- Aéroport de départ -->
+                <div class="col-lg-6 col-md-5 mb-3">
+                    <div class="form-group">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap mb-1">
+                            <label class="form-label mb-0">@lang('trans.start_aeroport') <span
+                                    class="text-danger">*</span></label>
+                            <div class="anac-segmented">
+                                <div class="form-check">
+                                    <input class="form-check-input lieu-type-radio" type="radio"
+                                        name="type_lieu_depart" id="type_lieu_depart_aeroport" value="aeroport"
+                                        data-field="depart" checked>
+                                    <label class="form-check-label" for="type_lieu_depart_aeroport">
+                                        <i class="fas fa-plane"></i> @lang('trans.airport')
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input lieu-type-radio" type="radio"
+                                        name="type_lieu_depart" id="type_lieu_depart_piste" value="piste"
+                                        data-field="depart">
+                                    <label class="form-check-label" for="type_lieu_depart_piste">
+                                        <i class="fas fa-road"></i> @lang('trans.runway')
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="aeroport_depart_wrapper">
+                            <select class="form-control select2_aeroports" id="aeroport_depart_id"
+                                name="aeroport_depart_id" required>
+                                @foreach ($aeroports as $aeroport)
+                                    <option value="{{ $aeroport->id }}">{{ $aeroport->codeICAO }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="invalid-feedback" id="aeroport_depart_id_error"></div>
+                        </div>
+                        <div id="piste_depart_wrapper" style="display:none;">
+                            <input type="text" class="form-control" id="nom_piste_depart" name="nom_piste_depart"
+                                maxlength="255" placeholder="{{ __('trans.runway_name') }}">
+                            <div class="invalid-feedback" id="nom_piste_depart_error"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Heure de départ -->
+                <div class="col-lg-6 col-md-3 mb-3">
+                    <div class="form-group">
+                        <label for="date_depart" class="form-label">@lang('trans.departure_time') <span
+                                class="text-danger">*</span></label>
+                        <input type="time" class="form-control" id="date_depart" name="date_depart" required>
+                        <div class="invalid-feedback" id="date_depart_error"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row vol-block vol-block--arrivee">
+                <!-- Aéroport d'arrivée -->
+                <div class="col-lg-6 col-md-5 mb-3">
+                    <div class="form-group">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap mb-1">
+                            <label class="form-label mb-0">@lang('trans.end_aeroport')<span
+                                    class="text-danger">*</span></label>
+                            <div class="anac-segmented">
+                                <div class="form-check">
+                                    <input class="form-check-input lieu-type-radio" type="radio"
+                                        name="type_lieu_arrivee" id="type_lieu_arrivee_aeroport" value="aeroport"
+                                        data-field="arrivee" checked>
+                                    <label class="form-check-label" for="type_lieu_arrivee_aeroport">
+                                        <i class="fas fa-plane-arrival"></i> @lang('trans.airport')
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input lieu-type-radio" type="radio"
+                                        name="type_lieu_arrivee" id="type_lieu_arrivee_piste" value="piste"
+                                        data-field="arrivee">
+                                    <label class="form-check-label" for="type_lieu_arrivee_piste">
+                                        <i class="fas fa-road"></i> @lang('trans.runway')
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="aeroport_arrivee_wrapper">
+                            <select class="form-control select2_aeroports" id="aeroport_arrivee_id"
+                                name="aeroport_arrivee_id" required>
+                                @foreach ($aeroports as $aeroport)
+                                    <option value="{{ $aeroport->id }}">{{ $aeroport->codeICAO }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="invalid-feedback" id="aeroport_arrivee_id_error"></div>
+                        </div>
+                        <div id="piste_arrivee_wrapper" style="display:none;">
+                            <input type="text" class="form-control" id="nom_piste_arrivee" name="nom_piste_arrivee"
+                                maxlength="255" placeholder="{{ __('trans.runway_name') }}">
+                            <div class="invalid-feedback" id="nom_piste_arrivee_error"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Heure d'arrivée -->
+                <div class="col-lg-6 col-md-4 mb-3">
+                    <div class="form-group">
+                        <label for="date_arrivee" class="form-label">@lang('trans.arrival_time') <span
+                                class="text-danger">*</span></label>
+                        <input type="time" class="form-control" id="date_arrivee" name="date_arrivee" required>
+                        <div class="invalid-feedback" id="date_arrivee_error"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section pour les escales intermédiaires -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="vol-subcard mb-4">
+                        <div class="vol-subcard__head">
+                            <h3 class="vol-subcard__title">
+                                <i class="fas fa-route"></i> @lang('trans.intermediate_airports')
+                            </h3>
+                            <button type="button" class="btn btn-sm anac-action anac-action--blue" id="addEscaleBtn">
+                                <i class="fas fa-plus"></i> @lang('trans.add_intermediate_airport')
+                            </button>
+                        </div>
+                        <div class="vol-subcard__body" id="escalesContainer">
+                            <!-- Les escales seront ajoutées dynamiquement ici -->
+                            <div class="auth-alert auth-alert--info mb-0" id="noEscalesAlert">
+                                @lang('trans.no_intermediate_airports')
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="vol-actions">
+                        <button type="button" class="anac-btn anac-btn--ghost" id="cancelVolFormBtn">
+                            <i class="fas fa-times"></i> @lang('trans.cancel')
+                        </button>
+                        <button type="submit" class="anac-btn anac-btn--primary" id="submitVolBtn">
+                            <i class="fas fa-save"></i> <span id="volFormAction">@lang('trans.save')</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <!-- Tableau des vols existants -->
+        @if (isset($vols) && $vols->isNotEmpty())
+            <div class="mt-4" id="volsTableContainer">
+                <div class="table-responsive">
+                    <table class="table" id="volsTable">
+                        <thead>
+                            <tr>
+                                <th>@lang('trans.flight_number')</th>
+                                <th>@lang('trans.start_aeroport')</th>
+                                <th>@lang('trans.end_aeroport')</th>
+                                <th>@lang('trans.departure_time')</th>
+                                <th>@lang('trans.arrival_time')</th>
+                                <th>@lang('trans.nb_passagers')</th>
+                                <th>@lang('trans.itinerary')</th>
+                                <th>@lang('trans.actions')</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($vols as $volItem)
+                                @php
+                                    // Récupérer les escales pour ce vol
+                                    $escales = $volItem->escales()->orderBy('ordre')->get();
+                                    $routeString =
+                                        optional($volItem->aeroportDepart)->codeICAO ??
+                                        ($volItem->nom_piste_depart ?? __('trans.not_available'));
+                                    if ($escales->isNotEmpty()) {
+                                        foreach ($escales as $escale) {
+                                            $routeString .= ' → ' . $escale->aeroport->codeICAO;
+                                        }
+                                    }
+                                    $routeString .=
+                                        ' → ' .
+                                        (optional($volItem->aeroportArrivee)->codeICAO ??
+                                            ($volItem->nom_piste_arrivee ?? __('trans.not_available')));
+                                @endphp
+                                <tr id="vol-{{ $volItem->id }}">
+                                    <td>{{ $volItem->numero_vol }}</td>
+                                    <td>{{ optional($volItem->aeroportDepart)->codeICAO ?? ($volItem->nom_piste_depart ?? __('trans.not_available')) }}
+                                    </td>
+                                    <td>{{ optional($volItem->aeroportArrivee)->codeICAO ?? ($volItem->nom_piste_arrivee ?? __('trans.not_available')) }}
+                                    </td>
+                                    <td>{{ date('H:i', strtotime($volItem->date_depart)) }}</td>
+                                    <td>{{ date('H:i', strtotime($volItem->date_arrivee)) }}</td>
+                                    <td>{{ $volItem->nbr_passagers }}</td>
+                                    <td>
+                                        <small class="text-muted">{{ $routeString }}</small><br>
+                                        <small>
+                                            @if ($escales->isNotEmpty())
+                                                @foreach ($escales as $escale)
+                                                    {{ date('H:i', strtotime($escale->date_arrivee)) }}
+                                                    {{ $escale->aeroport->codeICAO }}
+                                                    {{ date('H:i', strtotime($escale->date_depart)) }}
+                                                    @if (!$loop->last)
+                                                        →
+                                                    @endif
+                                                @endforeach
+                                            @else
+                                                @lang('trans.no_intermediate_airports')
+                                            @endif
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div class="anac-actions">
+                                            <button class="btn btn-sm anac-action anac-action--yellow edit-vol"
+                                                data-id="{{ $volItem->id }}"
+                                                data-numero_vol="{{ $volItem->numero_vol }}"
+                                                data-aeroport_depart_id="{{ $volItem->aeroport_depart_id }}"
+                                                data-aeroport_arrivee_id="{{ $volItem->aeroport_arrivee_id }}"
+                                                data-nom_piste_depart="{{ $volItem->nom_piste_depart }}"
+                                                data-nom_piste_arrivee="{{ $volItem->nom_piste_arrivee }}"
+                                                data-date_depart="{{ $volItem->date_depart }}"
+                                                data-date_arrivee="{{ $volItem->date_arrivee }}"
+                                                data-nbr_passagers="{{ $volItem->nbr_passagers }}"
+                                                data-objet="{{ $volItem->objet_vol }}"
+                                                data-escales="{{ json_encode($volItem->escales) }}">
+                                                <i class="fas fa-edit"></i> @lang('trans.edit')
+                                            </button>
+                                            <button class="btn btn-sm anac-action anac-action--red delete-vol"
+                                                data-id="{{ $volItem->id }}">
+                                                <i class="fas fa-trash"></i> @lang('trans.delete')
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @else
+            <div class="auth-alert auth-alert--info mb-0" id="noVolsAlert">
+                <i class="fas fa-info-circle"></i>
+                @lang('trans.no_flights_registered')
+            </div>
+        @endif
+    </div>
+</div>
 
 @push('custom')
     <script>
@@ -439,7 +502,7 @@
                 <div class="col-md-2">
                     <div class="form-group">
                         <label>&nbsp;</label>
-                        <button type="button" class="btn btn-danger btn-block remove-escale" 
+                        <button type="button" class="btn btn-sm anac-action anac-action--red w-100 remove-escale" 
                                 data-counter="${counter}">
                             <i class="fas fa-trash"></i>
                         </button>
@@ -462,7 +525,7 @@
                 setTimeout(() => {
                     $(`#escale_aeroport_${escaleCounter}`).select2({
                         theme: 'bootstrap4',
-                        placeholder: "Sélectionnez un aéroport",
+                        placeholder: @json(__('trans.select_airport')),
                         allowClear: true
                     });
                 }, 50);
@@ -502,7 +565,7 @@
                         setTimeout(() => {
                             $(`#escale_aeroport_${escaleCounter}`).select2({
                                 theme: 'bootstrap4',
-                                placeholder: "Sélectionnez un aéroport",
+                                placeholder: @json(__('trans.select_airport')),
                                 allowClear: true
                             });
                         }, 50);
@@ -618,7 +681,7 @@
                 $('#volsTableContainer, #noVolsAlert').hide();
                 $('#showVolFormBtn').hide();
                 $('#vol_id').val('');
-                $('#volFormAction').text(@json(__('trans.send')));
+                $('#volFormAction').text(@json(__('trans.save')));
                 $('#volForm')[0].reset();
                 $('.invalid-feedback').text('');
                 $('.is-invalid').removeClass('is-invalid');
@@ -775,11 +838,11 @@
                     },
                     beforeSend: function() {
                         $('#submitVolBtn').prop('disabled', true).html(
-                            '<i class="fas fa-spinner fa-spin"></i> Enregistrement...');
+                            '<i class="fas fa-spinner fa-spin"></i> ' + @json(__('trans.saving')));
                     },
                     success: function(response) {
                         console.log('Réponse réussie:', response);
-                        toastr.success(response.message || 'Vol enregistré avec succès');
+                        toastr.success(response.message || @json(__('trans.saved_success')));
                         setTimeout(() => {
                             location.reload();
                         }, 1500);
@@ -790,7 +853,7 @@
 
                         if (xhr.status === 419) {
                             toastr.error(
-                                'Session expirée. Veuillez rafraîchir la page et réessayer.'
+                                @json(__('trans.session_expired'))
                             );
                             setTimeout(() => {
                                 location.reload();
@@ -802,10 +865,10 @@
                                 $(`#${key}`).addClass('is-invalid');
                                 $(`#${key}_error`).text(value[0]);
                             });
-                            toastr.error('Veuillez corriger les erreurs dans le formulaire');
+                            toastr.error(@json(__('trans.fix_form_errors')));
                         } else {
                             toastr.error(xhr.responseJSON?.message ||
-                                'Une erreur est survenue');
+                                @json(__('trans.error_occurred')));
                         }
                     },
                     complete: function() {
@@ -823,14 +886,14 @@
                 const volId = $(this).data('id');
 
                 Swal.fire({
-                    title: 'Confirmer la suppression',
-                    text: "Êtes-vous sûr de vouloir supprimer ce vol?",
+                    title: @json(__('trans.confirm_delete_title')),
+                    text: @json(__('trans.confirm_delete_text')),
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Oui, supprimer!',
-                    cancelButtonText: 'Annuler'
+                    confirmButtonText: @json(__('trans.confirm_delete_yes')),
+                    cancelButtonText: @json(__('trans.cancel'))
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
@@ -841,8 +904,8 @@
                             },
                             success: function(response) {
                                 Swal.fire(
-                                    'Supprimé!',
-                                    'Le vol a été supprimé.',
+                                    @json(__('trans.success')),
+                                    @json(__('trans.deleted_success')),
                                     'success'
                                 ).then(() => {
                                     location.reload();
@@ -851,9 +914,9 @@
                             error: function(xhr) {
                                 Swal.fire({
                                     icon: 'error',
-                                    title: 'Erreur',
+                                    title: @json(__('trans.error')),
                                     text: xhr.responseJSON.message ||
-                                        'Une erreur est survenue lors de la suppression'
+                                        @json(__('trans.delete_error'))
                                 });
                             }
                         });

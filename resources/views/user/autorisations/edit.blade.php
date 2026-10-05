@@ -15,21 +15,54 @@
 
         <div class="row justify-content-center">
             <div class="col-md-12">
-                <!-- Au début de la vue, dans le titre -->
-                <h4 class="text-center">
-                    {{ $demandeAutorisation->type->libelle }} -
-                    @if ($demandeAutorisation->type_demande_autorisation_id == 3)
-                        {{ $demandeAutorisation->type_vol_names }}
-                    @else
-                        {{ $demandeAutorisation->typeVol->nom ?? 'N/A' }}
-                    @endif
-                    - {{ $demandeAutorisation->date_debut }} -
-                    {{ $demandeAutorisation->date_fin }} - {{ Auth::user()->demandeur->np }}
-                    - {{ strtoupper($demandeAutorisation->objet) ?? 'N/A' }}
-                    @if (!empty($demandeAutorisation->sous_validite))
-                        - {{ '+' . $demandeAutorisation->sous_validite }} H
-                    @endif
-                </h4>
+                <!-- En-tête du dossier -->
+                <div class="card anac-hero">
+                    <div class="card-body">
+                        <span class="anac-hero__eyebrow">
+                            <i class="fas fa-shield-alt"></i> @lang('trans.type_demande')
+                        </span>
+
+                        <h1 class="anac-hero__title">{{ $demandeAutorisation->type->libelle }}</h1>
+                        <p class="anac-hero__subtitle">
+                            @if ($demandeAutorisation->type_demande_autorisation_id == 3)
+                                {{ $demandeAutorisation->type_vol_names }}
+                            @else
+                                {{ $demandeAutorisation->typeVol->nom ?? __('trans.not_available') }}
+                            @endif
+                        </p>
+
+                        <div class="anac-hero__meta">
+                            <span class="anac-hero__chip">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span class="anac-hero__label">@lang('trans.start_date')</span>
+                                {{ $demandeAutorisation->date_debut }}
+                                <i class="fas fa-arrow-right"></i>
+                                <span class="anac-hero__label">@lang('trans.end_date')</span>
+                                {{ $demandeAutorisation->date_fin }}
+                            </span>
+
+                            <span class="anac-hero__chip">
+                                <i class="fas fa-user-tie"></i>
+                                <span class="anac-hero__label">@lang('trans.applicant')</span>
+                                {{ Auth::user()->demandeur->np }}
+                            </span>
+
+                            <span class="anac-hero__chip">
+                                <i class="fas fa-tag"></i>
+                                <span class="anac-hero__label">@lang('trans.object')</span>
+                                {{ $demandeAutorisation->objet ? strtoupper($demandeAutorisation->objet) : __('trans.not_available') }}
+                            </span>
+
+                            @if (!empty($demandeAutorisation->sous_validite))
+                                <span class="anac-hero__chip">
+                                    <i class="fas fa-clock"></i>
+                                    <span class="anac-hero__label">@lang('trans.validity')</span>
+                                    +{{ $demandeAutorisation->sous_validite }} H
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
 
                 {{-- Transport de dépouille mortelle (type 4) : ni avion/immatriculation, ni équipage --}}
                 @php
@@ -40,7 +73,7 @@
                 @endphp
 
                 @if ($readonly)
-                    <div class="alert alert-info">
+                    <div class="auth-alert auth-alert--info">
                         <i class="fas fa-lock"></i>
                         @lang('trans.demande_readonly_notice')
                     </div>

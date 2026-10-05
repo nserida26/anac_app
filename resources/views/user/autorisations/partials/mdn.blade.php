@@ -1,8 +1,6 @@
                 @if (in_array($demandeAutorisation->type->id, [5, 6, 7]))
-                    <div class="card card-info mt-4">
-                        <div class="card-header bg-primary text-white">
-                            <h3 class="card-title">@lang('trans.mdn_management')</h3>
-                        </div>
+                    <div class="card mt-4">
+                        <x-anac-card-header icon="fas fa-file-contract" :title="__('trans.mdn_management')" />
                         <div class="card-body">
                             {{-- Add MDN Form --}}
                             <form method="POST" id="mdnForm" action="{{ url('/user/mdns') }}"
@@ -45,7 +43,7 @@
 
                                 <div class="row">
                                     <div class="col-lg-12">
-                                        <button id="submitMdn" type="submit" class="btn btn-success float-right">
+                                        <button id="submitMdn" type="submit" class="anac-btn anac-btn--primary float-right">
                                             <i class="fas fa-plus"></i> @lang('trans.add')
                                         </button>
                                     </div>
@@ -57,7 +55,7 @@
                                 <div class="row mt-4">
                                     <div class="col-lg-12">
                                         <div class="table-responsive">
-                                            <table class="table table-striped table-bordered" id="mdnTable">
+                                            <table class="table" id="mdnTable">
                                                 <thead>
                                                     <tr>
                                                         <th>@lang('trans.authorization_date')</th>
@@ -72,19 +70,21 @@
                                                             <td>{{ $mdn->formatted_date_autorisation }}</td>
                                                             <td>{{ $mdn->numero_mdn }}</td>
                                                             <td>
-                                                                <span class="badge badge-info">
-                                                                    {{ $mdn->pays->nom ?? 'NR' }}
+                                                                <span class="badge badge--info">
+                                                                    {{ $mdn->pays->nom ?? __('trans.not_available') }}
                                                                 </span>
                                                             </td>
                                                             <td>
-                                                                <button class="btn btn-warning btn-sm edit-mdn"
-                                                                    data-id="{{ $mdn->id }}">
-                                                                    <i class="fas fa-edit"></i> @lang('trans.update')
-                                                                </button>
-                                                                <button class="btn btn-danger btn-sm delete-mdn"
-                                                                    data-id="{{ $mdn->id }}">
-                                                                    <i class="fas fa-trash"></i> @lang('trans.delete')
-                                                                </button>
+                                                                <div class="anac-actions">
+                                                                    <button class="btn btn-sm anac-action anac-action--yellow edit-mdn"
+                                                                        data-id="{{ $mdn->id }}">
+                                                                        <i class="fas fa-edit"></i> @lang('trans.update')
+                                                                    </button>
+                                                                    <button class="btn btn-sm anac-action anac-action--red delete-mdn"
+                                                                        data-id="{{ $mdn->id }}">
+                                                                        <i class="fas fa-trash"></i> @lang('trans.delete')
+                                                                    </button>
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                         <tr id="edit-form-mdn-{{ $mdn->id }}"
@@ -136,11 +136,11 @@
                                                                     </div>
 
                                                                     <button type="submit"
-                                                                        class="btn btn-primary btn-sm update-mdn">
+                                                                        class="btn btn-sm anac-action anac-action--blue update-mdn">
                                                                         <i class="fas fa-save"></i> @lang('trans.update')
                                                                     </button>
                                                                     <button type="button"
-                                                                        class="btn btn-secondary btn-sm cancel-edit-mdn"
+                                                                        class="btn btn-sm anac-action anac-action--grey cancel-edit-mdn"
                                                                         data-id="{{ $mdn->id }}">
                                                                         <i class="fas fa-times"></i> @lang('trans.cancel')
                                                                     </button>
@@ -186,11 +186,11 @@
                     processData: false,
                     contentType: false,
                     success: function(response) {
-                        toastr.success(response.message || "MDN ajouté avec succès.");
+                        toastr.success(response.message || @json(__('trans.added_success')));
                         setTimeout(() => location.reload(), 1000);
                     },
                     error: function(xhr) {
-                        let message = xhr.responseJSON?.message || "Une erreur s'est produite.";
+                        let message = xhr.responseJSON?.message || @json(__('trans.error_occurred'));
                         if (xhr.responseJSON?.errors) {
                             message = Object.values(xhr.responseJSON.errors).flat().join(', ');
                         }
@@ -216,11 +216,11 @@
                         'X-HTTP-Method-Override': 'PUT'
                     },
                     success: function(response) {
-                        toastr.success(response.message || "MDN mis à jour avec succès.");
+                        toastr.success(response.message || @json(__('trans.updated_success')));
                         setTimeout(() => location.reload(), 1000);
                     },
                     error: function(xhr) {
-                        let message = xhr.responseJSON?.message || "Une erreur s'est produite.";
+                        let message = xhr.responseJSON?.message || @json(__('trans.error_occurred'));
                         if (xhr.responseJSON?.errors) {
                             message = Object.values(xhr.responseJSON.errors).flat().join(', ');
                         }
@@ -233,7 +233,7 @@
             $(document).on('click', '.delete-mdn', function() {
                 const id = $(this).data('id');
 
-                if (confirm('Êtes-vous sûr de vouloir supprimer ce MDN ?')) {
+                if (confirm(@json(__('trans.confirm_delete_text')))) {
                     $.ajax({
                         url: '{{ url('/user/mdns') }}/' + id,
                         type: 'DELETE',
@@ -241,13 +241,13 @@
                             _token: '{{ csrf_token() }}'
                         },
                         success: function(response) {
-                            toastr.success(response.message || "MDN supprimé avec succès.");
+                            toastr.success(response.message || @json(__('trans.deleted_success')));
                             $('#mdn-' + id).remove();
                             $('#edit-form-mdn-' + id).remove();
                         },
                         error: function(xhr) {
                             toastr.error(xhr.responseJSON?.message ||
-                                "Une erreur s'est produite.");
+                                @json(__('trans.error_occurred')));
                         }
                     });
                 }

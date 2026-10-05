@@ -1,8 +1,6 @@
                 @if ($demandeAutorisation->type->id === 4)
-                    <div class="card card-primary">
-                        <div class="card-header bg-primary text-white">
-                            <h3 class="card-title">@lang('trans.deceased_persons')</h3>
-                        </div>
+                    <div class="card">
+                        <x-anac-card-header icon="fas fa-id-card" :title="__('trans.deceased_persons')" />
                         <div class="card-body">
                             <form method="POST" id="deceasedPersonForm" action="{{ url('/user/personnes-deces') }}"
                                 enctype="multipart/form-data">
@@ -33,7 +31,7 @@
                                 <div class="row">
                                     <div class="col-lg-12">
                                         <button id="submitDeceasedPerson" type="submit"
-                                            class="btn btn-success float-right">
+                                            class="anac-btn anac-btn--primary float-right">
                                             <i class="fas fa-plus"></i> @lang('trans.add')
                                         </button>
                                     </div>
@@ -44,7 +42,7 @@
                                 <div class="row mt-4">
                                     <div class="col-lg-12">
                                         <div class="table-responsive">
-                                            <table class="table table-striped table-bordered" id="deceasedPersonsTable">
+                                            <table class="table" id="deceasedPersonsTable">
                                                 <thead>
                                                     <tr>
                                                         <th>@lang('trans.full_name')</th>
@@ -56,12 +54,14 @@
                                                     @foreach ($personnesDeces as $personne)
                                                         <tr id="personne-{{ $personne->id }}">
                                                             <td>{{ $personne->nom_prenom }}</td>
-                                                            <td>{{ $personne->numero_passport ?? 'N/A' }}</td>
+                                                            <td>{{ $personne->numero_passport ?? __('trans.not_available') }}</td>
                                                             <td>
-                                                                <button class="btn btn-warning btn-sm edit-personne"
-                                                                    data-id="{{ $personne->id }}">@lang('trans.update')</button>
-                                                                <button class="btn btn-danger btn-sm delete-personne"
-                                                                    data-id="{{ $personne->id }}">@lang('trans.delete')</button>
+                                                                <div class="anac-actions">
+                                                                    <button class="btn btn-sm anac-action anac-action--yellow edit-personne"
+                                                                        data-id="{{ $personne->id }}">@lang('trans.update')</button>
+                                                                    <button class="btn btn-sm anac-action anac-action--red delete-personne"
+                                                                        data-id="{{ $personne->id }}">@lang('trans.delete')</button>
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                         <tr id="edit-form-personne-{{ $personne->id }}"
@@ -96,11 +96,11 @@
                                                                     </div>
 
                                                                     <button type="submit"
-                                                                        class="btn btn-primary btn-sm update-personne">
+                                                                        class="btn btn-sm anac-action anac-action--blue update-personne">
                                                                         @lang('trans.update')
                                                                     </button>
                                                                     <button type="button"
-                                                                        class="btn btn-secondary btn-sm cancel-edit"
+                                                                        class="btn btn-sm anac-action anac-action--grey cancel-edit"
                                                                         data-id="{{ $personne->id }}"
                                                                         data-type="personne">
                                                                         @lang('trans.cancel')
@@ -137,7 +137,7 @@
                         location.reload();
                     },
                     error: function(xhr) {
-                        toastr.error(xhr.responseJSON?.message || "Une erreur s'est produite.");
+                        toastr.error(xhr.responseJSON?.message || @json(__('trans.error_occurred')));
                     }
                 });
             });
@@ -160,7 +160,7 @@
                         location.reload();
                     },
                     error: function(xhr) {
-                        toastr.error(xhr.responseJSON?.message || "Une erreur s'est produite.");
+                        toastr.error(xhr.responseJSON?.message || @json(__('trans.error_occurred')));
                     }
                 });
             });
@@ -170,13 +170,14 @@
                 const id = $(this).data('id');
 
                 Swal.fire({
-                    title: 'Confirmer la suppression',
-                    text: "Êtes-vous sûr de vouloir supprimer cette personne?",
+                    title: @json(__('trans.confirm_delete_title')),
+                    text: @json(__('trans.confirm_delete_text')),
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
-                    confirmButtonText: 'Oui, supprimer!'
+                    confirmButtonText: @json(__('trans.confirm_delete_yes')),
+                    cancelButtonText: @json(__('trans.cancel'))
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
@@ -188,7 +189,7 @@
                             success: function() {
                                 $(`#personne-${id}, #edit-form-personne-${id}`)
                                     .remove();
-                                toastr.success('Personne supprimée avec succès');
+                                toastr.success(@json(__('trans.deleted_success')));
                             }
                         });
                     }

@@ -1,9 +1,7 @@
                 @if ($demandeAutorisation->type->id === 2)
                     <!-- Receiving Party Section -->
-                    <div class="card card-primary">
-                        <div class="card-header bg-primary text-white">
-                            <h3 class="card-title">@lang('trans.receiving_party_info')</h3>
-                        </div>
+                    <div class="card">
+                        <x-anac-card-header icon="fas fa-address-book" :title="__('trans.receiving_party_info')" />
                         <div class="card-body">
                             <form method="POST" id="receivingPartyForm" action="{{ url('/user/receiving-parties/') }}"
                                 enctype="multipart/form-data">
@@ -69,7 +67,7 @@
 
                                 <div class="row">
                                     <div class="col-lg-12">
-                                        <button type="submit" class="btn btn-success float-right">
+                                        <button type="submit" class="anac-btn anac-btn--primary float-right">
                                             <i class="fas fa-plus"></i> @lang('trans.add_action')
                                         </button>
                                     </div>
@@ -80,7 +78,7 @@
                                 <div class="row mt-4">
                                     <div class="col-lg-12">
                                         <div class="table-responsive">
-                                            <table class="table table-striped table-bordered" id="partyTable">
+                                            <table class="table" id="partyTable">
                                                 <thead>
                                                     <tr>
                                                         <th>@lang('trans.contact')</th>
@@ -101,22 +99,24 @@
                                                             <td>
                                                                 @if ($party->piece_identite_path)
                                                                     <a href="{{ asset('/uploads/' . $party->piece_identite_path) }}"
-                                                                        target="_blank" class="btn btn-sm btn-primary">
+                                                                        target="_blank" class="btn btn-sm anac-action anac-action--blue">
                                                                         <i class="fas fa-eye"></i>
                                                                     </a>
                                                                 @else
-                                                                    N/A
+                                                                    @lang('trans.not_available')
                                                                 @endif
                                                             </td>
                                                             <td>
-                                                                <button class="btn btn-warning btn-sm edit-party"
-                                                                    data-id="{{ $party->id }}">
-                                                                    <i class="fas fa-edit"></i>
-                                                                </button>
-                                                                <button class="btn btn-danger btn-sm delete-party"
-                                                                    data-id="{{ $party->id }}">
-                                                                    <i class="fas fa-trash"></i>
-                                                                </button>
+                                                                <div class="anac-actions">
+                                                                    <button class="btn btn-sm anac-action anac-action--yellow edit-party"
+                                                                        data-id="{{ $party->id }}">
+                                                                        <i class="fas fa-edit"></i>
+                                                                    </button>
+                                                                    <button class="btn btn-sm anac-action anac-action--red delete-party"
+                                                                        data-id="{{ $party->id }}">
+                                                                        <i class="fas fa-trash"></i>
+                                                                    </button>
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                         <tr id="edit-form-party-{{ $party->id }}"
@@ -186,10 +186,10 @@
                                                                         </div>
                                                                     </div>
                                                                     <button type="submit"
-                                                                        class="btn btn-primary btn-sm update-party"
+                                                                        class="btn btn-sm anac-action anac-action--blue update-party"
                                                                         data-id="{{ $party->id }}">@lang('trans.update')</button>
                                                                     <button type="button"
-                                                                        class="btn btn-secondary btn-sm cancel-edit"
+                                                                        class="btn btn-sm anac-action anac-action--grey cancel-edit"
                                                                         data-id="{{ $party->id }}"
                                                                         data-type="party">@lang('trans.cancel')</button>
                                                                 </form>
@@ -254,13 +254,14 @@
                 const id = $(this).data('id');
 
                 Swal.fire({
-                    title: 'Confirmer la suppression',
-                    text: "Êtes-vous sûr de vouloir supprimer ce contact?",
+                    title: @json(__('trans.confirm_delete_title')),
+                    text: @json(__('trans.confirm_delete_text')),
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
-                    confirmButtonText: 'Oui, supprimer!'
+                    confirmButtonText: @json(__('trans.confirm_delete_yes')),
+                    cancelButtonText: @json(__('trans.cancel'))
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
@@ -271,7 +272,7 @@
                             },
                             success: function() {
                                 $(`#party-${id}, #edit-form-party-${id}`).remove();
-                                toastr.success('Contact supprimé avec succès');
+                                toastr.success(@json(__('trans.deleted_success')));
                             }
                         });
                     }

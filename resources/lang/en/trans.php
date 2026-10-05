@@ -1518,4 +1518,20 @@ return [
     'action_issues_title' => 'View reported issues',
     'action_print_title' => 'Print the authorization',
     'demande_delete_closed_error' => 'This request has already been submitted and can no longer be deleted.',
+
+    // ── UI messages (autorisations edit page) ──
+    'confirm_delete_title' => 'Confirm deletion',
+    'confirm_delete_text' => 'Are you sure you want to delete this item? This action is irreversible.',
+    'confirm_delete_yes' => 'Yes, delete!',
+    'deleted_success' => 'Deleted successfully',
+    'saved_success' => 'Saved successfully',
+    'added_success' => 'Added successfully',
+    'updated_success' => 'Updated successfully',
+    'delete_error' => 'Error while deleting',
+    'select_airport' => 'Select an airport',
+    'select_pdf_document' => 'Please select a PDF document',
+    'fix_form_errors' => 'Please fix the errors in the form',
+    'registration_placeholder' => 'Type a registration and press Enter',
+    'seats' => 'seats',
+    'unit_kg' => 'kg',
 ];

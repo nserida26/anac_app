@@ -336,6 +336,242 @@ body.anac-app {
     padding: 1.25rem;
 }
 
+/* ── En-tête de carte avec icône (composant x-anac-card-header) ── */
+.anac-app .card .card-header {
+    gap: 0.75rem;
+}
+
+.anac-app .anac-card-head {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+}
+
+.anac-app .anac-card-head__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--anac-primary) 0%, var(--anac-primary-light) 100%);
+    color: var(--anac-accent);
+    font-size: 0.9rem;
+    box-shadow: var(--anac-shadow-sm);
+}
+
+.anac-app .anac-card-head__title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--anac-primary);
+}
+
+.anac-app .anac-card-head__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 0 0 auto;
+}
+
+.anac-app .anac-card-head__count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3em 0.75em;
+    border-radius: 999px;
+    background: var(--anac-gray-100);
+    color: var(--anac-gray-600);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+/* ── Bandeau d'en-tête de dossier (hero navy & or) ── */
+.anac-app .anac-hero {
+    position: relative;
+    border: none;
+    border-radius: var(--anac-radius);
+    background: linear-gradient(135deg, var(--anac-primary) 0%, var(--anac-primary-light) 100%);
+    box-shadow: var(--anac-shadow-md);
+    overflow: hidden;
+    color: var(--anac-white);
+}
+
+.anac-app .anac-hero::after {
+    content: '';
+    position: absolute;
+    top: -70px;
+    right: -70px;
+    width: 240px;
+    height: 240px;
+    background: radial-gradient(circle, rgba(200, 169, 81, 0.35) 0%, rgba(200, 169, 81, 0) 70%);
+    pointer-events: none;
+}
+
+.anac-app .anac-hero .card-body {
+    position: relative;
+    z-index: 1;
+    padding: 1.6rem 1.75rem;
+}
+
+.anac-app .anac-hero__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.3em 0.85em;
+    border-radius: 999px;
+    background: rgba(200, 169, 81, 0.16);
+    border: 1px solid rgba(200, 169, 81, 0.35);
+    color: var(--anac-accent);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.anac-app .anac-hero__title {
+    margin: 0.85rem 0 0;
+    font-size: 1.55rem;
+    font-weight: 800;
+    line-height: 1.25;
+    color: var(--anac-white);
+}
+
+.anac-app .anac-hero__subtitle {
+    margin: 0.3rem 0 0;
+    font-size: 0.98rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.anac-app .anac-hero__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.2rem;
+}
+
+.anac-app .anac-hero__chip {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.5rem 0.85rem;
+    border-radius: var(--anac-radius-sm);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--anac-white);
+}
+
+.anac-app .anac-hero__chip i {
+    color: var(--anac-accent);
+}
+
+.anac-app .anac-hero__label {
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+@media (max-width: 575.98px) {
+    .anac-app .anac-hero .card-body {
+        padding: 1.25rem 1rem;
+    }
+
+    .anac-app .anac-hero__title {
+        font-size: 1.3rem;
+    }
+}
+
+/* ── Boutons génériques du layout (primaire navy→or, secondaire doux) ── */
+.anac-app .anac-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    height: 40px;
+    padding: 0 1.1rem;
+    border: none;
+    border-radius: var(--anac-radius-sm);
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+    transition: var(--anac-transition);
+}
+
+.anac-app .anac-btn--primary {
+    background: linear-gradient(135deg, var(--anac-primary) 0%, var(--anac-primary-light) 100%);
+    color: var(--anac-white);
+    box-shadow: var(--anac-shadow-sm);
+}
+
+.anac-app .anac-btn--primary:hover {
+    color: var(--anac-white);
+    transform: translateY(-1px);
+    box-shadow: var(--anac-shadow-md);
+}
+
+.anac-app .anac-btn--ghost {
+    background: var(--anac-gray-100);
+    color: var(--anac-gray-600);
+}
+
+.anac-app .anac-btn--ghost:hover {
+    background: var(--anac-gray-200);
+    color: var(--anac-gray-800);
+    transform: translateY(-1px);
+}
+
+.anac-app .anac-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ── Contrôle segmenté (radios Aéroport / Piste) ── */
+.anac-app .anac-segmented {
+    display: inline-flex;
+    padding: 3px;
+    gap: 3px;
+    background: var(--anac-gray-100);
+    border-radius: 999px;
+}
+
+.anac-app .anac-segmented .form-check {
+    display: inline-flex;
+    margin: 0;
+    padding: 0;
+    min-height: 0;
+}
+
+.anac-app .anac-segmented .form-check-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.anac-app .anac-segmented .form-check-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--anac-gray-600);
+    cursor: pointer;
+    transition: var(--anac-transition);
+}
+
+.anac-app .anac-segmented .form-check-input:checked+.form-check-label {
+    background: var(--anac-primary);
+    color: var(--anac-white);
+    box-shadow: var(--anac-shadow-sm);
+}
+
 /* ── Tables (design aligné sur les pages d'authentification) ── */
 .anac-app .table {
     width: 100%;
@@ -683,6 +919,12 @@ body.anac-app {
     line-height: 1.2;
     letter-spacing: 0.2px;
 }
+
+.anac-app .badge--neutral           { background-color: #eef0f3; color: #5b6670; }
+.anac-app .badge--info              { background-color: #e8f1fb; color: #2563a8; }
+.anac-app .badge--success           { background-color: #e7f6ed; color: #1e7a47; }
+.anac-app .badge--warning           { background-color: #fdf4dd; color: #9c7c1a; }
+.anac-app .badge--danger            { background-color: #fdecec; color: #c0392b; }
 
 .anac-app .badge-draft             { background-color: #eef0f3; color: #5b6670; }
 .anac-app .badge-submitted         { background-color: #e8f1fb; color: #2563a8; }

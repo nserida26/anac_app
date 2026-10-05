@@ -1,50 +1,6 @@
 @push('css')
     <style>
         /* ── Section Documents : alignée sur le design du layout (navy & or) ── */
-        .doc-card .card-header {
-            gap: 0.75rem;
-        }
-
-        .doc-head {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.65rem;
-            min-width: 0;
-        }
-
-        .doc-head__icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 34px;
-            height: 34px;
-            flex: 0 0 auto;
-            border-radius: 10px;
-            background: linear-gradient(135deg, var(--anac-primary) 0%, var(--anac-primary-light) 100%);
-            color: var(--anac-accent);
-            font-size: 0.9rem;
-            box-shadow: var(--anac-shadow-sm);
-        }
-
-        .doc-head__title {
-            margin: 0;
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--anac-primary);
-        }
-
-        .doc-head__count {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            padding: 0.3em 0.75em;
-            border-radius: 999px;
-            background: var(--anac-gray-100);
-            color: var(--anac-gray-600);
-            font-size: 0.78rem;
-            font-weight: 700;
-        }
-
         .doc-intro {
             margin: 0 0 1rem;
             font-size: 0.9rem;
@@ -202,37 +158,6 @@
             color: #c0392b;
         }
 
-        /* Bouton d'upload (pièces manquantes) */
-        .doc-upload-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.45rem;
-            height: 40px;
-            padding: 0 1.1rem;
-            flex: 0 0 auto;
-            border: none;
-            border-radius: var(--anac-radius-sm);
-            background: linear-gradient(135deg, var(--anac-primary) 0%, var(--anac-primary-light) 100%);
-            color: var(--anac-white);
-            font-weight: 600;
-            letter-spacing: 0.2px;
-            white-space: nowrap;
-            box-shadow: var(--anac-shadow-sm);
-            transition: var(--anac-transition);
-        }
-
-        .doc-upload-btn:hover:not(:disabled) {
-            color: var(--anac-white);
-            transform: translateY(-1px);
-            box-shadow: var(--anac-shadow-md);
-        }
-
-        .doc-upload-btn:disabled {
-            opacity: 0.65;
-            cursor: not-allowed;
-        }
-
         /* Zone de dépôt dans le modal (ajout / remplacement) */
         .doc-drop {
             display: flex;
@@ -321,7 +246,7 @@
         }
 
         @media (max-width: 575.98px) {
-            .doc-head__count {
+            .anac-card-head__count {
                 display: none;
             }
 
@@ -344,16 +269,8 @@
 
 <!-- Documents Section -->
 <div class="card doc-card">
-    <div class="card-header">
-        <div class="doc-head">
-            <span class="doc-head__icon"><i class="fas fa-folder-open"></i></span>
-            <h3 class="doc-head__title">@lang('trans.documents')</h3>
-        </div>
-        <span class="doc-head__count">
-            <i class="fas fa-paperclip"></i>
-            {{ $demandeAutorisation->documents->count() }}
-        </span>
-    </div>
+    <x-anac-card-header icon="fas fa-folder-open" :title="__('trans.documents')"
+        :count="$demandeAutorisation->documents->count()" />
 
     <div class="card-body">
         <p class="doc-intro">@lang('trans.pdf_only_max_size')</p>
@@ -420,7 +337,7 @@
                                 <span class="doc-item__hint">@lang('trans.no_documents_uploaded')</span>
 
                                 <div class="doc-item__actions">
-                                    <button type="button" class="doc-upload-btn upload-document"
+                                    <button type="button" class="anac-btn anac-btn--primary upload-document"
                                         data-type-id="{{ $requiredDoc->id }}" data-type-name="{{ $typeName }}">
                                         <i class="fas fa-upload"></i> <span>@lang('trans.upload')</span>
                                     </button>
@@ -443,7 +360,7 @@
                 upload: @json(__('trans.upload')),
                 replace: @json(__('trans.replace')),
                 replaceDocument: @json(__('trans.replace_document')),
-                selectFile: 'Veuillez sélectionner un document (PDF)'
+                selectFile: @json(__('trans.select_pdf_document'))
             };
 
             let docMode = 'upload';
@@ -561,14 +478,14 @@
                 const id = $(this).data('id');
 
                 Swal.fire({
-                    title: 'Confirmer la suppression',
-                    text: "Êtes-vous sûr de vouloir supprimer ce document? Cette action est irréversible.",
+                    title: @json(__('trans.confirm_delete_title')),
+                    text: @json(__('trans.confirm_delete_text')),
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
-                    confirmButtonText: 'Oui, supprimer!',
-                    cancelButtonText: 'Annuler'
+                    confirmButtonText: @json(__('trans.confirm_delete_yes')),
+                    cancelButtonText: @json(__('trans.cancel'))
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
@@ -578,13 +495,13 @@
                                 _token: '{{ csrf_token() }}'
                             },
                             success: function(response) {
-                                toastr.success(response.message || 'Document supprimé avec succès');
+                                toastr.success(response.message || @json(__('trans.deleted_success')));
                                 setTimeout(function() {
                                     location.reload();
                                 }, 900);
                             },
                             error: function() {
-                                toastr.error('Erreur lors de la suppression du document');
+                                toastr.error(@json(__('trans.delete_error')));
                             }
                         });
                     }

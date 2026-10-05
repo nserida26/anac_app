@@ -1,9 +1,9 @@
 @push('css')
     <style>
         .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice {
-            background-color: #28a745;
-            color: white;
-            border-color: #28a745;
+            background-color: var(--anac-primary);
+            color: var(--anac-white);
+            border-color: var(--anac-primary);
             padding: 5px 10px;
         }
 
@@ -28,25 +28,26 @@
         }
 
         .preview-badge {
-            font-size: 0.9rem;
-            padding: 5px 10px;
+            font-size: 0.8rem;
+            padding: 0.4em 0.85em;
             margin: 2px;
-            border-radius: 3px;
-            background-color: #17a2b8;
-            color: white;
+            border-radius: 999px;
+            background-color: var(--anac-primary-light);
+            color: var(--anac-white);
             display: inline-block;
         }
     </style>
 @endpush
 
                 @unless ($isDepouilleMortelle)
-                    <div class="card card-primary">
-                        <div class="card-header bg-primary text-white">
-                            <h3 class="card-title">@lang('trans.plane_info')</h3>
-                            <button type="button" class="btn btn-sm btn-light float-right" id="showAvionFormBtn">
-                                <i class="fas fa-plus"></i> @lang('trans.add_planes')
-                            </button>
-                        </div>
+                    <div class="card">
+                        <x-anac-card-header icon="fas fa-fighter-jet" :title="__('trans.plane_info')">
+                            <x-slot name="actions">
+                                <button type="button" class="anac-btn anac-btn--primary" id="showAvionFormBtn">
+                                    <i class="fas fa-plus"></i> @lang('trans.add_planes')
+                                </button>
+                            </x-slot>
+                        </x-anac-card-header>
                         <div class="card-body">
                             <!-- Formulaire avec Select2 Tags -->
                             <form method="POST" id="avionForm" style="display: none;">
@@ -55,7 +56,7 @@
                                 <input type="hidden" name="demande_autorisation_id" id="demande_autorisation_id"
                                     value="{{ $demandeAutorisation->id }}">
 
-                                <div class="alert alert-info">
+                                <div class="auth-alert auth-alert--info">
                                     <i class="fas fa-info-circle"></i>
                                     @lang('trans.registrations_help')
                                 </div>
@@ -85,7 +86,7 @@
                                             <div class="d-flex justify-content-between align-items-center mb-1">
                                                 <label for="type_avion_id" class="form-label">@lang('trans.plane_type') <span
                                                         class="text-danger">*</span></label>
-                                                <button type="button" class="btn btn-sm btn-success" id="addTypeAvionBtn">
+                                                <button type="button" class="btn btn-sm anac-action anac-action--blue" id="addTypeAvionBtn">
                                                     <i class="fas fa-plus"></i> @lang('trans.add_action')
                                                 </button>
                                             </div>
@@ -95,7 +96,7 @@
                                                 @foreach ($type_avions as $type)
                                                     <option value="{{ $type->id }}" data-code="{{ $type->code }}"
                                                         data-capacite="{{ $type->capacite }}">
-                                                        {{ $type->code }} ({{ $type->capacite }} places)
+                                                        {{ $type->code }} ({{ $type->capacite }} @lang('trans.seats'))
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -109,7 +110,7 @@
                                             <div class="d-flex justify-content-between align-items-center mb-1">
                                                 <label for="compagnie_aerienne_id" class="form-label">@lang('trans.operator') <span
                                                         class="text-danger">*</span></label>
-                                                <button type="button" class="btn btn-sm btn-success" id="addCompanyBtn">
+                                                <button type="button" class="btn btn-sm anac-action anac-action--blue" id="addCompanyBtn">
                                                     <i class="fas fa-plus"></i> @lang('trans.add_action')
                                                 </button>
                                             </div>
@@ -135,7 +136,9 @@
                                 <!-- Prévisualisation -->
                                 <div class="row" id="previewSection" style="display: none;">
                                     <div class="col-md-12">
-                                        <div class="alert alert-success">
+                                        <div class="auth-alert auth-alert--success align-items-start">
+                                            <i class="fas fa-check-circle"></i>
+                                            <div class="flex-grow-1">
                                             <h6><i class="fas fa-plane"></i> @lang('trans.preview_planes_title')</h6>
                                             <div class="row">
                                                 <div class="col-md-6">
@@ -152,16 +155,18 @@
                                                         @lang('trans.plane_unit')</p>
                                                 </div>
                                             </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <button type="submit" class="btn btn-success float-right" id="submitAvionBtn">
-                                            <i class="fas fa-save"></i> <span id="formActionText">@lang('trans.send')</span>
+                                        <button type="submit" class="anac-btn anac-btn--primary float-right"
+                                            id="submitAvionBtn">
+                                            <i class="fas fa-save"></i> <span id="formActionText">@lang('trans.save')</span>
                                         </button>
-                                        <button type="button" class="btn btn-secondary float-right mr-2"
+                                        <button type="button" class="anac-btn anac-btn--ghost float-right mr-2"
                                             id="cancelAvionFormBtn">
                                             <i class="fas fa-times"></i> @lang('trans.cancel')
                                         </button>
@@ -175,7 +180,7 @@
                                     <div class="row mt-4" id="avionsTableContainer">
                                         <div class="col-lg-12">
                                             <div class="table-responsive">
-                                                <table class="table table-striped table-bordered" id="avionsTable">
+                                                <table class="table" id="avionsTable">
                                                     <thead>
                                                         <tr>
                                                             <th>@lang('trans.registration')</th>
@@ -188,18 +193,18 @@
                                                         @foreach ($avions as $avionItem)
                                                             <tr id="avion-{{ $avionItem->id }}">
                                                                 <td>{{ $avionItem->immatriculation }}</td>
-                                                                <td>{{ $avionItem->type->code ?? 'N/A' }}</td>
-                                                                <td>{{ $avionItem->operateur_nom ?? 'N/A' }}</td>
+                                                                <td>{{ $avionItem->type->code ?? __('trans.not_available') }}</td>
+                                                                <td>{{ $avionItem->operateur_nom ?? __('trans.not_available') }}</td>
                                                                 <td>
-                                                                    <div class="btn-group" role="group">
-                                                                        <button class="btn btn-warning btn-sm edit-avion"
+                                                                    <div class="anac-actions">
+                                                                        <button class="btn btn-sm anac-action anac-action--yellow edit-avion"
                                                                             data-id="{{ $avionItem->id }}"
                                                                             data-immatriculation="{{ $avionItem->immatriculation }}"
                                                                             data-type_avion_id="{{ $avionItem->type_avion_id }}"
                                                                             data-compagnie_aerienne_id="{{ $avionItem->compagnie_aerienne_id }}">
                                                                             <i class="fas fa-edit"></i> @lang('trans.edit')
                                                                         </button>
-                                                                        <button class="btn btn-danger btn-sm delete-avion"
+                                                                        <button class="btn btn-sm anac-action anac-action--red delete-avion"
                                                                             data-id="{{ $avionItem->id }}">
                                                                             <i class="fas fa-trash"></i> @lang('trans.delete')
                                                                         </button>
@@ -214,7 +219,8 @@
                                     </div>
                                 </div>
                             @else
-                                <div class="alert alert-info" id="noAvionsAlert">
+                                <div class="auth-alert auth-alert--info mb-0" id="noAvionsAlert">
+                                    <i class="fas fa-info-circle"></i>
                                     @lang('trans.no_planes_registered')
                                 </div>
                             @endif
@@ -232,7 +238,7 @@
                 $('#avionsTableContainer, #noAvionsAlert').hide();
                 $('#showAvionFormBtn').hide();
                 $('#avion_id').val(''); // Reset l'ID pour une nouvelle création
-                $('#formActionText').text(@json(__('trans.send')));
+                $('#formActionText').text(@json(__('trans.save')));
                 $('#avionForm')[0].reset(); // Reset le formulaire
                 $('.invalid-feedback').text(''); // Effacer les messages d'erreur
                 $('.is-invalid').removeClass('is-invalid'); // Enlever les classes d'erreur
@@ -275,13 +281,14 @@
                 const avionId = $(this).data('id');
 
                 Swal.fire({
-                    title: 'Confirmer la suppression',
-                    text: "Êtes-vous sûr de vouloir supprimer cet avion?",
+                    title: @json(__('trans.confirm_delete_title')),
+                    text: @json(__('trans.confirm_delete_text')),
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
-                    confirmButtonText: 'Oui, supprimer!'
+                    confirmButtonText: @json(__('trans.confirm_delete_yes')),
+                    cancelButtonText: @json(__('trans.cancel'))
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
@@ -293,7 +300,7 @@
                             success: function(response) {
                                 Swal.fire({
                                     icon: 'success',
-                                    title: 'Succès',
+                                    title: @json(__('trans.success')),
                                     text: response.message,
                                 }).then(() => {
                                     location.reload();
@@ -301,10 +308,9 @@
                             },
                             error: function(xhr) {
                                 Swal.fire({
-                                    icon: 'error',
-                                    title: 'Erreur',
-                                    text: xhr.responseJSON.message ||
-                                        'Une erreur est survenue'
+                                    icon: 'error',                                        title: @json(__('trans.error')),
+                                        text: xhr.responseJSON.message ||
+                                        @json(__('trans.error_occurred'))
                                 });
                             }
                         });
@@ -340,9 +346,9 @@
                         } else {
                             Swal.fire({
                                 icon: 'error',
-                                title: 'Erreur',
+                                title: @json(__('trans.error')),
                                 text: xhr.responseJSON.message ||
-                                    'Une erreur est survenue'
+                                    @json(__('trans.error_occurred'))
                             });
                         }
                     }

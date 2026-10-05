@@ -1,9 +1,7 @@
                 @if ($demandeAutorisation->first_type_vol_id == 1)
                     <!-- Freight Section -->
-                    <div class="card card-primary">
-                        <div class="card-header bg-primary text-white">
-                            <h3 class="card-title">@lang('trans.freight')</h3>
-                        </div>
+                    <div class="card">
+                        <x-anac-card-header icon="fas fa-box" :title="__('trans.freight')" />
                         <div class="card-body">
                             <form method="POST" id="fretForm" action="{{ url('/user/frets') }}">
                                 @csrf
@@ -47,7 +45,7 @@
 
                                 <div class="row">
                                     <div class="col-lg-12">
-                                        <button id="submitFret" type="submit" class="btn btn-success float-right">
+                                        <button id="submitFret" type="submit" class="anac-btn anac-btn--primary float-right">
                                             <i class="fas fa-plus"></i> @lang('trans.add')
                                         </button>
                                     </div>
@@ -58,7 +56,7 @@
                                 <div class="row mt-4">
                                     <div class="col-lg-12">
                                         <div class="table-responsive">
-                                            <table class="table table-striped table-bordered" id="fretTable">
+                                            <table class="table" id="fretTable">
                                                 <thead>
                                                     <tr>
                                                         <th>@lang('trans.nature')</th>
@@ -71,13 +69,15 @@
                                                     @foreach ($fretVols as $fret)
                                                         <tr id="fret-{{ $fret->id }}">
                                                             <td>{{ strtoupper($fret->nature) }}</td>
-                                                            <td>{{ $fret->poids }} kg</td>
+                                                            <td>{{ $fret->poids }} @lang('trans.unit_kg')</td>
                                                             <td>{{ $fret->instructions_speciales }}</td>
                                                             <td>
-                                                                <button class="btn btn-warning btn-sm edit-fret"
-                                                                    data-id="{{ $fret->id }}">@lang('trans.update')</button>
-                                                                <button class="btn btn-danger btn-sm delete-fret"
-                                                                    data-id="{{ $fret->id }}">@lang('trans.destroy')</button>
+                                                                <div class="anac-actions">
+                                                                    <button class="btn btn-sm anac-action anac-action--yellow edit-fret"
+                                                                        data-id="{{ $fret->id }}">@lang('trans.update')</button>
+                                                                    <button class="btn btn-sm anac-action anac-action--red delete-fret"
+                                                                        data-id="{{ $fret->id }}">@lang('trans.destroy')</button>
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                         <tr id="edit-form-fret-{{ $fret->id }}"
@@ -134,10 +134,10 @@
                                                                         </div>
                                                                     </div>
                                                                     <button type="submit"
-                                                                        class="btn btn-primary btn-sm update-fret"
+                                                                        class="btn btn-sm anac-action anac-action--blue update-fret"
                                                                         data-id="{{ $fret->id }}">@lang('trans.update')</button>
                                                                     <button type="button"
-                                                                        class="btn btn-secondary btn-sm cancel-edit"
+                                                                        class="btn btn-sm anac-action anac-action--grey cancel-edit"
                                                                         data-id="{{ $fret->id }}"
                                                                         data-type="fret">@lang('trans.cancel')</button>
                                                                 </form>
@@ -198,13 +198,14 @@
                 const id = $(this).data('id');
 
                 Swal.fire({
-                    title: 'Confirmer la suppression',
-                    text: "Êtes-vous sûr de vouloir supprimer ce fret?",
+                    title: @json(__('trans.confirm_delete_title')),
+                    text: @json(__('trans.confirm_delete_text')),
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
-                    confirmButtonText: 'Oui, supprimer!'
+                    confirmButtonText: @json(__('trans.confirm_delete_yes')),
+                    cancelButtonText: @json(__('trans.cancel'))
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
@@ -215,7 +216,7 @@
                             },
                             success: function() {
                                 $(`#fret-${id}, #edit-form-fret-${id}`).remove();
-                                toastr.success('Fret supprimé avec succès');
+                                toastr.success(@json(__('trans.deleted_success')));
                             }
                         });
                     }

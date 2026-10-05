@@ -1,9 +1,7 @@
                 <!-- Flight Crew Section -->
                 @if (!$isDepouilleMortelle && !in_array($demandeAutorisation->first_type_vol_id, [12, 13]))
-                    <div class="card card-primary">
-                        <div class="card-header bg-primary text-white">
-                            <h3 class="card-title">@lang('trans.flight_crew')</h3>
-                        </div>
+                    <div class="card">
+                        <x-anac-card-header icon="fas fa-users" :title="__('trans.flight_crew')" />
                         <div class="card-body">
                             <form method="POST" id="crewForm" action="{{ url('/user/equipes') }}"
                                 enctype="multipart/form-data">
@@ -95,7 +93,7 @@
 
                                 <div class="row">
                                     <div class="col-lg-12">
-                                        <button id="submitCrew" type="submit" class="btn btn-success float-right">
+                                        <button id="submitCrew" type="submit" class="anac-btn anac-btn--primary float-right">
                                             <i class="fas fa-plus"></i> @lang('trans.add')
                                         </button>
                                     </div>
@@ -106,7 +104,7 @@
                                 <div class="row mt-4">
                                     <div class="col-lg-12">
                                         <div class="table-responsive">
-                                            <table class="table table-striped table-bordered" id="crewTable">
+                                            <table class="table" id="crewTable">
                                                 <thead>
                                                     <tr>
                                                         {{-- <th>@lang('trans.name')</th> --}}
@@ -133,24 +131,26 @@
                                                                         ({{ date('d/m/Y', strtotime($membre->licence_expiration)) }})
                                                                     @endif
                                                                 @else
-                                                                    N/A
+                                                                    @lang('trans.not_available')
                                                                 @endif
                                                             </td>
                                                             <td>
                                                                 @if ($membre->justificatif)
                                                                     <a href="{{ asset('/uploads/' . $membre->justificatif) }}"
-                                                                        target="_blank" class="btn btn-sm btn-primary">
+                                                                        target="_blank" class="btn btn-sm anac-action anac-action--blue">
                                                                         <i class="fas fa-eye"></i>
                                                                     </a>
                                                                 @else
-                                                                    N/A
+                                                                    @lang('trans.not_available')
                                                                 @endif
                                                             </td>
                                                             <td>
-                                                                <button class="btn btn-warning btn-sm edit-membre"
-                                                                    data-id="{{ $membre->id }}">@lang('trans.update')</button>
-                                                                <button class="btn btn-danger btn-sm delete-membre"
-                                                                    data-id="{{ $membre->id }}">@lang('trans.delete')</button>
+                                                                <div class="anac-actions">
+                                                                    <button class="btn btn-sm anac-action anac-action--yellow edit-membre"
+                                                                        data-id="{{ $membre->id }}">@lang('trans.update')</button>
+                                                                    <button class="btn btn-sm anac-action anac-action--red delete-membre"
+                                                                        data-id="{{ $membre->id }}">@lang('trans.delete')</button>
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                         <tr id="edit-form-membre-{{ $membre->id }}"
@@ -210,11 +210,11 @@
                                                                     </div>
 
                                                                     <button type="submit"
-                                                                        class="btn btn-primary btn-sm update-membre">
+                                                                        class="btn btn-sm anac-action anac-action--blue update-membre">
                                                                         @lang('trans.update')
                                                                     </button>
                                                                     <button type="button"
-                                                                        class="btn btn-secondary btn-sm cancel-edit"
+                                                                        class="btn btn-sm anac-action anac-action--grey cancel-edit"
                                                                         data-id="{{ $membre->id }}" data-type="membre">
                                                                         @lang('trans.cancel')
                                                                     </button>
@@ -250,7 +250,7 @@
                         location.reload();
                     },
                     error: function(xhr) {
-                        toastr.error(xhr.responseJSON?.message || "Une erreur s'est produite.");
+                        toastr.error(xhr.responseJSON?.message || @json(__('trans.error_occurred')));
                     }
                 });
             });
@@ -274,7 +274,7 @@
                         location.reload();
                     },
                     error: function(xhr) {
-                        alert('Error: ' + xhr.responseText);
+                        toastr.error(xhr.responseJSON?.message || @json(__('trans.error_occurred')));
                     }
                 });
             });
@@ -283,13 +283,14 @@
                 const id = $(this).data('id');
 
                 Swal.fire({
-                    title: 'Confirmer la suppression',
-                    text: "Êtes-vous sûr de vouloir supprimer ce membre d'équipage?",
+                    title: @json(__('trans.confirm_delete_title')),
+                    text: @json(__('trans.confirm_delete_text')),
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
-                    confirmButtonText: 'Oui, supprimer!'
+                    confirmButtonText: @json(__('trans.confirm_delete_yes')),
+                    cancelButtonText: @json(__('trans.cancel'))
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
@@ -300,7 +301,7 @@
                             },
                             success: function() {
                                 $(`#membre-${id}, #edit-form-membre-${id}`).remove();
-                                toastr.success('Membre supprimé avec succès');
+                                toastr.success(@json(__('trans.deleted_success')));
                             }
                         });
                     }
