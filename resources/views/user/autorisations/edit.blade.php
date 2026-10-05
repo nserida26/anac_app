@@ -55,7 +55,7 @@
                         #fretForm,
                         #receivingPartyForm,
                         #deceasedPersonForm,
-                        #documentForm,
+                        .upload-document,
                         #addAeroportBtn,
                         #addEscaleBtn,
                         #addTypeAvionBtn,
