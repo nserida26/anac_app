@@ -1460,6 +1460,8 @@ return [
     'no_blacklist_entries' => 'No blocked registrations.',
     'immatriculation_blacklisted' => 'This registration is blocked and cannot be saved.',
 
+    'type_document_autorisations' => 'Document types (authorizations)',
+
     // Applicant profile: e-mail notifications (additional channel alongside WhatsApp)
     'notify_whatsapp' => 'Receive WhatsApp notifications',
     'notify_email' => 'Receive e-mail notifications',

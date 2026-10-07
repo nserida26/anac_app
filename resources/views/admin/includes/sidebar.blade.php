@@ -189,6 +189,12 @@
                                     <p>@lang('trans.immatriculation_blacklists')</p>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a href="{{ route('type-document-autorisations.index') }}" class="nav-link ">
+                                    <i class="fas fa-file-alt nav-icon"></i>
+                                    <p>@lang('trans.type_document_autorisations')</p>
+                                </a>
+                            </li>
                             @endrole
                                 </ul>
                             </li>

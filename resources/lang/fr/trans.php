@@ -1786,6 +1786,8 @@ return [
     'no_blacklist_entries' => 'Aucune immatriculation bloquée.',
     'immatriculation_blacklisted' => "Cette immatriculation est bloquée et ne peut pas être enregistrée.",
 
+    'type_document_autorisations' => 'Types de documents (autorisations)',
+
     // Profil demandeur : notifications par e-mail (canal additionnel au WhatsApp)
     'notify_whatsapp' => 'Recevoir les notifications par WhatsApp',
     'notify_email' => 'Recevoir les notifications par e-mail',

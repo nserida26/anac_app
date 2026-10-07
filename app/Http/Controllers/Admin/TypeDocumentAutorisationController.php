@@ -24,10 +24,11 @@ class TypeDocumentAutorisationController extends Controller
      */
     public function index()
     {
-        $typeDocumentAutorisations = TypeDocumentAutorisation::with('typeVol', 'typeDemande')->paginate();
+        // Catalogue de référence, pagination gérée côté client par DataTables.
+        $typeDocumentAutorisations = TypeDocumentAutorisation::with('typeVol', 'typeDemande')->get();
 
         return view('admin.type-document-autorisations.index', compact('typeDocumentAutorisations'))
-            ->with('i', (request()->input('page', 1) - 1) * $typeDocumentAutorisations->perPage());
+            ->with('i', 0);
     }
 
     /**

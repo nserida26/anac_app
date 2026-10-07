@@ -41,7 +41,7 @@
 
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover">
+                            <table class="table table-striped table-hover" id="datatable">
                                 <thead class="thead">
                                     <tr>
                                         <th>No</th>
@@ -86,8 +86,19 @@
                         </div>
                     </div>
                 </div>
-                {!! $typeDocumentAutorisations->links() !!}
             </div>
         </div>
     </div>
 @endsection
+@push('script')
+    <!-- DataTables  & Plugins -->
+    <script src="{{ asset('assets/admin/plugins/datatables/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/admin/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+    <script src="{{ asset('assets/admin/plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+    <script src="{{ asset('assets/admin/plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
+@endpush
+@push('custom')
+    <script>
+        $('#datatable').DataTable();
+    </script>
+@endpush
