@@ -644,6 +644,7 @@ Route::post('/demandes/{id}/update-type-licence', [App\Http\Controllers\AdminCon
                 Route::resource('autorites', AutoriteController::class);
                 Route::resource('settings', SettingController::class);
                 Route::resource('type-documents', TypeDocumentController::class);
+                Route::resource('type-document-autorisations', App\Http\Controllers\Admin\TypeDocumentAutorisationController::class);
                 Route::resource('compagnies', CompagnyController::class);
                 Route::resource('centre-formations', CentreFormationController::class);
                 Route::resource('evaluateurs', EvaluateurController::class);

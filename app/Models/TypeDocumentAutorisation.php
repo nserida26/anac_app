@@ -11,6 +11,13 @@ class TypeDocumentAutorisation extends Model
 
     protected $table = 'type_document_autorisations';
 
+    static $rules = [
+        'type_vol_id' => 'required|exists:type_vols,id',
+        'type_demande_autorisation_id' => 'required|exists:type_demande_autorisations,id',
+        'nom_fr' => 'required|string|max:100',
+        'nom_en' => 'required|string|max:100',
+    ];
+
     protected $fillable = [
         'type_vol_id',
         'type_demande_autorisation_id',
