@@ -148,57 +148,31 @@
                                     <p>@lang('trans.evaluators')</p>
                                 </a>
                             </li>
-                            
+
                             <li class="nav-item">
                                 <a href="#" class="nav-link ">
                                     <i class="fas fa-user-md nav-icon"></i>
                                     <p>@lang('trans.examiners_management') <i class="fas fa-angle-left right"></i></p>
-                                    
+
                                 </a>
                                 <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                <a href="{{ url('admin/examinateurs') }}" class="nav-link ">
-                                    <i class="fas fa-user-md nav-icon"></i>
-                                    <p>@lang('trans.medical_examiners')</p>
-                                </a>
-                            </li>
-                            
-                            <li class="nav-item">
-                                <a href="{{ route('admin.examinateurs.index') }}" class="nav-link ">
+                                    <li class="nav-item">
+                                        <a href="{{ url('admin/examinateurs') }}" class="nav-link ">
+                                            <i class="fas fa-user-md nav-icon"></i>
+                                            <p>@lang('trans.medical_examiners')</p>
+                                        </a>
+                                    </li>
 
-                                    <i class="fas fa-user nav-icon"></i>
-                                    <p>@lang('trans.examiners')</p>
-                                </a>
-                            </li>
-                            @role('admin')
-                            <li class="nav-item">
-                                <a href="{{ route('admin.examinateurs.index', ['type' => 'medical']) }}" class="nav-link ">
-                                    <i class="fas fa-user-md nav-icon"></i>
-                                    <p>@lang('trans.examinateurs_centres_medicaux')</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('admin.centres-expertise-medicale.index') }}" class="nav-link ">
-                                    <i class="fas fa-hospital nav-icon"></i>
-                                    <p>@lang('trans.medical_expertise_centres')</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('admin.immatriculation-blacklists.index') }}" class="nav-link ">
-                                    <i class="fas fa-ban nav-icon"></i>
-                                    <p>@lang('trans.immatriculation_blacklists')</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('type-document-autorisations.index') }}" class="nav-link ">
-                                    <i class="fas fa-file-alt nav-icon"></i>
-                                    <p>@lang('trans.type_document_autorisations')</p>
-                                </a>
-                            </li>
-                            @endrole
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.examinateurs.index') }}" class="nav-link ">
+
+                                            <i class="fas fa-user nav-icon"></i>
+                                            <p>@lang('trans.examiners')</p>
+                                        </a>
+                                    </li>
                                 </ul>
                             </li>
-                            
+
 
                             <li class="nav-item">
                                 <a href="{{ url('admin/autorites') }}" class="nav-link ">
@@ -250,10 +224,35 @@
                             </li>
                         @endcan
                         @can('manage-vi')
-                        <li class="nav-item">
+                            <li class="nav-item">
                                 <a href="{{ url('admin/aeroports') }}" class="nav-link ">
                                     <i class="fas fa-plane-departure"></i>
                                     <p>@lang('trans.aeroports')</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.examinateurs.index', ['type' => 'medical']) }}"
+                                    class="nav-link ">
+                                    <i class="fas fa-user-md nav-icon"></i>
+                                    <p>@lang('trans.examinateurs_centres_medicaux')</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.centres-expertise-medicale.index') }}" class="nav-link ">
+                                    <i class="fas fa-hospital nav-icon"></i>
+                                    <p>@lang('trans.medical_expertise_centres')</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.immatriculation-blacklists.index') }}" class="nav-link ">
+                                    <i class="fas fa-ban nav-icon"></i>
+                                    <p>@lang('trans.immatriculation_blacklists')</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('type-document-autorisations.index') }}" class="nav-link ">
+                                    <i class="fas fa-file-alt nav-icon"></i>
+                                    <p>@lang('trans.type_document_autorisations')</p>
                                 </a>
                             </li>
                         @endcan
