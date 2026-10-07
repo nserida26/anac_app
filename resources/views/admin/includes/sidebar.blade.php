@@ -181,6 +181,19 @@
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a href="{{ route('admin.examinateurs.index', ['type' => 'medical']) }}"
+                                    class="nav-link ">
+                                    <i class="fas fa-user-md nav-icon"></i>
+                                    <p>@lang('trans.examinateurs_centres_medicaux')</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.centres-expertise-medicale.index') }}" class="nav-link ">
+                                    <i class="fas fa-hospital nav-icon"></i>
+                                    <p>@lang('trans.medical_expertise_centres')</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a href="{{ url('admin/centre-formations') }}" class="nav-link ">
                                     <i class="fa fa-school nav-icon"></i>
                                     <p>@lang('trans.training_center')</p>
@@ -230,19 +243,7 @@
                                     <p>@lang('trans.aeroports')</p>
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a href="{{ route('admin.examinateurs.index', ['type' => 'medical']) }}"
-                                    class="nav-link ">
-                                    <i class="fas fa-user-md nav-icon"></i>
-                                    <p>@lang('trans.examinateurs_centres_medicaux')</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('admin.centres-expertise-medicale.index') }}" class="nav-link ">
-                                    <i class="fas fa-hospital nav-icon"></i>
-                                    <p>@lang('trans.medical_expertise_centres')</p>
-                                </a>
-                            </li>
+
                             <li class="nav-item">
                                 <a href="{{ route('admin.immatriculation-blacklists.index') }}" class="nav-link ">
                                     <i class="fas fa-ban nav-icon"></i>
