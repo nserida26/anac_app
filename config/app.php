@@ -58,6 +58,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Welcome Page Demo Video
+    |--------------------------------------------------------------------------
+    |
+    | Path (relative to public/) or full URL of the "how to use the platform"
+    | video displayed in the video section of the welcome page. Example:
+    |
+    |     WELCOME_VIDEO_URL=videos/demo.mp4
+    |
+    */
+
+    'welcome_video_url' => env('WELCOME_VIDEO_URL', 'videos/demo.mp4'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

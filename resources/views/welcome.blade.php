@@ -18,8 +18,8 @@
     <link rel="stylesheet" href="{{ asset('assets/admin/dist/css/adminlte.min.css') }}">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="{{ asset('assets/admin/plugins/fontawesome-free/css/all.min.css') }}">
-    <!-- Custom Styles -->
-    <link rel="stylesheet" href="{{ asset('css/welcome.css') }}">
+    <!-- Custom Styles (cache-busted: version = file mtime) -->
+    <link rel="stylesheet" href="{{ asset('css/welcome.css') }}?v={{ @filemtime(public_path('css/welcome.css')) ?: 1 }}">
 </head>
 
 <body>
@@ -143,6 +143,56 @@
     </section>
 
     <!-- ══════════════════════════════════════════════════════════════
+         VIDEO / DEMO SECTION
+         ══════════════════════════════════════════════════════════════ -->
+    @php
+        // Fallback hard-coded si le cache de configuration est obsolète (config:cache)
+        $videoUrl = (string) (config('app.welcome_video_url') ?: 'videos/demo.mp4');
+        $videoSrc = Str::startsWith($videoUrl, ['http://', 'https://'])
+            ? $videoUrl
+            : asset($videoUrl);
+    @endphp
+
+    <section class="video-section" id="demo">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-label">{{ __('Demo') }}</span>
+                <h2 class="section-title">{{ __('See the platform in action') }}</h2>
+                <div class="section-divider"></div>
+            </div>
+
+            <div class="video-card-wrap reveal">
+                <div class="video-card">
+                    <div class="video-card__frame">
+                        <video class="video-card__preview" preload="metadata" muted playsinline
+                               poster="{{ asset('assets/admin/imgs/anac.jpg') }}"
+                               aria-hidden="true" tabindex="-1">
+                            <source src="{{ $videoSrc }}" type="video/mp4">
+                        </video>
+                        <span class="video-card__shade"></span>
+
+                        <button type="button" class="video-play" id="video-trigger"
+                                aria-haspopup="dialog" aria-controls="video-modal"
+                                aria-label="{{ __('Watch the demo video') }}">
+                            <i class="fas fa-play" aria-hidden="true"></i>
+                        </button>
+
+                        <span class="video-card__badge">
+                            <i class="fas fa-film" aria-hidden="true"></i>
+                            <span class="video-card__duration">{{ __('Video') }}</span>
+                        </span>
+                    </div>
+
+                    <div class="video-card__meta">
+                        <h3 class="video-card__title">{{ __('Video tutorial') }}</h3>
+                        <p class="video-card__desc">{{ __('Video tutorial desc') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════
          ABOUT SECTION
          ══════════════════════════════════════════════════════════════ -->
     <section class="about-section" id="about">
@@ -224,6 +274,33 @@
     </footer>
 
     <!-- ══════════════════════════════════════════════════════════════
+         VIDEO MODAL (lightbox)
+         ══════════════════════════════════════════════════════════════ -->
+    <div class="video-modal" id="video-modal" role="dialog" aria-modal="true"
+         aria-labelledby="video-modal-title">
+        <div class="video-modal__backdrop" data-video-close></div>
+
+        <div class="video-modal__dialog">
+            <div class="video-modal__header">
+                <h2 class="video-modal__title" id="video-modal-title">{{ __('Video tutorial') }}</h2>
+
+                <button type="button" class="video-modal__close" data-video-close
+                        aria-label="{{ __('Close') }}">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <div class="video-modal__body">
+                <video class="video-modal__player" data-src="{{ $videoSrc }}"
+                       poster="{{ asset('assets/admin/imgs/anac.jpg') }}"
+                       controls playsinline preload="none"></video>
+            </div>
+
+            <p class="video-modal__hint">{{ __('Video tutorial desc') }}</p>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
          SCRIPTS (Vanilla JS — no jQuery needed)
          ══════════════════════════════════════════════════════════════ -->
     <script>
@@ -252,6 +329,97 @@
 
         window.addEventListener('scroll', revealOnScroll, { passive: true });
         window.addEventListener('load', revealOnScroll);
+
+        // ── Video lightbox ──
+        var videoModal = document.getElementById('video-modal');
+
+        if (videoModal) {
+            var videoTrigger = document.getElementById('video-trigger');
+            var videoCard = videoTrigger ? videoTrigger.closest('.video-card') : null;
+            var videoPlayer = videoModal.querySelector('.video-modal__player');
+            var videoLastFocus = null;
+
+            function openVideoModal() {
+                if (videoModal.classList.contains('is-open')) return;
+
+                videoLastFocus = document.activeElement;
+                videoPlayer.src = videoPlayer.dataset.src;
+                videoModal.classList.add('is-open');
+                document.body.style.overflow = 'hidden';
+                videoModal.querySelector('.video-modal__close').focus();
+
+                // Autoplay is allowed: opened from a user gesture.
+                var playing = videoPlayer.play();
+                if (playing && typeof playing.catch === 'function') {
+                    playing.catch(function () { /* blocked by the browser — controls remain available */ });
+                }
+            }
+
+            function closeVideoModal() {
+                if (!videoModal.classList.contains('is-open')) return;
+
+                videoModal.classList.remove('is-open');
+                document.body.style.overflow = '';
+                videoPlayer.pause();
+                videoPlayer.removeAttribute('src');
+                videoPlayer.load(); // stop the stream & free memory
+
+                if (videoLastFocus && typeof videoLastFocus.focus === 'function') {
+                    videoLastFocus.focus();
+                }
+            }
+
+            if (videoCard) {
+                videoCard.addEventListener('click', openVideoModal);
+            }
+
+            videoModal.querySelectorAll('[data-video-close]').forEach(function (el) {
+                el.addEventListener('click', closeVideoModal);
+            });
+
+            // ── Keyboard support (Esc + focus trap) ──
+            document.addEventListener('keydown', function (e) {
+                if (!videoModal.classList.contains('is-open')) return;
+
+                if (e.key === 'Escape') {
+                    closeVideoModal();
+                    return;
+                }
+
+                if (e.key !== 'Tab') return;
+
+                var focusables = videoModal.querySelectorAll('button, video, a[href], [tabindex]:not([tabindex="-1"])');
+                if (!focusables.length) return;
+
+                var first = focusables[0];
+                var last = focusables[focusables.length - 1];
+
+                if (!videoModal.contains(document.activeElement)) {
+                    e.preventDefault();
+                    first.focus();
+                } else if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            });
+
+            // ── Show the real duration on the card badge ──
+            var videoPreview = document.querySelector('.video-card__preview');
+            var videoDuration = document.querySelector('.video-card__duration');
+
+            if (videoPreview && videoDuration) {
+                videoPreview.addEventListener('loadedmetadata', function () {
+                    if (!isFinite(videoPreview.duration) || videoPreview.duration <= 0) return;
+
+                    var mins = Math.floor(videoPreview.duration / 60);
+                    var secs = Math.floor(videoPreview.duration % 60);
+                    videoDuration.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
+                });
+            }
+        }
 
         // ── Smooth scroll for anchor links ──
         document.querySelectorAll('a[href^="#"]').forEach(function (a) {
