@@ -53,12 +53,12 @@ class TypeDocumentAutorisationController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate(TypeDocumentAutorisation::$rules);
+        $validated = $request->validate(TypeDocumentAutorisation::$rules);
 
-        TypeDocumentAutorisation::create($request->all());
+        $this->syncCombinations($validated);
 
         return redirect()->route('type-document-autorisations.index')
-            ->with('success', 'Type de document créé avec succès.');
+            ->with('success', 'Type(s) de document créé(s) avec succès.');
     }
 
     /**
@@ -98,12 +98,42 @@ class TypeDocumentAutorisationController extends Controller
      */
     public function update(Request $request, TypeDocumentAutorisation $typeDocumentAutorisation)
     {
-        $request->validate(TypeDocumentAutorisation::$rules);
+        $validated = $request->validate(TypeDocumentAutorisation::$rules);
 
-        $typeDocumentAutorisation->update($request->all());
+        $originalComboStillSelected = in_array($typeDocumentAutorisation->type_vol_id, $validated['type_vol_id'])
+            && in_array($typeDocumentAutorisation->type_demande_autorisation_id, $validated['type_demande_autorisation_id']);
+
+        $this->syncCombinations($validated);
+
+        // La ligne éditée a été remplacée par les nouvelles combinaisons ci-dessus
+        // (sa combinaison d'origine n'est plus sélectionnée) : elle devient redondante.
+        if (!$originalComboStillSelected) {
+            $typeDocumentAutorisation->delete();
+        }
 
         return redirect()->route('type-document-autorisations.index')
-            ->with('success', 'Type de document mis à jour avec succès.');
+            ->with('success', 'Type(s) de document mis à jour avec succès.');
+    }
+
+    /**
+     * Enregistre une ligne par combinaison (type_vol_id × type_demande_autorisation_id)
+     * sélectionnée, avec le même libellé — permet de choisir plusieurs types de vol
+     * et/ou plusieurs types de demande en une seule saisie (create ou edit).
+     */
+    private function syncCombinations(array $validated): void
+    {
+        foreach ($validated['type_vol_id'] as $typeVolId) {
+            foreach ($validated['type_demande_autorisation_id'] as $typeDemandeId) {
+                TypeDocumentAutorisation::updateOrCreate(
+                    [
+                        'type_vol_id' => $typeVolId,
+                        'type_demande_autorisation_id' => $typeDemandeId,
+                        'nom_fr' => $validated['nom_fr'],
+                    ],
+                    ['nom_en' => $validated['nom_en']]
+                );
+            }
+        }
     }
 
     /**

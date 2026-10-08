@@ -11,9 +11,13 @@ class TypeDocumentAutorisation extends Model
 
     protected $table = 'type_document_autorisations';
 
+    // Formulaire : sélection multiple de type_vol_id/type_demande_autorisation_id,
+    // une ligne est enregistrée par combinaison (voir TypeDocumentAutorisationController).
     static $rules = [
-        'type_vol_id' => 'required|exists:type_vols,id',
-        'type_demande_autorisation_id' => 'required|exists:type_demande_autorisations,id',
+        'type_vol_id' => 'required|array|min:1',
+        'type_vol_id.*' => 'exists:type_vols,id',
+        'type_demande_autorisation_id' => 'required|array|min:1',
+        'type_demande_autorisation_id.*' => 'exists:type_demande_autorisations,id',
         'nom_fr' => 'required|string|max:100',
         'nom_en' => 'required|string|max:100',
     ];
