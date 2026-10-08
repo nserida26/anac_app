@@ -208,7 +208,6 @@
 <option data-countryCode="VG" value="84">Virgin Islands - British (+1284)</option>
 <option data-countryCode="VI" value="84">Virgin Islands - US (+1340)</option>
 <option data-countryCode="WF" value="681">Wallis &amp; Futuna (+681)</option>
-<option data-countryCode="YE" value="969">Yemen (North)(+969)</option>
-<option data-countryCode="YE" value="967">Yemen (South)(+967)</option>
+<option data-countryCode="YE" value="967">Yemen(+967)</option>
 <option data-countryCode="ZM" value="260">Zambia (+260)</option>
 <option data-countryCode="ZW" value="263">Zimbabwe (+263)</option>
