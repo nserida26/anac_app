@@ -46,6 +46,23 @@ class DemandeAutorisation extends Model
     public function paiement() { return $this->hasOne(PaiementAutorisation::class, 'demande_autorisation_id'); }
     public function documents() { return $this->hasMany(DocumentAutorisation::class); }
 
+    /**
+     * Types de documents exigés pour cette demande (catalogue TypeDocumentAutorisation),
+     * déterminés par le type de vol et le type de demande — indépendamment du nombre de
+     * lignes "vol" réellement créées (certains types, ex. NOTIFICATION PERMANENTE ou
+     * dépouille mortelle, n'en créent aucune).
+     */
+    public function requiredDocumentTypes()
+    {
+        if (!$this->type_vol_id || !$this->type_demande_autorisation_id) {
+            return collect();
+        }
+
+        return TypeDocumentAutorisation::where('type_vol_id', $this->type_vol_id)
+            ->where('type_demande_autorisation_id', $this->type_demande_autorisation_id)
+            ->get();
+    }
+
     public function equipe() { return $this->hasMany(EquipeVol::class); }
     public function personnes() { return $this->hasMany(PersonneDeces::class, 'demande_autorisation_id'); }
     public function fret() { return $this->hasMany(FretVol::class); }

@@ -366,13 +366,7 @@ class DemandeAutorisationController extends Controller
         $fretVols  = $demandeAutorisation->fret;
         $receivingParties = $demandeAutorisation->receivingParties;
         $personnesDeces = PersonneDeces::where('demande_autorisation_id', $demandeAutorisation->id)->get();
-        $requiredDocs = [];
-        if (isset($vols) && $vols->isNotEmpty()) {
-
-            $requiredDocs = TypeDocumentAutorisation::where('type_vol_id', $demandeAutorisation->typeVol->id)
-                ->where('type_demande_autorisation_id', $demandeAutorisation->type->id)
-                ->get();
-        }
+        $requiredDocs = $demandeAutorisation->requiredDocumentTypes();
         $aeroports = Aeroport::all();
         $pays = Pays::orderBy('nom')->get();
         $compagnies = Compagnie::all();

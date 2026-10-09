@@ -240,17 +240,11 @@ class AdminController extends Controller
         $fretVols  = $demandeAutorisation->fret;
         $personnesDeces  = $demandeAutorisation->personnes;
         $receivingParties = $demandeAutorisation->receivingParties;
-        $requiredDocs = [];
-        if (isset($vols) && $vols->isNotEmpty()) {
-            # code...
-            $requiredDocs = TypeDocumentAutorisation::where('type_vol_id', $demandeAutorisation->typeVol->id)
-                ->where('type_demande_autorisation_id', $demandeAutorisation->type->id)
-                ->get();
-        }
+        $requiredDocs = $demandeAutorisation->requiredDocumentTypes();
 
         $avions = $demandeAutorisation->avions;
 
-        return view('admin.demandeAutorisations.show', compact('personnesDeces', 'avions', 'receivingParties', 'demandeAutorisation', 'vols', 'equipe_vols', 'fretVols'));
+        return view('admin.demandeAutorisations.show', compact('personnesDeces', 'avions', 'receivingParties', 'demandeAutorisation', 'vols', 'equipe_vols', 'fretVols', 'requiredDocs'));
     }
 
     public function approbations()

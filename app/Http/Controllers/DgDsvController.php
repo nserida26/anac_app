@@ -846,14 +846,7 @@ $demandeAutorisations = DemandeAutorisation::with(['type', 'user', 'etatDemande'
         $personnesDeces  = $demandeAutorisation->personnes;
 
         $receivingParties = $demandeAutorisation->receivingParties;
-        $requiredDocs = [];
-        if (isset($vols) && $vols->isNotEmpty()) {
-            # code...
-            $requiredDocs = TypeDocumentAutorisation::where('type_vol_id', $demandeAutorisation->typeVol->id)
-                ->where('type_demande_autorisation_id', $demandeAutorisation->type->id)
-                ->get();
-        }
-
+        $requiredDocs = $demandeAutorisation->requiredDocumentTypes();
 
         $aeroports = Aeroport::all();
         $avions = $demandeAutorisation->avions;
